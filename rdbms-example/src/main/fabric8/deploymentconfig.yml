@@ -1,0 +1,93 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: ${project.artifactId}
+  name: ${project.artifactId}
+spec:
+  replicas: 1
+  selector:
+    app: ${project.artifactId}
+  strategy:
+    resources:
+      limits:
+        memory: "256Mi"
+      requests:
+        memory: "20Mi"
+    type: Recreate
+  template:
+    metadata:
+      name: ${project.artifactId}
+      labels:
+        app: ${project.artifactId}
+    spec:
+      containers:
+      - name: ${project.artifactId}
+        env:
+        - name: JAVA_APP_DIR
+          value: /deployments
+        - name: JAVA_OPTIONS
+          value: "-Djava.net.preferIPv4Stack=true -Duser.home=/tmp -Djava.net.preferIPv4Addresses=true"
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: SPRING_DATASOURCE_SAMPLEDB_USERNAME
+          valueFrom:
+             secretKeyRef:
+               name: postgresql
+               key: database-user
+        - name: SPRING_DATASOURCE_SAMPLEDB_PASSWORD
+          valueFrom:
+             secretKeyRef:
+               name: postgresql
+               key: database-password
+        - name: SPRING_DATASOURCE_SAMPLEDB_DATABASENAME
+          valueFrom:
+             secretKeyRef:
+               name: postgresql
+               key: database-name                 
+        - name: SPRING_DATASOURCE_SAMPLEDB_URL
+          value: jdbc:postgresql://postgresql/$(SPRING_DATASOURCE_SAMPLEDB_DATABASENAME) 
+        - name: JAVA_DEBUG
+          value: "true"
+        image: teiid-dataservice/${project.artifactId}:${project.version}
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            port: 8080
+            path: "/$metadata"
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: "/$metadata"
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          timeoutSeconds: 5
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 9779
+          name: prometheus
+        - containerPort: 8778
+          name: jolokia
+        workingDir: /deployments
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: 500m
+          requests:
+            memory: 256Mi
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      -  ${project.artifactId}
+      from:
+        kind: ImageStreamTag
+        name: ${project.artifactId}:${project.version}
+    type: ImageChange
+  - type: ConfigChange
