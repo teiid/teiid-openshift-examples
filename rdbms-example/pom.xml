@@ -12,7 +12,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.io.fabric8>3.5.41</version.io.fabric8>
     <version.postgresql>42.1.4</version.postgresql>
-    <version.teiid.spring-boot>1.0.2-SNAPSHOT</version.teiid.spring-boot>
+    <version.teiid.spring-boot>1.0.3-SNAPSHOT</version.teiid.spring-boot>
     <version.spring-boot>1.5.13.RELEASE</version.spring-boot> 
   </properties>
   
@@ -20,10 +20,15 @@
     <dependencies>
       <dependency>
         <groupId>org.teiid</groupId>
-        <artifactId>spring-boot-bom</artifactId>
+        <artifactId>teiid-spring-boot-starter-parent</artifactId>
         <version>${version.teiid.spring-boot}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.teiid</groupId>
+        <artifactId>spring-odata</artifactId>
+        <version>${version.teiid.spring-boot}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
