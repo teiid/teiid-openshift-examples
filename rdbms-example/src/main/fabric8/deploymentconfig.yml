@@ -47,7 +47,7 @@ spec:
              secretKeyRef:
                name: postgresql
                key: database-name                 
-        - name: SPRING_DATASOURCE_SAMPLEDB_URL
+        - name: SPRING_DATASOURCE_SAMPLEDB_JDBCURL
           value: jdbc:postgresql://postgresql/$(SPRING_DATASOURCE_SAMPLEDB_DATABASENAME) 
         - name: JAVA_DEBUG
           value: "true"
