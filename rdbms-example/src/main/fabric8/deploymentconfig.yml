@@ -20,6 +20,9 @@ spec:
       name: ${project.artifactId}
       labels:
         app: ${project.artifactId}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8778"        
     spec:
       containers:
       - name: ${project.artifactId}

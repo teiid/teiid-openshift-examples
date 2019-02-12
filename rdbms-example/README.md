@@ -170,4 +170,17 @@ Response:
 
 ```
 
+### 3Scale Integration
+By default the OData service that is defined in this example defines necessary annotations to be discovered by 3Scale API management system. The annotations are
+
+```
+discovery.3scale.net/scheme: "http"
+discovery.3scale.net/port: "8080"
+discovery.3scale.net/description-path: "/swagger.json" 
+```
+
+If the 3Scale system is defined to same cluster and namespace then your OData API is automatically discovered by 3Scale, where user can configure the API management features.  
+
+### JDBC
+
 If you want to use the JDBC, it is not exposed to outside applications by default (no route created). It is only suitable for applications in the cloud. If you have another application that is using JDBC, ODBC or SQL-Alchemy you can connect to the JDBC service exposed and issue SQL queries against the virtual database deployed. 
