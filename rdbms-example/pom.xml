@@ -13,7 +13,7 @@
     <version.io.fabric8>3.5.41</version.io.fabric8>
     <version.postgresql>42.1.4</version.postgresql>
     <version.teiid.spring-boot>1.0.3-SNAPSHOT</version.teiid.spring-boot>
-    <version.spring-boot>1.5.13.RELEASE</version.spring-boot> 
+    <spring-boot.version>2.1.2.RELEASE</spring-boot.version> 
   </properties>
   
   <dependencyManagement>
@@ -44,7 +44,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-         <version>${version.spring-boot}</version>
+         <version>${spring-boot.version}</version>
         <executions>
           <execution>
             <goals>
@@ -95,10 +95,6 @@
   </profiles>
 
   <dependencies>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>  
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
