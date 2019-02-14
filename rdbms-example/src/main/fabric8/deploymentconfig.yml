@@ -22,7 +22,7 @@ spec:
         app: ${project.artifactId}
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "8778"        
+        prometheus.io/port: "9779"        
     spec:
       containers:
       - name: ${project.artifactId}
