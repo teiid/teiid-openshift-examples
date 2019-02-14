@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+		
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.examples</groupId>
+	<artifactId>teiid-openshift-examples-parent</artifactId>
+	<packaging>pom</packaging>
+	<version>1.0.0</version>
+	<name>Teiid Openshift Examples Parent</name>
+	<description>OpenShift deployment based Teiid Examples</description>
+
+	<url>http://jboss.org/teiid</url>
+	<licenses>
+		<license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+    
+	<modules>
+		<module>rdbms-example</module>
+	</modules>	
+</project>
