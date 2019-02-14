@@ -30,15 +30,18 @@ Before you begin, you must have access to OpenShift Dedicated cluster, or `minis
 
 
 ```
-$minishift start --cpus 2 --memory 8196 --vm-driver virtualbox --disk-size 40GB
+$minishift start --cpus 2 --memory 8196 --disk-size 40GB
 
 ```
 
 * Log into OpenShift using on the command line.   Can use the default username/password of developer/developer, if no credentials have been configured.
 
 ```
-$oc login host:port
+$oc login
 ```
+
+The ip of the minishift instance will be shown by the login, or may be obtained by running $minishif ip
+
 * Create a new namespace in the OpenShift, i.e. a new project in OpenShift, this is the namespace we will be deploying the vdb-service into.
 
 ```
@@ -46,7 +49,7 @@ $oc new-project teiid-dataservice
 
 ```
 
-* Log into the OpenShift Web Console application using the https://host:port/console.
+* Log into the OpenShift Web Console application using the https://ip:8443/console.
 
 ## Create an sample Database (Optional)
 For this example we need a PostgreSQL database. If you already have existing PostgreSQL database available, or using Data Integration with some other database like SQLServer you can skip this step. 
@@ -80,16 +83,16 @@ make sure you have your VDB copied over to `src/main/resource` folder, and then 
 ### Data Sources Configuration
 
 #### Local Mode
-Edit `/src/main/resources/application.properties` provide `spring.datasource.xxxx.jdbc-url` kind of properties for each of your data source. Note that the properties you will be providing here will be replaced with ENVIRONMENT variables in OpenShift, so you can use these properties for connecting to your local test database for testing before deploying into the OpenShift. These properties are optional.
+Edit `/src/main/resources/application.properties` to provide `spring.datasource.xxxx.jdbc-url` properties for each of your data sources. Note that the properties you will be providing here will be replaced with ENVIRONMENT variables in OpenShift, so you can use these properties for connecting to your local test database for testing before deploying into the OpenShift. These properties are optional.
 
 #### OpenShift Mode
-* Edit `/src/main/fabric8/deploymentconfig.yml` file. This contains a complete Deployment Configuration that is used by `fabric8-maven-plugin` to deploy the Teiid VDB docker image into OpenShift. This file stays mostly same for all projects, except for supplying the properties that you want to override that are defined in the `application.properties`. 
+* See the `/src/main/fabric8/deploymentconfig.yml` file. This contains a complete Deployment Configuration that is used by `fabric8-maven-plugin` to deploy the Teiid VDB docker image into OpenShift. This file stays mostly same for all projects, except for supplying the properties that you want to override that are defined in the `application.properties`. 
 
 * The properties you define in either `application.properties` or in `deploymentconfig.yml` for data sources are **very specific** to a given data source type. The properties mentioned in this example are only for a relational database store. Please consult data source specific documentation for details for other types data sources.
 
-* Note that an environment properties like `SPRING_DATASOURCE_SAMPLEDB_USERNAME` directly replaces a Spring Boot property `spring.datasource.sampledb.username` in `application.properties` file. Since the ENVIRONMENT properties do not allow `.` in their names, all the `.` are converted to underscore `_` which application understands to convert into correct configuration.
+* Note that an environment properties like `SPRING_DATASOURCE_SAMPLEDB_USERNAME` directly replaces a Spring Boot property `spring.datasource.sampledb.username` in the `application.properties` file. Since the ENVIRONMENT properties do not allow `.` in their names, all the `.` are converted to underscore `_` which application understands to convert into correct configuration.
  
-* Edit `/src/main/fabric8/deploymentconfig.yml` file to provide ALL ENVIRONMENT properties to configure your data source(s). Note this example reads these properties from a `secret` called `postgresql` on OpenShift for database credentials. For example:
+* You may edit the `/src/main/fabric8/deploymentconfig.yml` file to provide ALL ENVIRONMENT properties to configure your data source(s). Note this example reads these properties from a `secret` called `postgresql` on OpenShift for database credentials. For example:
 
 ```
 - name: SPRING_DATASOURCE_SAMPLEDB_DATABASENAME
@@ -98,18 +101,36 @@ Edit `/src/main/resources/application.properties` provide `spring.datasource.xxx
        name: postgresql
        key: database-name
 ```
-The above configuration is defining an environment property called  `SPRING_DATASOURCE_SAMPLEDB_DATABASENAME` where the `database-name` property is read from a secret defined in OpenShift by the name `postgresql`. As a OpenShift user you can create secrets in the OpenShift using OpenShift web-console or using command line scripting 
+The above configuration is defining an environment property called `SPRING_DATASOURCE_SAMPLEDB_DATABASENAME` where the `database-name` property is read from a secret defined in OpenShift by the name `postgresql`. As a OpenShift user you can create secrets in the OpenShift using OpenShift web-console or using command line scripting.
+
+For example, create a postgresql instance with the following - substituting whatever you want for user, password and database name:
 
 ```
-oc create secret generic my-secret --from-file=path/to/bar
+$oc new-app -e POSTGRESQL_USER=user -e POSTGRESQL_PASSWORD=mypassword -e POSTGRESQL_DATABASE=sampledb postgresql
 ```
-Where the `bar` file has all the secret passwords along with any other configuration in key value format 
+
+Then create the secret file, secret.yaml with those values:
 
 ```
-database-name=sampledb
-username=user
-password=mysecret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgresql
+type: Opaque
+stringData:
+  database-user: user
+  database-name: sampledb
+  database-password: mypassword
 ```
+
+And create the secret:
+
+```
+$oc create -f ./secret.yaml
+```
+
+Note that just creating or altering a secret does not automatically restart pods that use that secret.
+
 #### Data Source, sample schema and data population (ONLY FOR TESTING, DANGER WILL OVERIDE DATA IN DATABASE) 
 When working with relational data sources you can supply "schema-xxxx.sql" and "data-xxxx.sql" files to define the DDL to initialize your schema and DML to pre-load data into the database. Note that `xxxx` denotes the data source name you choose in previous steps, and must match exactly. Typically you do not want to do this with production databases, so remove these files if you do not need to setup a database. They are used in this example strictly to ease the database setup.
 
@@ -137,18 +158,17 @@ To use JDBC or OData we need to create services and routes for it on OpenShift. 
 Execute following command to build and deploy a custom Teiid image to the OpenShift.
 
 ```
-$ cd rdbms-example
-$ mvn clean install -Popenshift
+$mvn clean install -Popenshift
 ```
 
 Once the build is completed, go back to the OpenShift web-console application and make sure you do not have any errors with deployment. Now go to "Applications/Routes" and find the OData endpoint. Click on the endpoint and then issue requests like below using browser.
 
 ```
-http://rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/customer?$format=json
+http://rdbms-example-odata-teiid-dataservice.{ip}.nip.io/customer?$format=json
 
 Response:
 {
-  "@odata.context": "http://rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/$metadata#customer",
+  "@odata.context": "http://rdbms-example-odata-teiid-dataservice.{ip}.nip.io/$metadata#customer",
   "value": [
     {
       "id": 10,
