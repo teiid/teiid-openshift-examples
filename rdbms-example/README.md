@@ -30,7 +30,7 @@ Before you begin, you must have access to OpenShift Dedicated cluster, or `minis
 
 
 ```
-$minishift start --cpus 2 --memory 8196 --disk-size 40GB
+$minishift start --cpus 2 --memory 8GB --disk-size 40GB
 
 ```
 

@@ -3,8 +3,8 @@ kind: Template
 metadata:
   name: prometheus
   labels:
-    app: dataintegration
-    syndesis.io/app: dataintegration
+    app: datavirtualization
+    syndesis.io/app: datavirtualization
     syndesis.io/type: infrastructure
 parameters:
 - name: ROUTE_HOSTNAME
@@ -35,8 +35,8 @@ objects:
   metadata:
     name: prometheus
     labels:
-      app: dataintegration
-      syndesis.io/app: dataintegration
+      app: datavirtualization
+      syndesis.io/app: datavirtualization
       syndesis.io/type: infrastructure
       syndesis.io/component: di-prometheus
   spec:
@@ -52,8 +52,8 @@ objects:
   metadata:
     name: syndesis:viewers
     labels:
-      app: dataintegration
-      syndesis.io/app: dataintegration
+      app: datavirtualization
+      syndesis.io/app: datavirtualization
       syndesis.io/type: infrastructure
   roleRef:
     name: view
@@ -65,16 +65,16 @@ objects:
   metadata:
     name: di-prometheus
     labels:
-      app: dataintegration
-      syndesis.io/app: dataintegration
+      app: datavirtualization
+      syndesis.io/app: datavirtualization
       syndesis.io/type: infrastructure
       syndesis.io/component: di-prometheus
 - apiVersion: v1
   kind: ConfigMap
   metadata:
     labels:
-      app: dataintegration
-      syndesis.io/app: dataintegration
+      app: datavirtualization
+      syndesis.io/app: datavirtualization
       syndesis.io/type: infrastructure
       syndesis.io/component: di-prometheus
     name: di-prometheus-config
@@ -124,7 +124,7 @@ objects:
             regex: true
           - source_labels: [__meta_kubernetes_pod_label_syndesis_io_type]
             action: keep
-            regex: integration
+            regex: (integration|datavirtualization)
           - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
             action: replace
             target_label: __metrics_path__
@@ -146,17 +146,7 @@ objects:
             target_label: kubernetes_pod_name
           metric_relabel_configs:
           - source_labels: [__name__]
-            regex: jmx_(.+)
-            action: drop
-          - source_labels: [__name__]
-            regex: jvm_(.+)
-            action: drop
-          - source_labels: [__name__]
-            regex: process_(.+)
-            action: drop
-          - source_labels: [type, __name__]
-            separator: ':'
-            regex: context:(org_apache_camel_ExchangesTotal|org_apache_camel_ExchangesFailed|io_syndesis_camel_StartTimestamp|io_syndesis_camel_LastExchangeCompletedTimestamp|io_syndesis_camel_LastExchangeFailureTimestamp)
+            regex: (org_teiid_PercentBufferDiskSpaceInUse|org_teiid_TotalRequestsProcessed|org_teiid_SessionCount|org_teiid_WaitingRequestsCount)
             action: keep
 
 - apiVersion: v1
@@ -164,8 +154,8 @@ objects:
   metadata:
     name: di-prometheus
     labels:
-      app: dataintegration
-      syndesis.io/app: dataintegration
+      app: datavirtualization
+      syndesis.io/app: datavirtualization
       syndesis.io/type: infrastructure
       syndesis.io/component: di-prometheus
   spec:
@@ -175,8 +165,8 @@ objects:
       protocol: TCP
       targetPort: 9090
     selector:
-      app: dataintegration
-      syndesis.io/app: dataintegration
+      app: datavirtualization
+      syndesis.io/app: datavirtualization
       syndesis.io/component: di-prometheus
   status:
     loadBalancer: {}
@@ -185,8 +175,8 @@ objects:
   metadata:
     name: di-prometheus
     labels:
-      app: dataintegration
-      syndesis.io/app: dataintegration
+      app: datavirtualization
+      syndesis.io/app: datavirtualization
       syndesis.io/type: infrastructure
       syndesis.io/component: di-prometheus
   spec:
@@ -200,15 +190,15 @@ objects:
   metadata:
     name: di-prometheus
     labels:
-      app: dataintegration
-      syndesis.io/app: dataintegration
+      app: datavirtualization
+      syndesis.io/app: datavirtualization
       syndesis.io/type: infrastructure
       syndesis.io/component: di-prometheus
   spec:
     replicas: 1
     selector:
-      app: dataintegration
-      syndesis.io/app: dataintegration
+      app: datavirtualization
+      syndesis.io/app: datavirtualization
       syndesis.io/component: di-prometheus
     strategy:
       type: Recreate
@@ -220,8 +210,8 @@ objects:
     template:
       metadata:
         labels:
-          app: dataintegration
-          syndesis.io/app: dataintegration
+          app: datavirtualization
+          syndesis.io/app: datavirtualization
           syndesis.io/type: infrastructure
           syndesis.io/component: di-prometheus
       spec:
