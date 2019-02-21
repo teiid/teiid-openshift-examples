@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>keycloak-dv-example</artifactId>
+  <name>OpenShift deployment based Teiid example showing Keycloak as security mechnism</name>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <version.io.fabric8>3.5.41</version.io.fabric8>
+    <version.postgresql>42.1.4</version.postgresql>
+    <version.teiid.spring-boot>1.0.3-SNAPSHOT</version.teiid.spring-boot>
+    <spring-boot.version>2.0.3.RELEASE</spring-boot.version> 
+  </properties>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.teiid</groupId>
+        <artifactId>teiid-spring-boot-starter-parent</artifactId>
+        <version>${version.teiid.spring-boot}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+         <version>${spring-boot.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>openshift</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>fabric8-maven-plugin</artifactId>
+            <version>${version.io.fabric8}</version>
+            <configuration>
+              <generator>
+                <includes>
+                  <include>spring-boot</include>
+                </includes>
+                <config>
+                  <spring-boot>
+                    <from>fabric8/s2i-java</from>
+                  </spring-boot>
+                </config>
+              </generator>
+            </configuration>            
+            <executions>
+              <execution>
+                <id>build</id>
+                <goals>
+                  <goal>resource</goal>
+                  <goal>build</goal>
+                  <goal>apply</goal>
+                </goals>
+                <phase>package</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <dependencies>
+
+    <dependency>    
+      <groupId>org.springframework.boot</groupId>   
+      <artifactId>spring-boot-starter-actuator</artifactId> 
+    </dependency>    
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>       
+    <dependency>
+      <groupId>org.teiid</groupId>
+      <artifactId>teiid-spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.teiid</groupId>
+      <artifactId>spring-keycloak-odata</artifactId>
+    </dependency>  
+  </dependencies>
+  
+</project>
