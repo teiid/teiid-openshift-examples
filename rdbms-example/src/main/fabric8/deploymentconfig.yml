@@ -61,15 +61,15 @@ spec:
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
-            port: 8081
-            path: "/health"
+            port: 8080
+            path: "/actuator/health"
           initialDelaySeconds: 60
           periodSeconds: 20
           timeoutSeconds: 5
         readinessProbe:
           httpGet:
-            path: "/health"
-            port: 8081
+            path: "/actuator/health"
+            port: 8080
           initialDelaySeconds: 60
           periodSeconds: 20
           timeoutSeconds: 5
@@ -80,8 +80,6 @@ spec:
           name: prometheus
         - containerPort: 8778
           name: jolokia
-        - containerPort: 8081
-          name: actuator    
         workingDir: /deployments
         resources:
           limits:
