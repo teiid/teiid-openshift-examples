@@ -26,3 +26,4 @@ oc process prometheus -p OPENSHIFT_PROJECT=`oc project -q` | oc create -f -
 
 At this time, if you log into your OpenShift console, you should see the Prometheus installed in the same namespace as your project.
 
+Grafana dashboard integration is upcoming as an extension to this example, until then you can create route to Prometheus service and see some simple graphs. To do that, go to services page, find `prometheus` service and client `create route` and access the console using the url provided.
