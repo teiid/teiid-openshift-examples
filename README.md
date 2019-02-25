@@ -4,17 +4,15 @@ This repository contains example projects, designed to be deployed on OpenShift 
 
 
 ## Available Examples and Utility
-
-| **Example Name** | **Description** | **Prerequisite** |
-|:--------------------|:--------------------------|:----------------|:------------------|
+| Example Name  | Description   | Prerequisite  |
+| ------------- |:-------------:| :-----|
 |[rdbms-example](rdbms-example) |Shows how to deploy a single source VDB into OpenShift  |None |
 |[prometheus](prometheus) |Provides a template for installing a Prometheus instance for use with Teiid  |rdbms-example |
-|[vdb-migratiion](vdb-migratiion) |VDB Migration Utility that will convert a VDB (xml format) to a DDL formatted vdb  |None |
 
 
 ## Run the Examples
 
-To run the examples, first read the README.md located within the example directory.
+To run the examples, first read the README.md located within the example directory. These examples reqiure you to have valid DDL based VDB. Please look below for converting your .vdb or -vdb.xml file into DDL format. Otherwise, head on over to the rdbms-example.
 
 
 ## Run the VDB Migration Utility
@@ -33,7 +31,6 @@ To perform the task of converting a vdb and report validation errors, do the fol
 Open a terminal and navigate to the vdb-migration directory.
 
 ```
-$cd  vdb-migration
 $mvn exec:java -Dvdb={filepath/to/vdb}
 ```
 This will perform the vdb conversion, reporting any validation errors to the terminal.
@@ -44,10 +41,11 @@ This will perform the vdb conversion, reporting any validation errors to the ter
 To perform the task of converting a vdb, report validation errors, and writing the result to a file, do the following:
 
 ```
-$cd  vdb-migration
 $mvn exec:java -Dvdb={filepath/to/vdb} -Doutput={filepath/to/convertedvdb}
 ```
-This will perform the vdb conversion and will a valid vdb to the specified output file.  The output file will only be written ff there are no validation errors
+This will perform the vdb conversion and will a valid vdb to the specified output file.  The output file will only be written if there are no validation errors.
+
+
 
 
 ## Links
