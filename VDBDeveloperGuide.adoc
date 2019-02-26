@@ -1,0 +1,59 @@
+= JBoss Data Virtualization Developer Guide to Spring Boot based Teiid
+
+As a developer if you are using Spring Boot library with DDL VDB for your Data Virtualization purposes, then guide will provide details about what features are supported when compared to previous versions of Data Virtualization.
+
+== Features supported and Key changes from prior DV
+
+* The previous versions of DV were server based model, where a single instance of Teiid is used, but developer is allowed to deploy any number of VDBs that they need to support their use cases. In this Spring Boot version of this software a a *single* VDB is used to build application instance. If you have multiple VDBs each one needs to be defined using a separate application.
+
+* There is no installation of server or deployment of VDBs in the new architecture. Build a docker container that has single VDB that works as virtualization database. This docker image can be run in OpenShift using maven based build process. So, a CI/CD based delivery model is applied. 
+
+* DDL based VDBs are only type that are supported.
+TIP: If you have a .vdb file, convert that file to .DDL using the VDB migration utility.
+
+* Each instance of the application will have their own configuration in the `application.properties` file.
+
+* The configuration will contain all the data source creation properties. The data source configuration is entirely different from that of previous JDV versions. These will follow the native source support that defined by vendors for each data source in Spring Boot environment.
+
+* This model is more suited for the container based workloads in cloud environments like OpenShift.
+
+* You can deploy more than single instance of the application instance for scaling the deployments.
+
+* If the application exposes the OData API, the endpoint URL is different from previous versions. The `/odata4/<vdb-name>` is dropped from the URL.
+
+* Currently relational databases, REST based sources, file and MongoDB data sources are supported to be sources where the VDB can integrate the data from. Support for other sources is coming in future versions.
+
+* OData API can be secured through Keycloak using OpenIDConnect protocol. The OAuth2 based authorization can be enabled.
+
+* Monitoring support can be enabled through Prometheus and Dashboard through Grafana.
+
+* User defined functions and their Java based code can be part of the VDB application or they need to be defined as dependencies to the application in the pom.xml file.
+
+* No schema updates at runtime are allowed.
+
+* Hibernate support is integrated.  
+
+* Scaling is natively supported when deployed on OpenShift
+
+* Audit/Command logs are logged to regular log 
+
+ 
+== What’s not supported
+
+* The Designer tool to build and test the VDB is no longer supported
+* XML document models are not supported
+* Wildfly base server is not supported
+* The distributed cache (materialization, resultset cache) are not supported yet.
+* JDBC/ODBC connections to the virtual database do not currently support any authentication. Previous WildFly based JAAS based security  model is no longer supported. Later versions will support Keycloak based authentication/authorizations.
+* No support for Dynamically generated REST API over deployed VDBs.
+* XA based transaction support is currently not supported
+* VDB import feature is not directly supported, however user can manually combine the all the VDBs involved before deployment.
+* Since there is no security over JDBC/ODBC the data roles feature is currently not supported.
+* No Admin API support. Since the application instance is immutable, the instance started can NOT be modified.
+* Data source level security at resource adapter level including the passthrough authentication is not supported. Some features like Kerberos and OAuth2 delegate models will be considered for future versions.
+* Custom translators and Extension of translators is not supported, planned for future versions.
+* Teiid Web-Console is no longer supported.
+* PreParser support is currently not available, planned for future versions.
+* No prebuilt scraping of Audit/Command log is provided. ELK/LogStash being considered for future versions.
+ 
+ 
