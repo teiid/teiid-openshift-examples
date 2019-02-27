@@ -2,26 +2,25 @@
 
 As a developer if you are using Spring Boot library with DDL VDB for your Data Virtualization purposes, then guide will provide details about what features are supported when compared to previous versions of Data Virtualization.
 
-== Features supported and Key changes from prior DV
+== Why the changes?
 
-* The previous versions of DV were server based model, where a single instance of Teiid is used, but developer is allowed to deploy any number of VDBs that they need to support their use cases. In this Spring Boot version of this software a a *single* VDB is used to build application instance. If you have multiple VDBs each one needs to be defined using a separate application.
+The new model is more suited for the container based workloads in cloud environments like OpenShift.  A slim runtime image can be generated for a given VDB such that it can be managed and scaled independently of any other VDB.
 
-* There is no installation of server or deployment of VDBs in the new architecture. Build a docker container that has single VDB that works as virtualization database. This docker image can be run in OpenShift using maven based build process. So, a CI/CD based delivery model is applied. 
+== Key changes from JDV
+
+* A single instance of EAP/WildFly with Teiid installed could have any number of VDBs deployed. With Teiid Spring Boot a *single* VDB is used to build an application instance. If you have multiple VDBs each one needs to be defined using a separate application.
+
+* There is no installation of a server or deployment of VDBs in the new architecture. You build a docker container that has a single VDB that works as virtualization database. This docker image can be run in OpenShift using maven based build processes, which supports a CI/CD based delivery model. 
 
 * DDL based VDBs are only type that are supported.
-TIP: If you have a .vdb file, convert that file to .DDL using the VDB migration utility.
+TIP: If you have a .vdb file, convert that to a single -vdb.xml file using designer.  Then convert that file to a .DDL vdb using the VDB migration utility.
 
-* Each instance of the application will have their own configuration in the `application.properties` file.
+* Each instance of an application will have their own configuration in an `application.properties` file.
+** Configuration changes will always need to restart the instance.
 
-* The configuration will contain all the data source creation properties. The data source configuration is entirely different from that of previous JDV versions. These will follow the native source support that defined by vendors for each data source in Spring Boot environment.
-
-* This model is more suited for the container based workloads in cloud environments like OpenShift.
-
-* You can deploy more than single instance of the application instance for scaling the deployments.
+* The data source configuration is different from JDV. You will follow the necessary configuration for the relevent Spring Boot component - JEE resource adapters are no longer used.
 
 * If the application exposes the OData API, the endpoint URL is different from previous versions. The `/odata4/<vdb-name>` is dropped from the URL.
-
-* Currently relational databases, REST based sources, file and MongoDB data sources are supported to be sources where the VDB can integrate the data from. Support for other sources is coming in future versions.
 
 * OData API can be secured through Keycloak using OpenIDConnect protocol. The OAuth2 based authorization can be enabled.
 
@@ -29,31 +28,38 @@ TIP: If you have a .vdb file, convert that file to .DDL using the VDB migration 
 
 * User defined functions and their Java based code can be part of the VDB application or they need to be defined as dependencies to the application in the pom.xml file.
 
-* No schema updates at runtime are allowed.
+* Failover and horizontal scaling are natively by OpenShift.
 
-* Hibernate support is integrated.  
+* All logs, including the Audit/Command logs, are logged by default to the console log.
+** You may change the logging configuration to suite your needs, but in OpenShift additional facitility will be provided for the collection and analysis of logs.
 
-* Scaling is natively supported when deployed on OpenShift
+== What’s not supported *yet*
 
-* Audit/Command logs are logged to regular log 
-
- 
-== What’s not supported
-
-* The Designer tool to build and test the VDB is no longer supported
-* XML document models are not supported
-* Wildfly base server is not supported
+* Relational databases, REST based sources, file and MongoDB data sources are supported to be sources where the VDB can integrate the data from. Support for other sources is coming in future versions.
 * The distributed cache (materialization, resultset cache) are not supported yet.
-* JDBC/ODBC connections to the virtual database do not currently support any authentication. Previous WildFly based JAAS based security  model is no longer supported. Later versions will support Keycloak based authentication/authorizations.
-* No support for Dynamically generated REST API over deployed VDBs.
-* XA based transaction support is currently not supported
+* JDBC/ODBC connections to the virtual database do not currently support any authentication.  Later versions will support Keycloak based authentication/authorizations.
+* Dynamically generated REST API over deployed VDBs.
+* XA based transactions
 * VDB import feature is not directly supported, however user can manually combine the all the VDBs involved before deployment.
 * Since there is no security over JDBC/ODBC the data roles feature is currently not supported.
-* No Admin API support. Since the application instance is immutable, the instance started can NOT be modified.
+* Runtime lists from the Admin API - sessions, queries, transations, etc. will be available via system tables.
 * Data source level security at resource adapter level including the passthrough authentication is not supported. Some features like Kerberos and OAuth2 delegate models will be considered for future versions.
 * Custom translators and Extension of translators is not supported, planned for future versions.
-* Teiid Web-Console is no longer supported.
 * PreParser support is currently not available, planned for future versions.
 * No prebuilt scraping of Audit/Command log is provided. ELK/LogStash being considered for future versions.
+* Multisource vdbs
+
+== What’s not supported
+
+* Peer-to-peer clustering
+* The Designer tool to build and test the VDB is no longer supported.
+* XML document models are not supported.
+* Wildfly/EAP runtime is not supported.
+** JAAS based security integration is not supported.
+** Resource Adapters are not supported.
+** No Admin API support. Since the application instance is immutable, the instance started can NOT be modified.  Monitoring will utilize JMX and exposure via jolokia or jmx_exporter.
+** Teiid Web-Console is no longer supported.
+
+
  
  
