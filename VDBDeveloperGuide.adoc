@@ -51,6 +51,7 @@ TIP: If you have a .vdb file, convert that to a single -vdb.xml file using desig
 
 == What’s not supported
 
+* The VDB version concept is not supported.
 * Peer-to-peer clustering
 * The Designer tool to build and test the VDB is no longer supported.
 * XML document models are not supported.
