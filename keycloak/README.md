@@ -52,7 +52,7 @@ http://keycloak-teiid-dataservice.192.168.99.100.nip.io
 
 ## Changes to code to enable Keycloak based security on OData API
 
-So far we have setup the Keycloak server in OpenShift and configured it for to be used with Data Integration. But before can use KeyCloak based security on OData API, the example needs to be modified to make use of the Keycloak. For it make the below code changes.
+So far we have setup the Keycloak server in OpenShift and configured it for to be used with Data Integration. But before we can use KeyCloak based security on OData API, the example needs to be modified to make use of the Keycloak. For it make the below code changes.
 
 #### pom.xml
 The `pom.xml` needs to be added with additional dependencies for Keycloak, as described below
@@ -87,19 +87,19 @@ keycloak.resource = di
 keycloak.public-client = true
 ```
 
-Note that depending your environment, the above properties may be different in values, especially from environment to environment and how you setup your Keycloak server.
+Note that depending on your environment, the above properties may have different values, especially from environment to environment and how you setup your Keycloak server.
 
 #### deploymentconfig.yml
 
-The `src/main/fabric8/deploymentconfig.yml` needs to be added with ENVIRONMENT variables that may be different in different deployments. If you are deploying application in DEV and PROD environments, you need a mechanism switch the configuration.
+The `src/main/fabric8/deploymentconfig.yml` needs to be added with ENVIRONMENT variables that may be different in different deployments. If you are deploying application in DEV and PROD environments, you need a mechanism to switch the configuration.
 
-Especially the property `keycloak.auth-server-url`. Add following to configure a configmap then use that in your deployment
+Especially the property `keycloak.auth-server-url`. Add the following to configure a configmap then use that in your deployment
 
 ```
 oc create configmap my-config --from-literal=keycloak.auth-server-url=http://keycloak-teiid-dataservice.192.168.99.100.nip.io/auth
 ```
 
-Above creates a config map called `my-config` in OpenShift, that can be referenced from your deployment config as shown below. Between DEV and PROD make sure the name of the config map stays same but the contents will vary. Note there are many ways to create config maps, the above a simple example.
+Above creates a config map called `my-config` in OpenShift, that can be referenced from your deployment config as shown below. Between DEV and PROD make sure the name of the config map stays same but the contents will vary. Note there are many ways to create config maps, the above is a simple example.
 
 Then in the `src/main/fabric8/deploymentconfig.yml` add
 
@@ -121,7 +121,7 @@ CREATE ROLE ReadOnly WITH JAAS ROLE ReadOnly;
 GRANT SELECT ON TABLE "accounts.customer" TO ReadOnly
 ```
 
-In the above, the first line is creating role called "ReadOnly" and mapping to the role we created earlier in Keycloak's role with same name of "ReadOnly". They can be different, but here for simplicity I used same name. The second line gives the SELECT permissions to the `accounts.customer` table the user with "ReadOnly" permissions.
+In the above, the first line is creating role called "ReadOnly" and mapping to the role we created earlier in Keycloak's role with same name of "ReadOnly". They can be different, but here for simplicity the same name is used. The second line gives the SELECT permissions to the `accounts.customer` table to the user with "ReadOnly" permissions.
 
 ## Build Example
 
@@ -133,7 +133,7 @@ $ mvn clean install -Popenshift
 
 ## Post Deployment
 
-Now you should see that the image you deployed into the OpenShift is active and running. It has a OData route to it. Before we proceed, we need to add a "Valid Redirect URIs" for the client we created. In this example it is "di", so click on "clients", select "di" client and provide the "Valid Redirect URIs" field as your OData services root URL appended with "*". for ex:
+Now you should see that the image you deployed into the OpenShift is active and running. It has an OData route to it. Before we proceed, we need to add a "Valid Redirect URIs" for the client we created. In this example it is "di", so click on "clients", select "di" client and provide the "Valid Redirect URIs" field as your OData services root URL appended with "*", for example:
 
 ```
 http://keycloak-dv-example-odata-teiid-dataservice.192.168.99.100.nip.io/*
@@ -149,6 +149,6 @@ Now using the browser you can issue an OData API call such as
 http://keycloak-rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/customer
 ```
 
-it will present with a login page, where use the user credentials you created in previous steps and access the service. If you use `user` as user name when you login you will be granted to view the data of the customer view. If you used `developer` as the user name the permission to view the customer data is not granted, as the `developer` user does not have the `ReadOnly` role. 
+You will presented with a login page, where you use the user credentials you created in previous steps and access the service. If you use `user` as user name when you login you will be granted to view the data of the customer view. If you used `developer` as the user name the permission to view the customer data is not granted, as the `developer` user does not have the `ReadOnly` role. 
 
 Note that urls like `/$metadata` are specifically excluded from security such that they can be discovered by other services.
