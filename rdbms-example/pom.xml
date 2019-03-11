@@ -78,7 +78,7 @@
                 </includes>
                 <config>
                   <spring-boot>
-                    <from>fabric8/s2i-java</from>
+                    <from>registry.access.redhat.com/fuse7/fuse-java-openshift:latest</from>
                   </spring-boot>
                 </config>
               </generator>
