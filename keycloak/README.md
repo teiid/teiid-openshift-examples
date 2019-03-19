@@ -38,9 +38,9 @@ Click "roles", to create a new role and create a role called "odata". This role 
 
 Go back to the "users" panel, find the user you created in the previous step and grant him/her the role of "odata". Note, create any number of roles you need to manage your Data Integration's RBAC based access and assign them to the user. Mapping to LDAP/Active Directory based roles is beyond this example, however it is supported as federation through Keycloak. Refer to Keycloak's documentation.
 
-For this example purpose create another role called `ReadOnly` and assign this to the `user`. Create another user called `developer` and assign the `odata` role but without `ReadOnly` role, so that you can verify functionality of Data Roles later in the example.
+For this example purpose create another role called `ReadRole` and assign this to the `user`. Create another user called `developer` and assign the `odata` role but without `ReadRole` role, so that you can verify functionality of Data Roles later in the example.
 
-Note that the `odata` is to provide access to the OData API endpoint, where as `ReadOnly` is being used in the Data Roles for this application. If you want you could reuse single role for both.
+Note that the `odata` is to provide access to the OData API endpoint, where as `ReadRole` is being used in the Data Roles for this application. If you want you could reuse single role for both.
 
 ![](images/keycloak5.png)
 
@@ -117,11 +117,11 @@ Note that if you used different realm or client by the environment you would hav
 The previous example's virtual database does not define any Data Roles. Add these following two lines to the .DDL file at `src/main/resources/customer-vdb.ddl`
 
 ```
-CREATE ROLE ReadOnly WITH JAAS ROLE ReadOnly;
-GRANT SELECT ON TABLE "accounts.customer" TO ReadOnly
+CREATE ROLE ReadRole WITH JAAS ROLE ReadRole;
+GRANT SELECT ON TABLE "accounts.customer" TO ReadRole
 ```
 
-In the above, the first line is creating role called "ReadOnly" and mapping to the role we created earlier in Keycloak's role with same name of "ReadOnly". They can be different, but here for simplicity the same name is used. The second line gives the SELECT permissions to the `accounts.customer` table to the user with "ReadOnly" permissions.
+In the above, the first line is creating role called "ReadRole" and mapping to the role we created earlier in Keycloak's role with same name of "ReadRole". They can be different, but here for simplicity the same name is used. The second line gives the SELECT permissions to the `accounts.customer` table to the user with "ReadRole" permissions.
 
 ## Build Example
 
@@ -149,6 +149,6 @@ Now using the browser you can issue an OData API call such as
 http://keycloak-rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/customer
 ```
 
-You will presented with a login page, where you use the user credentials you created in previous steps and access the service. If you use `user` as user name when you login you will be granted to view the data of the customer view. If you used `developer` as the user name the permission to view the customer data is not granted, as the `developer` user does not have the `ReadOnly` role. 
+You will presented with a login page, where you use the user credentials you created in previous steps and access the service. If you use `user` as user name when you login you will be granted to view the data of the customer view. If you used `developer` as the user name the permission to view the customer data is not granted, as the `developer` user does not have the `ReadRole` role. 
 
 Note that urls like `/$metadata` are specifically excluded from security such that they can be discovered by other services.

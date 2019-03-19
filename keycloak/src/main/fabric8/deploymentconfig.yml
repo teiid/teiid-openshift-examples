@@ -96,6 +96,6 @@ spec:
       -  ${project.artifactId}
       from:
         kind: ImageStreamTag
-        name: ${project.artifactId}:${project.version}
+        name: ${project.artifactId}:latest
     type: ImageChange
   - type: ConfigChange
