@@ -128,7 +128,7 @@ In the above, the first line is creating role called "ReadOnly" and mapping to t
 Execute following command to build and deploy a custom Teiid image to the OpenShift.
 
 ```
-$ mvn clean install -Popenshift
+$ mvn -s ../settings.xml clean install -Popenshift
 ```
 
 ## Post Deployment
