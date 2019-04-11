@@ -82,11 +82,12 @@ spec:
           name: jolokia
         workingDir: /deployments
         resources:
-          limits:
-            memory: 512Mi
-            cpu: 500m
           requests:
             memory: 256Mi
+            cpu: "0.2"
+          limits:
+            memory: 512Mi
+            cpu: "1.0"
   triggers:
   - imageChangeParams:
       automatic: true
