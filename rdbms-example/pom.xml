@@ -64,6 +64,9 @@
   <profiles>
     <profile>
       <id>openshift</id>
+      <properties>
+      	<fabric8.namespace>teiid-dataservice</fabric8.namespace>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -78,6 +81,7 @@
                 <config>
                   <spring-boot>
                     <from>fabric8/s2i-java</from>
+                    <name>${fabric8.namespace}/${project.artifactId}:${project.version}</name>
                   </spring-boot>
                 </config>
               </generator>
