@@ -3,6 +3,10 @@ kind: Service
 metadata:
   name: ${project.artifactId}-jdbc
 spec:
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 86400
   ports:
   - name: ${project.artifactId}-jdbc
     port: 31000

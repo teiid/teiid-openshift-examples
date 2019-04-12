@@ -74,6 +74,10 @@ spec:
           periodSeconds: 20
           timeoutSeconds: 5
         ports:
+        - containerPort: 35432
+          name: pg
+        - containerPort: 31000
+          name: teiid
         - containerPort: 8080
           name: http
         - containerPort: 9779
