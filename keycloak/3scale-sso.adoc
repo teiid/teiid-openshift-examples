@@ -6,7 +6,7 @@ The main aim in this example is to secure the Data Virtualization's OData API in
 
 Note that in this example, the installation of Keycloak is done using a template file from Keycloak, however if you already have Keycloak environment set up in OpenShift then we suggest you use that instance. We only showing this step here for illustration purposes only.
 
-== [[3scale based API Management]]3scale based API Management
+== 3scale based API Management
 
 Using 3scale one can manage/monetize on APIs that are available for consumption. Here in this example, the OData API is being managed through 3scale, however the API is secured through Keycloak/RH-SSO. When the user logs in, 3scale will engage in authentication with Keycloak, upon success it will then delegate the security token down to the OData API. OData API will verify the token, and read permissions from token and apply those to the data roles defined on the virtual database. The below diagram illustrates authentication flow.
 
@@ -18,7 +18,7 @@ Here is link:https://developers.redhat.com/blog/2017/11/21/setup-3scale-openid-c
 
 In the above article, go through until Keycloak security realms, and users, roles are created, just short of configuration in the 3scale. You only need to do this very fist time. Then go to next section to configure the Data Virtualization service, once that service is discovered in 3scale, follow through rest of the article.
 
-== [[Configure Data Virtualization with 3scale and Keycloak]]Configure Data Virtualization with 3scale and Keycloak
+== Configure Data Virtualization with 3scale and Keycloak
 
 So far we have setup the Keycloak server in OpenShift and configured it for to be used with Data Virtualization. But before we can use KeyCloak based security on OData API, the example needs to be modified to make use of the Keycloak. For it make the below code changes.
 
