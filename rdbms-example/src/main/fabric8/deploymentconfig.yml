@@ -57,7 +57,7 @@ spec:
           value: "true"
         - name: AB_JMX_EXPORTER_CONFIG
           value: "prometheus-config.yml"
-        image: ${fabric8.namespace}/${project.artifactId}:${project.version}
+        image: ${project.artifactId}:${project.version}
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -99,6 +99,6 @@ spec:
       -  ${project.artifactId}
       from:
         kind: ImageStreamTag
-        name: ${project.artifactId}:latest
+        name: ${project.artifactId}:${project.version}
     type: ImageChange
   - type: ConfigChange

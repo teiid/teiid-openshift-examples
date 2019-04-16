@@ -59,7 +59,7 @@ spec:
              configMapKeyRef:
                name: my-config
                key: keycloak.auth-server-url          
-        image: teiid-dataservice/${project.artifactId}:${project.version}
+        image: ${project.artifactId}:${project.version}
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -76,6 +76,10 @@ spec:
           periodSeconds: 20
           timeoutSeconds: 10
         ports:
+        - containerPort: 35432
+          name: pg
+        - containerPort: 31000
+          name: teiid
         - containerPort: 8080
           name: http
         - containerPort: 9779
@@ -84,11 +88,12 @@ spec:
           name: jolokia
         workingDir: /deployments
         resources:
-          limits:
-            memory: 512Mi
-            cpu: 500m
           requests:
             memory: 256Mi
+            cpu: "0.2"
+          limits:
+            memory: 512Mi
+            cpu: "1.0"
   triggers:
   - imageChangeParams:
       automatic: true
@@ -96,6 +101,6 @@ spec:
       -  ${project.artifactId}
       from:
         kind: ImageStreamTag
-        name: ${project.artifactId}:latest
+        name: ${project.artifactId}:${project.version}
     type: ImageChange
   - type: ConfigChange

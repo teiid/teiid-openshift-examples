@@ -17,7 +17,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.io.fabric8>3.5.41</version.io.fabric8>
     <version.postgresql>42.1.4</version.postgresql>
-    <version.teiid.spring-boot>1.0.3</version.teiid.spring-boot>
+    <version.teiid.spring-boot>1.1.0-SNAPSHOT</version.teiid.spring-boot>
     <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
   </properties>
   

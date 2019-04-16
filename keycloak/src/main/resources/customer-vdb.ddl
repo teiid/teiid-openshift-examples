@@ -25,4 +25,4 @@ CREATE VIEW CustomerZip(id bigint PRIMARY KEY, name string, ssn string, zip stri
     FROM accounts.CUSTOMER c LEFT OUTER JOIN accounts.ADDRESS a 
     ON c.ID = a.CUSTOMER_ID;
     
-GRANT SELECT ON TABLE "accounts.customer" TO ReadRole
+GRANT SELECT ON TABLE "portfolio.CustomerZip" TO ReadRole;

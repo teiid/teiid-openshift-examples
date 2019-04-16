@@ -172,7 +172,7 @@ To use JDBC or OData we need to create services and routes for it on OpenShift. 
 Execute following command to build and deploy a custom Teiid image to the OpenShift.
 
 ```
-$mvn clean install -Popenshift
+$mvn clean install -Popenshift -Dfabric8.namespace=`oc project -q`
 ```
 
 Once the build is completed, go back to the OpenShift web-console application and make sure you do not have any errors with deployment. Now go to "Applications/Routes" and find the OData endpoint. Click on the endpoint and then issue requests like below using browser.
