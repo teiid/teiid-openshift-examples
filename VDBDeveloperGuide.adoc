@@ -37,12 +37,9 @@ TIP: If you have a .vdb file, convert that to a single -vdb.xml file using desig
 
 * Relational databases, REST based sources, file and MongoDB data sources are supported to be sources where the VDB can integrate the data from. Support for other sources is coming in future versions.
 * The distributed cache (materialization, resultset cache) are not supported yet.
-* JDBC/ODBC connections to the virtual database do not currently support any authentication.  Later versions will support Keycloak based authentication/authorizations.
-* Dynamically generated REST API over deployed VDBs.
 * XA based transactions
 * VDB import feature is not directly supported, however user can manually combine the all the VDBs involved before deployment.
-* Since there is no security over JDBC/ODBC the data roles feature is currently not supported.
-* Runtime lists from the Admin API - sessions, queries, transations, etc. will be available via system tables.
+* Runtime lists from the Admin API - sessions, queries, transactions, etc. will be available via system tables.
 * Data source level security at resource adapter level including the passthrough authentication is not supported. Some features like Kerberos and OAuth2 delegate models will be considered for future versions.
 * Custom translators and Extension of translators is not supported, planned for future versions.
 * PreParser support is currently not available, planned for future versions.

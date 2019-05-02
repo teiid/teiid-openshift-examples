@@ -1,5 +1,6 @@
 = Security & Data Role enforcement in Data Virtualization 
 
 This guide has two examples
-1. Secure OData API through Keycloak link:/keycloak-sso.adoc
-2. Secure OData API through 3scale and Keycloak link:/3scale-sso.adoc  
+1. Secure OData API through Keycloak link:/keycloak-odata-sso.adoc
+2. Secure pg/JDBC through Keycloak link:/keycloak-db-sso.adoc
+3. Secure OData API through 3scale and Keycloak link:/3scale-odata-sso.adoc

@@ -8,19 +8,10 @@
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.example</groupId>
   <artifactId>rdbms-example</artifactId>
   <name>OpenShift deployment based Teiid Example showing RDBMS as source</name>
   <packaging>jar</packaging>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.io.fabric8>3.5.41</version.io.fabric8>
-    <version.postgresql>42.1.4</version.postgresql>
-    <version.teiid.spring-boot>1.1.0-SNAPSHOT</version.teiid.spring-boot>
-    <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
-  </properties>
-  
   <dependencyManagement>
     <dependencies>
       <dependency>

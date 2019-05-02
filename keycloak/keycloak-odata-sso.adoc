@@ -1,12 +1,14 @@
-= Securing With OData API Keycloak 
+= Securing an OData API with Keycloak 
 
-This example is continuation of "rdbms-example", so if you have not gone through that project yet, the tasks in there should be completed first before going through this example.
+This example is continuation of "rdbms-example".  The tasks in there should be completed first before going through this example.
 
-The main aim in this example is to secure the Data Virtualization's OData API interface using the Keycloak. We will use OpenID-Connect as authentication mechanism to secure the API and use OAuth2 as authorization mechanism. 
+The main aim in this example is to secure the Data Virtualization's OData API interface with Keycloak. We will use OpenID-Connect as authentication mechanism to secure the API and use OAuth2 as the authorization mechanism. 
 
-Note that in this example, the installation of Keycloak is done using a template file from Keycloak, however if you already have Keycloak environment set up in OpenShift then we suggest you use that instance. We only showing this step here for illustration purposes only.
+Note that this functionality overlaps with securing PG/JDBC with Keycloak.
 
 == Install Keycloak
+
+In this example the installation of Keycloak is done using a template file from Keycloak, however if you already have Keycloak environment set up in OpenShift then we suggest you use that instance. We only showing this step here for illustration purposes only.
 
 To install Keycloak on the same namespace as your project, execute the following `oc` commands. The first one installs a template, and second one instantiates a Keycloak instance with predefined username and password.
 
@@ -15,7 +17,9 @@ oc create --force -f "https://raw.githubusercontent.com/jboss-dockerfiles/keyclo
 oc process keycloak-https -p KEYCLOAK_USER=admin -p KEYCLOAK_PASSWORD=admin -p NAMESPACE=`oc project -q` | oc create -f -
 ----
 
-Note: In future these above command will be replaced with an Operator and CRD.
+Note: In the future these above command will be replaced with an Operator and CRD.
+
+Note: this example uses a Keycloak template that does not persist configuration changes over the pod restarts. In real world examples, you want to switch the "h2" database into "postgresql" database with persistent volumes for the Keycloak template such that the configuration survives the pod restarts.
 
 Now, using log into the OpenShift console using your web browser and find out the route (URL) to your installed Keycloak server. My instance the URL is like
 
@@ -35,15 +39,13 @@ Click "users", to create a new user and provide the name and details to create o
 
 image:images/keycloak4.png[]
 
-Click "roles", to create a new role and create a role called "odata". This role will be used to validate user's access to the OData service. Repeat this step to add any other roles you want to give your user.
+Click "roles", create a role called `ReadRole`
 
 image:images/keycloak3.png[]
 
-Go back to the "users" panel, find the user you created in the previous step and grant him/her the role of "odata". Note, create any number of roles you need to manage your Data virtualization's RBAC based access and assign them to the user(s). Mapping to LDAP/Active Directory based roles is beyond this example, however it is supported as federation through Keycloak. Refer to Keycloak's documentation.
+You can create as many roles as needed for you users. Mapping to LDAP/Active Directory based roles is beyond this example, however it is supported as federation through Keycloak. Refer to Keycloak's documentation.
 
-For this example purpose create another role called `ReadRole` and assign this to the `user`. Create another user called `developer` and assign the `odata` role but without `ReadRole` role, so that you can verify functionality of Data Roles later in the example.
-
-Note that the `odata` is to provide access to the OData API endpoint, where as `ReadRole` is being used in the Data Roles for this application. If you want you could reuse single role for both.
+Go back to the "users" panel, find the user you created in the previous step and grant him/her the role of "ReadRole".
 
 image:images/keycloak5.png[]
 
@@ -58,23 +60,14 @@ https://keycloak-teiid-dataservice.192.168.99.100.nip.io
 So far we have setup the Keycloak server in OpenShift and configured it for to be used with Data Integration. But before we can use KeyCloak based security on OData API, the example needs to be modified to make use of the Keycloak. For it make the below code changes.
 
 ==== pom.xml
-The `pom.xml` needs to be added with additional dependencies for Keycloak, as described below
+The `pom.xml` needs additional dependencies for Keycloak, as described below
 
 in the "dependencies" section add
 
 ----
 <dependency>
   <groupId>org.teiid</groupId>
-  <artifactId>spring-keycloak-odata</artifactId>
-</dependency> 
-----
-
-this should replace previous dependency
-
-----
-<dependency>
-  <groupId>org.teiid</groupId>
-  <artifactId>spring-odata</artifactId>
+  <artifactId>spring-keycloak</artifactId>
 </dependency> 
 ----
 
@@ -143,7 +136,7 @@ Now you should see that the image you deployed into the OpenShift is active and 
 http://keycloak-dv-example-odata-teiid-dataservice.192.168.99.100.nip.io/*
 ----
 
-NOTE: Click "Save", for saving the profile. Note this example used Keycloak template that does not persist configuration changes over the pod restarts. In real world examples, you want to switch the "h2" database into "postgresql" database with persistent volumes for the Keycloak template such that the configuration survives the pod restarts.
+NOTE: Click "Save", for saving the profile.
 
 ==  Testing
 
@@ -153,6 +146,6 @@ Now using the browser you can issue an OData API call such as
 http://keycloak-rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/CustomerZip
 ----
 
-You will presented with a login page, where you use the user credentials you created in previous steps and access the service. If you use `user` as user name when you login you will be granted to view the data of the customer view. If you used `developer` as the user name the permission to view the customer data is not granted, as the `developer` user does not have the `ReadRole` role. 
+You will presented with a login page, where you use the user credentials you created in previous steps and access the service. If you use `user` as the user name, when you login you will be granted to view the data of the customer view. If you used `developer` as the user name, the permission to view the customer data is not granted, as the `developer` user does not have the `ReadRole` role. 
 
 Note that urls like `/$metadata` are specifically excluded from security such that they can be discovered by other services.

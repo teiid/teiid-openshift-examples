@@ -1,8 +1,8 @@
-= Securing With OData API through 3scale and Keycloak 
+= Securing an OData API through 3scale and Keycloak 
 
-This example is continuation of "rdbms-example", so if you have not gone through that project yet, the tasks in there should be completed first before going through this example.
+This example is continuation of "rdbms-example".  The tasks in there should be completed first before going through this example.
 
-The main aim in this example is to secure the Data Virtualization's OData API interface using the 3scale and Keycloak. We will use OpenID-Connect as authentication mechanism to secure the API and use OAuth2 as authorization mechanism. 
+The main aim in this example is to secure the Data Virtualization's OData API interface using 3scale and Keycloak. We will use OpenID-Connect as authentication mechanism to secure the API and use OAuth2 as the authorization mechanism. 
 
 Note that in this example, the installation of Keycloak is done using a template file from Keycloak, however if you already have Keycloak environment set up in OpenShift then we suggest you use that instance. We only showing this step here for illustration purposes only.
 
@@ -23,23 +23,14 @@ In the above article, go through until Keycloak security realms, and users, role
 So far we have setup the Keycloak server in OpenShift and configured it for to be used with Data Virtualization. But before we can use KeyCloak based security on OData API, the example needs to be modified to make use of the Keycloak. For it make the below code changes.
 
 ==== pom.xml
-The `pom.xml` needs to be added with additional dependencies for Keycloak, as described below
+The `pom.xml` needs additional dependencies for Keycloak, as described below
 
 in the "dependencies" section add
 
 ----
 <dependency>
   <groupId>org.teiid</groupId>
-  <artifactId>spring-keycloak-odata</artifactId>
-</dependency> 
-----
-
-this should replace previous dependency
-
-----
-<dependency>
-  <groupId>org.teiid</groupId>
-  <artifactId>spring-odata</artifactId>
+  <artifactId>spring-keycloak</artifactId>
 </dependency> 
 ----
 
@@ -50,11 +41,10 @@ The `src/main/resources/application.properties` needs to be added with following
 ----
 keycloak.realm = 3scale-sso
 keycloak.auth-server-url = http://keycloak-staging.dev.openshiftapps.com/auth
-keycloak.resource = 3scale-admin
+keycloak.resource = di
 keycloak.ssl-required = external
-keycloak.public-client = false
-keycloak.credentials.secret=4078a69a-9da9-45b8-84d9-5f1171a19aba
-keycloak.principal-attribute=preferred_usernamekeycloak.credentials.secret
+keycloak.public-client = true
+keycloak.principal-attribute=preferred_username
 ----
 
 Note that depending on your environment, the above properties may have different values, especially from environment to environment and how you setup your Keycloak server.

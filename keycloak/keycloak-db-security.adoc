@@ -1,0 +1,162 @@
+= Securing PG/JDBC with Keycloak 
+
+This example is continuation of "rdbms-example".  The tasks in there should be completed first before going through this example.
+
+The main aim in this example is to secure the Data Virtualization's PG/JDBC socket transports with Keycloak. We will use OpenID-Connect as authentication mechanism via Direct Access Grants and use OAuth2 as the authorization mechanism. 
+
+Note that this functionality overlaps with securing OData with Keycloak.
+
+== Install Keycloak
+
+In this example the installation of Keycloak is done using a template file from Keycloak, however if you already have Keycloak environment set up in OpenShift then we suggest you use that instance. We only showing this step here for illustration purposes only.
+
+To install Keycloak on the same namespace as your project, execute the following `oc` commands. The first one installs a template, and second one instantiates a Keycloak instance with predefined username and password.
+
+----
+oc create --force -f "https://raw.githubusercontent.com/jboss-dockerfiles/keycloak/master/openshift-examples/keycloak-https.json"
+oc process keycloak-https -p KEYCLOAK_USER=admin -p KEYCLOAK_PASSWORD=admin -p NAMESPACE=`oc project -q` | oc create -f -
+----
+
+Note: In the future these above command will be replaced with an Operator and CRD.
+
+Note: this example uses a Keycloak template that does not persist configuration changes over the pod restarts. In real world examples, you want to switch the "h2" database into "postgresql" database with persistent volumes for the Keycloak template such that the configuration survives the pod restarts.
+
+Now, using log into the OpenShift console using your web browser and find out the route (URL) to your installed Keycloak server. My instance the URL is like
+
+----
+https://secure-keycloak-teiid-dataservice.192.168.99.100.nip.io/auth/
+----
+
+using your web browser log into the admin console of the Keycloak. This will take you the "master" realm. In this example, I will be using the "master" realm and will be creating a "client" for the Data Integration called "di". Click on the left side navigation on clients
+
+image:images/keycloak1.png[]
+
+Click "create", to create a new client called "di" and select client protocol as "openid-connect" and save.  By default "Direct Access Grants Enabled" should be on - this allows a direct username/password authentication from Teiid.
+
+image:images/keycloak2.png[]
+
+Click "users", to create a new user and provide the name and details to create one. The screen shows creating user by the name "user". Also create second user called "developer". Provide credentials for both of them in credentials tab.
+
+image:images/keycloak4.png[]
+
+Click "roles", create a role called `ReadRole`
+
+image:images/keycloak3.png[]
+
+You can create as many roles as needed for you users. Mapping to LDAP/Active Directory based roles is beyond this example, however it is supported as federation through Keycloak. Refer to Keycloak's documentation.
+
+Go back to the "users" panel, find the user you created in the previous step and grant him/her the role of "ReadRole".
+
+image:images/keycloak5.png[]
+
+Using your OpenShift console in the Keycloak's project namespace, go to services menu option and find the "keycloak" service and its URL. Note that the service name may be different in your workspace as it depends on the name given during the Keycloak installation.
+
+----
+https://keycloak-teiid-dataservice.192.168.99.100.nip.io
+----
+
+== Keycloak based Security on pg/JDBC
+
+So far we have setup the Keycloak server in OpenShift and configured it for to be used with Data Integration. But before we can use KeyCloak based security on pg/JDBC, the example needs to be modified to make use of the Keycloak. For it make the below code changes.
+
+==== pom.xml
+The `pom.xml` needs additional dependencies for Keycloak, as described below
+
+in the "dependencies" section add
+
+----
+<dependency>
+  <groupId>org.teiid</groupId>
+  <artifactId>spring-keycloak</artifactId>
+</dependency> 
+----
+
+==== application.properties
+
+The `src/main/resources/application.properties` needs to be added with following additional properties
+
+----
+keycloak.realm = master
+keycloak.auth-server-url = http://keycloak-teiid-dataservice.192.168.99.100.nip.io/auth
+keycloak.ssl-required = external
+keycloak.resource = di
+keycloak.public-client = true
+----
+
+Note that depending on your environment, the above properties may have different values, especially from environment to environment and how you setup your Keycloak server.
+
+==== deploymentconfig.yml
+
+The `src/main/fabric8/deploymentconfig.yml` needs to be added with ENVIRONMENT variables that may be different in different deployments. If you are deploying application in DEV and PROD environments, you need a mechanism to switch the configuration to match that environment without changing the application code.
+
+Most of the properties can be static in nature, but the Auth URL is a location that might change from environment to environment. We can configure this property into a Configmap and access its value from there. To add the property `keycloak.auth-server-url` do following to create a ConfigMap
+
+----
+oc create configmap my-config --from-literal=keycloak.auth-server-url=http://keycloak-teiid-dataservice.192.168.99.100.nip.io/auth
+----
+
+Above creates a config map called `my-config` in OpenShift, that can be referenced from your deployment config as shown below. Between DEV and PROD make sure the name of the config map name stays same but the contents will vary. Note there are many ways to create config maps, the above is a simple example.
+
+Then in the `src/main/fabric8/deploymentconfig.yml` add
+
+----
+- name: KEYCLOAK_AUTHSERVERURL
+  valueFrom:
+     configMapKeyRef:
+       name: <config-name>
+       key: keycloak.auth-server-url
+----
+
+Note that if you used different realm or client by the environment you would have to adjust all those properties using the deploymentconfig.yml file.
+
+==== customer-vdb.ddl
+
+The previous example's virtual database does not define any Data Roles. Add these following two lines to the .DDL file at `src/main/resources/customer-vdb.ddl`
+
+----
+CREATE ROLE ReadRole WITH JAAS ROLE ReadRole;
+GRANT SELECT ON TABLE "portfolio.CustomerZip" TO ReadRole
+----
+
+In the above, the first line is creating role called "ReadRole" and mapping to the role we created earlier in Keycloak's role with same name of "ReadRole". They can be different, but here for simplicity the same name is used. The second line gives the SELECT permissions to the `portfolio.CustomerZip` View to the user with "ReadRole" grant.
+
+== Build Example
+
+Execute following command to build and deploy a custom Teiid image to the OpenShift.
+
+----
+$ mvn clean install -Popenshift -Dfabric8.namespace=`oc project -q`
+----
+
+== Post Deployment
+
+Now you should see that the image you deployed into the OpenShift is active and running.  To expose the Teiid JDBC port for external access, use 
+
+----
+$oc create -f - <<INGRESS
+apiVersion: v1
+kind: Service
+metadata:
+  name: security-example-ingress
+spec:
+  ports:
+  - name: teiid
+    port: 31000
+  type: LoadBalancer 
+  selector:
+    app: security-example
+  sessionAffinity: ClientIP
+INGRESS
+----
+
+To determine the ip/port run: 
+
+----
+$oc get svc rdbms-example-ingress
+----
+
+==  Testing
+
+If you use `user` as the user name when you login, you will be granted to view the data of the customer view. If you used `developer` as the user name, the permission to view the customer data is not granted, as the `developer` user does not have the `ReadRole` role.
+
+There is a simple-jdbc-client example in the directory above.  You may test against the JDBC host/port exposed by the LoadBalancer by altering it's application.properties to match the host and port.  You may of course test against a locally launched instance as well. 

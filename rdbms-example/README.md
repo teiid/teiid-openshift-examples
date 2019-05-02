@@ -1,6 +1,6 @@
 # Teiid OpenShift Deployment Example
 
-This execute this sample project requires basic knowledge in
+This sample project builds on basic knowledge of
 * OpenShift
 * Teiid
 * Maven and Java
@@ -222,7 +222,7 @@ If the 3Scale system is defined to same cluster and namespace then your OData AP
 
 If you want to use the JDBC, it is not exposed to outside applications by default (no route created). It is only suitable for applications in the cloud. 
 
-If you have another application that is using JDBC or the Postgres protocol issue the following:
+If you have an external application that is using JDBC or the Postgres protocol issue the following:
 
 ```
 $oc create -f - <<INGRESS
@@ -240,10 +240,11 @@ spec:
   sessionAffinity: ClientIP
 INGRESS
 ```
-Then run 
+
+To determine the ip/port run: 
 
 ```
 $oc get svc rdbms-example-ingress
 ```
 
-To determine the ip/port.  See more at [the OpenShift docs.](https://docs.openshift.com/container-platform/3.11/dev_guide/expose_service/expose_internal_ip_load_balancer.html#getting-traffic-into-cluster-load)
+See more at [the OpenShift docs.](https://docs.openshift.com/container-platform/3.11/dev_guide/expose_service/expose_internal_ip_load_balancer.html#getting-traffic-into-cluster-load)
