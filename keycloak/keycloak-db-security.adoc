@@ -152,7 +152,7 @@ INGRESS
 To determine the ip/port run: 
 
 ----
-$oc get svc rdbms-example-ingress
+$oc get svc security-example-ingress
 ----
 
 ==  Testing
