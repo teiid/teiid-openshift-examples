@@ -20,8 +20,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.io.fabric8>3.5.41</version.io.fabric8>
-		<version.postgresql>42.1.4</version.postgresql>
+		<version.io.fabric8>4.1.0</version.io.fabric8>
 		<version.teiid.spring-boot>${project.version}</version.teiid.spring-boot>
 		<spring-boot.version>2.1.2.RELEASE</spring-boot.version>
 		<version.org.codehaus.mojo.exec.plugin>1.2.1</version.org.codehaus.mojo.exec.plugin>

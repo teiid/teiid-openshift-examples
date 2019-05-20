@@ -157,7 +157,6 @@ Add any jdbc drivers, which are required by the data sources for the VDB that is
 <dependency>
   <groupId>org.postgresql</groupId>
   <artifactId>postgresql</artifactId>
-  <version>${version.postgresql}</version>
 </dependency>
 ```
 Note, that all dependencies must be supplied as maven artifacts to build a successful docker image. In some cases like Oracle, there is no JDBC driver that is publicly available, in those situations you need to create a local maven repository with required configuration and deploy the driver there and use it in the above process.

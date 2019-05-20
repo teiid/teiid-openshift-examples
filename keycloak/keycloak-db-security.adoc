@@ -130,7 +130,7 @@ $ mvn clean install -Popenshift -Dfabric8.namespace=`oc project -q`
 
 == Post Deployment
 
-Now you should see that the image you deployed into the OpenShift is active and running.  To expose the Teiid JDBC port for external access, use 
+Now you should see that the image you deployed into the OpenShift is active and running.  To expose the Teiid PG secure port for external access, use:
 
 ----
 $oc create -f - <<INGRESS
@@ -140,8 +140,8 @@ metadata:
   name: security-example-ingress
 spec:
   ports:
-  - name: teiid
-    port: 31000
+  - name: teiid-pg-secure
+    port: 35443
   type: LoadBalancer 
   selector:
     app: security-example
@@ -155,8 +155,14 @@ To determine the ip/port run:
 $oc get svc security-example-ingress
 ----
 
+Note that the secure transport will use a private key based upon the OpenShift managed service signing certificate.  See the annotation: "service.alpha.openshift.io/serving-cert-secret-name: service-certs" in the link:src/main/fabric8/pg-secure-svc.yml[pg-secure-svc.yml].
+
+You may similarly choose to expose the Teiid JDBC port, or modify the example to expose the secure Teiid JDBC port.
+
 ==  Testing
 
 If you use `user` as the user name when you login, you will be granted to view the data of the customer view. If you used `developer` as the user name, the permission to view the customer data is not granted, as the `developer` user does not have the `ReadRole` role.
 
-There is a simple-jdbc-client example in the directory above.  You may test against the JDBC host/port exposed by the LoadBalancer by altering it's application.properties to match the host and port.  You may of course test against a locally launched instance as well. 
+There is a simple-jdbc-client example in the directory above.  You may test against the PG host/port exposed by the LoadBalancer by altering its application-pg-secure.properties to match the host and port.  You may of course test against a locally launched instance as well.
+
+Note that if you deploy you client on OpenShift it is possible to trust the service serving certificate, but the mechanics will vary depending upon your platform - for Java please see link:https://developers.redhat.com/blog/2017/11/22/dynamically-creating-java-keystores-openshift/[Dynamically Createing Java Keystores in OpenShift].  This example users the server initContainer logic from that example, but references the upstream Keycloak image rather than RHSSO.
