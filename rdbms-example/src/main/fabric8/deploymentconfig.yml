@@ -26,7 +26,7 @@ spec:
         prometheus.io/port: "9779"
     spec:
       containers:
-      - name: ${project.artifactId}
+      - name: spring-boot
         env:
         - name: JAVA_APP_DIR
           value: /deployments
