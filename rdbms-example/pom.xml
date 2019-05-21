@@ -71,7 +71,7 @@
                 </includes>
                 <config>
                   <spring-boot>
-                    <from>fabric8/s2i-java</from>
+                    <from>fabric8/s2i-java:latest-java11</from>
                     <name>${fabric8.namespace}/${project.artifactId}:${project.version}</name>
                   </spring-boot>
                 </config>
