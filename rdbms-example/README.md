@@ -1,6 +1,6 @@
-# Teiid OpenShift Deployment Example
+# Data Virtualization OpenShift Deployment Example - Fuse 7.3 (Q2-19)
 
-This execute this sample project requires basic knowledge in
+This sample project builds on basic knowledge of
 * OpenShift
 * Teiid
 * Maven and Java
@@ -50,23 +50,6 @@ $oc new-project teiid-dataservice
 ```
 
 * Log into the OpenShift Web Console application using the https://ip:8443/console.
-
-## Create an sample Database (Optional)
-For this example we need a PostgreSQL database. If you already have existing PostgreSQL database available, or using Data Integration with some other database like SQLServer or MySQL you can skip this step. 
-
-Otherwise, click on Postgresql database icon and create an instance of it. Use user name "user", with password "user". Keep the database name as "sampledb". Note, that this example assumes you created the database on OpenShift.
-
-You can also create this database from command line by executing the following
-
-```
-oc new-app \
-    -e POSTGRESQL_USER=user \
-    -e POSTGRESQL_PASSWORD=user \
-    -e POSTGRESQL_DATABASE=sampledb \
-    postgresql:9.5
-```
-
-If you are using *your own* instance of the database, then make sure you have the right credentials available to access database in `application.properties` file. 
 
 ## Example
 
@@ -174,7 +157,6 @@ Add any jdbc drivers, which are required by the data sources for the VDB that is
 <dependency>
   <groupId>org.postgresql</groupId>
   <artifactId>postgresql</artifactId>
-  <version>${version.postgresql}</version>
 </dependency>
 ```
 Note, that all dependencies must be supplied as maven artifacts to build a successful docker image. In some cases like Oracle, there is no JDBC driver that is publicly available, in those situations you need to create a local maven repository with required configuration and deploy the driver there and use it in the above process.
@@ -237,4 +219,31 @@ If the 3Scale system is defined to same cluster and namespace then your OData AP
 
 ### JDBC
 
-If you want to use the JDBC, it is not exposed to outside applications by default (no route created). It is only suitable for applications in the cloud. If you have another application that is using JDBC, ODBC or SQL-Alchemy you can connect to the JDBC service exposed and issue SQL queries against the virtual database deployed. 
+If you want to use the JDBC, it is not exposed to outside applications by default (no route created). It is only suitable for applications in the cloud. 
+
+If you have an external application that is using JDBC or the Postgres protocol issue the following:
+
+```
+$oc create -f - <<INGRESS
+apiVersion: v1
+kind: Service
+metadata:
+  name: rdbms-example-ingress
+spec:
+  ports:
+  - name: teiid
+    port: 31000
+  type: LoadBalancer 
+  selector:
+    app: rdbms-example
+  sessionAffinity: ClientIP
+INGRESS
+```
+
+To determine the ip/port run: 
+
+```
+$oc get svc rdbms-example-ingress
+```
+
+See more at [the OpenShift docs.](https://docs.openshift.com/container-platform/3.11/dev_guide/expose_service/expose_internal_ip_load_balancer.html#getting-traffic-into-cluster-load)
