@@ -1,4 +1,4 @@
-# Teiid OpenShift Examples
+# Data Virtualization (Teiid) OpenShift Examples - Fuse 7.4 (Q3-19)
 
 This repository contains example projects, designed to be deployed on OpenShift using Teiid Spring Booot, and the VDB Migration Utility.
 
