@@ -1,4 +1,4 @@
-# Teiid OpenShift Examples
+# Teiid OpenShift Examples 
 
 This repository contains example projects, designed to be deployed on OpenShift using Teiid Spring Booot, and the VDB Migration Utility.
 
