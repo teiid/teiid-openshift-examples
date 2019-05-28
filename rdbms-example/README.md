@@ -177,11 +177,11 @@ $mvn clean install -Popenshift -Dfabric8.namespace=`oc project -q`
 Once the build is completed, go back to the OpenShift web-console application and make sure you do not have any errors with deployment. Now go to "Applications/Routes" and find the OData endpoint. Click on the endpoint and then issue requests like below using browser.
 
 ```
-http://rdbms-example-odata-teiid-dataservice.{ip}.nip.io/CustomerZip?$format=json
+http://rdbms-example-odata-teiid-dataservice.{ip}.nip.io/odata/CustomerZip?$format=json
 
 Response:
 {
-  "@odata.context": "http://rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/portfolio/$metadata#CustomerZip",
+  "@odata.context": "http://rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/odata/$metadata#CustomerZip",
   "value": [
     {
       "id": 10,

@@ -143,9 +143,9 @@ NOTE: Click "Save", for saving the profile.
 Now using the browser you can issue an OData API call such as
 
 ----
-http://keycloak-rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/CustomerZip
+http://keycloak-rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/odata/CustomerZip
 ----
 
 You will presented with a login page, where you use the user credentials you created in previous steps and access the service. If you use `user` as the user name, when you login you will be granted to view the data of the customer view. If you used `developer` as the user name, the permission to view the customer data is not granted, as the `developer` user does not have the `ReadRole` role. 
 
-Note that urls like `/$metadata` are specifically excluded from security such that they can be discovered by other services.
+Note that urls like `odata/$metadata` are specifically excluded from security such that they can be discovered by other services.
