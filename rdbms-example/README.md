@@ -63,12 +63,12 @@ For this example we need a PostgreSQL database. If you already have existing Pos
 
  You can also create this database from command line by executing the following	
 
- ```	
+ ```bash
 oc new-app \	
-    -e POSTGRESQL_USER=user \	
-    -e POSTGRESQL_PASSWORD=mypassword \	
-    -e POSTGRESQL_DATABASE=sampledb \	
-    postgresql:9.5	
+  -e POSTGRESQL_USER=user \	
+  -e POSTGRESQL_PASSWORD=mypassword \	
+  -e POSTGRESQL_DATABASE=sampledb \	
+  postgresql:9.5	
 ```	
 
 The above command automatically creates `secret` in OpenShift for you, from where the credentials are read for the application. If you are working with your own database, then create a `secret` as shown below
@@ -199,7 +199,7 @@ To use JDBC or OData we need to create services and routes for it on OpenShift. 
 Execute following command to build and deploy a custom Teiid image to the OpenShift.
 
 ```bash
-$mvn -s ../settings.xml clean install -Popenshift
+$mvn clean install -Popenshift -Dfabric8.namespace=`oc project -q`
 ```
 
 Once the build is completed, go back to the OpenShift web-console application and make sure you do not have any errors with deployment. Now go to "Applications/Routes" and find the OData endpoint. Click on the endpoint and then issue requests like below using browser.
