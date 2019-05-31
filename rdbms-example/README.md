@@ -1,15 +1,18 @@
 # Teiid OpenShift Deployment Example
 
 This sample project builds on basic knowledge of
+
 * OpenShift
 * Teiid
 * Maven and Java
 * Spring Boot
 
 ## Introduction
+
 This project serves as an example, how to deploy a Teiid VDB on OpenShift cluster. This example shows how to configure and deploy your VDB using [fabric8-maven-plugin](https://maven.fabric8.io/) using Spring Boot based Teiid as a MicroService on OpenShift.
 
 This project will show you 
+
 * How Build Spring Boot based Teiid instance based Maven.
 * Configure to deploy a vdb in the project 
 * Configure the connection details for your Data Source(s)
@@ -19,7 +22,8 @@ The example's VDB chosen is very simple vdb defined using DDL (customer-vdb.ddl)
 
 By the end of this example, we will have a VDB based Teiid Service deployed to OpenShift, and you should be able to issue an OData based REST call to fetch data.
 
-## Pre-Requisites
+## Prerequisites
+
 Before you begin, you must have access to OpenShift Dedicated cluster, or `minishift` or `oc cluster up` running and have access the the instance.
 
 * Requires minishift 1.25+ and openshift client 3.9+.   Minishift 1.31 defaults to its own 3.10 version of oc client.
@@ -52,6 +56,7 @@ $oc new-project teiid-dataservice
 * Log into the OpenShift Web Console application using the https://ip:8443/console.
 
 ## Sample Database (Optional Step)	
+
 For this example we need a PostgreSQL database. If you already have existing PostgreSQL database available, or using Data Integration with some other database like SQLServer or MySQL you can skip this step. However, in the configuration defined in next steps, you need to provide appropriate credentials.
 
  If you are loggined into OpenShift Console click on Postgresql database icon and create an instance of it. Use user name "user", with password "mypassword". Keep the database name as "sampledb". Note, that this example assumes you created the database on OpenShift. If you use different values than above, please make sure you have changed the appropriate configuration.
@@ -100,12 +105,13 @@ cd rdbms-example
 vi pom.xml
 ```
 
-* This example makes use of two maven plugins
+This example makes use of two maven plugins
 
-..1. spring-boot-maven-plugin which converts teiid library into a spring boot executable jar.
-..2. fabric8-maven-plugin, which helps to build a docker image based on that executable and optionally deploy into openShift.
+1. spring-boot-maven-plugin which converts teiid library into a spring boot executable jar.
+2. fabric8-maven-plugin, which helps to build a docker image based on that executable and optionally deploy into openShift.
 
 ### Java File Changes
+
 The below are the code changes that are required to make it customizable for your environment.
 
 * Edit `/src/main/java/com/example/DataSources.java` file, and add a @Bean method for each data source your VDB will need to access.  Note, the data source name MUST match with configuration property and bean name/method name. The example shown adds a data source for PostgreSQL database called "sampledb". Notice, that "sampledb" is same name used in your VDB's `SERVER` name and its `jndi-name` definition.
@@ -113,6 +119,7 @@ The below are the code changes that are required to make it customizable for you
 * `/src/main/java/com/example/Application.java` file is main spring boot application file, you can leave that as is, it is the main file that bootstraps the rest of the application.
 
 ### Virtual Database
+
 This example requires the VDB to be supplied as DDL based text file. The `src/main/resource` folder contains this example's `customer-vdb.ddl`. If you are using your own virtual database replace that file with yours.
 
 If your virtual database is not in the DDL form, but in .vdb or -vdb.xml format, then you can use the VDB Migration utility to convert into DDL form. For more information see [here](../README.md)
@@ -158,7 +165,7 @@ The same property, if you defined a value for `url` inside a `secret` can be rew
        name: postgresql
        key: url
 ```
-Where `name` defines the `secret` name yo created, and then `key` defines the property inside the `secret`.
+Where `name` defines the `secret` name you created, and then `key` defines the property inside the `secret`.
 
 You may edit the `/src/main/fabric8/deploymentconfig.yml` file to provide ALL ENVIRONMENT properties to configure your data source(s). Note this example reads these properties from a `secret` called `postgresql` on OpenShift for database credentials.
 
@@ -169,12 +176,14 @@ When working with relational data sources you can supply "schema-xxxx.sql" and "
 NOTE: This only works for relational databases, not for any other sources.
  
 ### Drivers or Additional dependencies for your VDB 
+
 Add any jdbc drivers, which are required by the data sources for the VDB that is being deployed, to the `pom.xml`. For example, to add the Postgresql JDBC driver, you would add in the following maven configuration within the `<dependencies>` section of the `pom.xml` file. 
 
 ```xml
 <dependency>
   <groupId>org.postgresql</groupId>
   <artifactId>postgresql</artifactId>
+  <version>${version.postgresql}</version>
 </dependency>
 ```
 
@@ -189,13 +198,13 @@ To use JDBC or OData we need to create services and routes for it on OpenShift. 
 
 Execute following command to build and deploy a custom Teiid image to the OpenShift.
 
-```
-$mvn clean install -Popenshift -Dfabric8.namespace=`oc project -q`
+```bash
+$mvn -s ../settings.xml clean install -Popenshift
 ```
 
 Once the build is completed, go back to the OpenShift web-console application and make sure you do not have any errors with deployment. Now go to "Applications/Routes" and find the OData endpoint. Click on the endpoint and then issue requests like below using browser.
 
-```
+```bash
 http://rdbms-example-odata-teiid-dataservice.{ip}.nip.io/odata/CustomerZip?$format=json
 
 Response:
@@ -226,9 +235,10 @@ Response:
 ```
 
 ### 3Scale Integration
+
 By default the OData service that is defined in this example defines necessary annotations to be discovered by 3Scale API management system. The annotations defined are
 
-```
+```bash
 discovery.3scale.net/scheme: "http"
 discovery.3scale.net/port: "8080"
 discovery.3scale.net/description-path: "/swagger.json" 
