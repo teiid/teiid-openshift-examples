@@ -114,7 +114,7 @@ Note that if you used different realm or client by the environment you would hav
 The previous example's virtual database does not define any Data Roles. Add these following two lines to the .DDL file at `src/main/resources/customer-vdb.ddl`
 
 ----
-CREATE ROLE ReadRole WITH JAAS ROLE ReadRole;
+CREATE ROLE ReadRole WITH FOREIGN ROLE ReadRole;
 GRANT SELECT ON TABLE "portfolio.CustomerZip" TO ReadRole
 ----
 
