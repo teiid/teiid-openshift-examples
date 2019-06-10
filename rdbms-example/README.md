@@ -273,6 +273,21 @@ To determine the ip/port run:
 
 ```
 $oc get svc rdbms-example-ingress
+
+NAME                   TYPE           CLUSTER-IP       EXTERNAL-IP                 PORT(S)           AGE
+dbms-example-ingress   LoadBalancer   172.30.156.130   172.29.57.89,172.29.57.89   31000:31985/TCP   13m
 ```
 
+Given your Minishift address is `192.168.99.100` the JDBC url for the VDB will be `jdbc:teiid:customer@mm://192.168.99.100:31985`. With this example there is no security so can use with no user/password settings. 
+
 See more at [the OpenShift docs.](https://docs.openshift.com/container-platform/3.11/dev_guide/expose_service/expose_internal_ip_load_balancer.html#getting-traffic-into-cluster-load)
+
+When working with JDBC if there are any transaction issues, add following to your `pom.xml` file in `dependencies` section to add a third party transaction manager.
+
+```
+<dependency>
+  <groupId>me.snowdrop</groupId>
+  <artifactId>narayana-spring-boot-starter</artifactId>
+  <version>2.1.0</version>
+</dependency> 
+```
