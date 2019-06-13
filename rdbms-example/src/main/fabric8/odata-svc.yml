@@ -7,7 +7,7 @@ metadata:
   annotations:
     discovery.3scale.net/scheme: "http"
     discovery.3scale.net/port: "8080"
-    discovery.3scale.net/description-path: "/swagger.json" 
+    discovery.3scale.net/description-path: "/openapi.json" 
 spec:
   sessionAffinity: ClientIP
   ports:
