@@ -49,7 +49,7 @@ The ip of the minishift instance will be shown by the login, or may be obtained 
 * Create a new namespace in the OpenShift, i.e. a new project in OpenShift, this is the namespace we will be deploying the vdb-service into.
 
 ```
-$oc new-project teiid-dataservice
+$oc new-project myproject
 
 ```
 
@@ -205,11 +205,11 @@ $mvn clean install -Popenshift -Dfabric8.namespace=`oc project -q`
 Once the build is completed, go back to the OpenShift web-console application and make sure you do not have any errors with deployment. Now go to "Applications/Routes" and find the OData endpoint. Click on the endpoint and then issue requests like below using browser.
 
 ```bash
-http://rdbms-example-odata-teiid-dataservice.{ip}.nip.io/odata/CustomerZip?$format=json
+http://rdbms-example-odata-myproject.{ip}.nip.io/odata/CustomerZip?$format=json
 
 Response:
 {
-  "@odata.context": "http://rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/odata/$metadata#CustomerZip",
+  "@odata.context": "http://rdbms-example-odata-myproject.192.168.99.100.nip.io/odata/$metadata#CustomerZip",
   "value": [
     {
       "id": 10,
