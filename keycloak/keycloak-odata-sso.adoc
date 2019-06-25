@@ -132,7 +132,7 @@ $ mvn clean install -Popenshift -Dfabric8.namespace=`oc project -q`
 Now you should see that the image you deployed into the OpenShift is active and running. It has an OData route to it. Before we proceed, we need to add a "Valid Redirect URIs" for the "di" client we created in Keycloak. Log into Keycloak admin console, click on "clients" from left navigation, select "di" client and provide the "Valid Redirect URIs" field as your OData services root URL appended with "*", for example:
 
 ----
-http://keycloak-dv-example-odata-teiid-dataservice.192.168.99.100.nip.io/*
+http://security-example-odata-teiid-dataservice.192.168.99.100.nip.io/*
 ----
 
 NOTE: Click "Save", for saving the profile.
@@ -142,7 +142,7 @@ NOTE: Click "Save", for saving the profile.
 Now using the browser you can issue an OData API call such as
 
 ----
-http://keycloak-rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/odata/CustomerZip
+http://security-example-odata-teiid-dataservice.192.168.99.100.nip.io/odata/CustomerZip
 ----
 
 You will presented with a login page, where you use the user credentials you created in previous steps and access the service. If you use `user` as the user name, when you login you will be granted to view the data of the customer view. If you used `developer` as the user name, the permission to view the customer data is not granted, as the `developer` user does not have the `ReadRole` role. 
