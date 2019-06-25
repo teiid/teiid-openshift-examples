@@ -23,7 +23,7 @@ Note: this example uses a Keycloak template that does not persist configuration 
 Now, using log into the OpenShift console using your web browser and find out the route (URL) to your installed Keycloak server. My instance the URL is like
 
 ----
-https://secure-keycloak-teiid-dataservice.192.168.99.100.nip.io/auth/
+https://secure-keycloak-myproject.192.168.99.100.nip.io/auth/
 ----
 
 using your web browser log into the admin console of the Keycloak. This will take you the "master" realm. In this example, I will be using the "master" realm and will be creating a "client" for the Data Integration called "di". Click on the left side navigation on clients
@@ -51,7 +51,7 @@ image:images/keycloak5.png[]
 Using your OpenShift console in the Keycloak's project namespace, go to services menu option and find the "keycloak" service and its URL. Note that the service name may be different in your workspace as it depends on the name given during the Keycloak installation.
 
 ----
-https://keycloak-teiid-dataservice.192.168.99.100.nip.io
+https://keycloak-myproject.192.168.99.100.nip.io
 ----
 
 == Keycloak based Security on OData API
@@ -76,7 +76,7 @@ The `src/main/resources/application.properties` needs to be added with following
 
 ----
 keycloak.realm = master
-keycloak.auth-server-url = http://keycloak-teiid-dataservice.192.168.99.100.nip.io/auth
+keycloak.auth-server-url = http://keycloak-myproject.192.168.99.100.nip.io/auth
 keycloak.ssl-required = external
 keycloak.resource = di
 keycloak.public-client = true
@@ -91,7 +91,7 @@ The `src/main/fabric8/deploymentconfig.yml` needs to be added with ENVIRONMENT v
 Most of the properties can be static in nature, but the Auth URL is a location that might change from environment to environment. We can configure this property into a Configmap and access its value from there. To add the property `keycloak.auth-server-url` do following to create a ConfigMap
 
 ----
-oc create configmap my-config --from-literal=keycloak.auth-server-url=http://keycloak-teiid-dataservice.192.168.99.100.nip.io/auth
+oc create configmap my-config --from-literal=keycloak.auth-server-url=http://keycloak-myproject.192.168.99.100.nip.io/auth
 ----
 
 Above creates a config map called `my-config` in OpenShift, that can be referenced from your deployment config as shown below. Between DEV and PROD make sure the name of the config map name stays same but the contents will vary. Note there are many ways to create config maps, the above is a simple example.
@@ -132,7 +132,7 @@ $ mvn clean install -Popenshift -Dfabric8.namespace=`oc project -q`
 Now you should see that the image you deployed into the OpenShift is active and running. It has an OData route to it. Before we proceed, we need to add a "Valid Redirect URIs" for the "di" client we created in Keycloak. Log into Keycloak admin console, click on "clients" from left navigation, select "di" client and provide the "Valid Redirect URIs" field as your OData services root URL appended with "*", for example:
 
 ----
-http://security-example-odata-teiid-dataservice.192.168.99.100.nip.io/*
+http://security-example-odata-myproject.192.168.99.100.nip.io/*
 ----
 
 NOTE: Click "Save", for saving the profile.
@@ -142,7 +142,7 @@ NOTE: Click "Save", for saving the profile.
 Now using the browser you can issue an OData API call such as
 
 ----
-http://security-example-odata-teiid-dataservice.192.168.99.100.nip.io/odata/CustomerZip
+http://security-example-odata-myproject.192.168.99.100.nip.io/odata/CustomerZip
 ----
 
 You will presented with a login page, where you use the user credentials you created in previous steps and access the service. If you use `user` as the user name, when you login you will be granted to view the data of the customer view. If you used `developer` as the user name, the permission to view the customer data is not granted, as the `developer` user does not have the `ReadRole` role. 
