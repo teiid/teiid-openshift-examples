@@ -32,7 +32,7 @@ To perform the task of converting a vdb and reporting validation errors, do the 
 Open a terminal and navigate to the teiid-openshift-examples directory.
 
 ```
-$mvn exec:java -Dvdb={filepath/to/vdb}
+$mvn -s settings.xml exec:java -Dvdb={filepath/to/vdb}
 ```
 This will perform the vdb conversion, reporting any validation errors to the terminal.  If there are no validation errors, the ddl form of the vdb will be written to the terminal.
 
@@ -44,7 +44,7 @@ To perform the task of converting a vdb, report validation errors, and writing t
 Open a terminal and navigate to the teiid-openshift-examples directory.
 
 ```
-$mvn exec:java -Dvdb={filepath/to/vdb} -Doutput={filepath/to/convertedvdb}
+$mvn -s settings.xml exec:java -Dvdb={filepath/to/vdb} -Doutput={filepath/to/convertedvdb}
 ```
 This will perform the vdb conversion and will write a valid vdb to the specified output file.  The output file will only be written if there are no validation errors.
 
@@ -54,8 +54,3 @@ This will perform the vdb conversion and will write a valid vdb to the specified
 ## Links
 
 * [Teiid OpenShift Examples Repository](https://github.com/teiid/teiid-openshift-examples)
-
-
-
-
-
