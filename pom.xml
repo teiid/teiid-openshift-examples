@@ -21,7 +21,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version.io.fabric8>4.1.0</version.io.fabric8>
-        <version.teiid>12.2.0</version.teiid>
+        <version.teiid>12.2.1</version.teiid>
 		<version.teiid.spring-boot>${project.version}</version.teiid.spring-boot>
 		<spring-boot.version>2.1.3.RELEASE</spring-boot.version>
 		<version.org.codehaus.mojo.exec.plugin>1.2.1</version.org.codehaus.mojo.exec.plugin>

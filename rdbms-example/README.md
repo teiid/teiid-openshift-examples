@@ -64,11 +64,11 @@ For this example we need a PostgreSQL database. If you already have existing Pos
  You can also create this database from command line by executing the following	
 
  ```bash
-oc new-app \	
-  -e POSTGRESQL_USER=user \	
-  -e POSTGRESQL_PASSWORD=mypassword \	
-  -e POSTGRESQL_DATABASE=sampledb \	
-  postgresql:9.5	
+oc new-app \
+  -e POSTGRESQL_USER=user \
+  -e POSTGRESQL_PASSWORD=mypassword \
+  -e POSTGRESQL_DATABASE=sampledb \
+  postgresql:9.5
 ```	
 
 The above command automatically creates `secret` in OpenShift for you, from where the credentials are read for the application. If you are working with your own database, then create a `secret` as shown below
@@ -122,9 +122,9 @@ The below are the code changes that are required to make it customizable for you
 
 This example requires the VDB to be supplied as DDL based text file. The `src/main/resource` folder contains this example's `customer-vdb.ddl`. If you are using your own virtual database replace that file with yours.
 
-If your virtual database is not in the DDL form, but in .vdb or -vdb.xml format, then you can use the VDB Migration utility to convert into DDL form. For more information see [here](../README.md)
+If your virtual database is not in the DDL form, but in .vdb or -vdb.xml format, then you can use the VDB Migration utility to convert into DDL form. For more information see [here](../README.md).
 
-make sure you have your VDB copied over to `src/main/resource` folder, and then edit `/src/main/resources/application.properties` set `teiid.vdb-file` property to your vdb name.  The default is set to the `customer-vdb.ddl` example vdb.
+Make sure you have your VDB copied over to `src/main/resource` folder, and then edit `/src/main/resources/application.properties` set `teiid.vdb-file` property to your vdb name.  The default is set to the `customer-vdb.ddl` example vdb.
 
 ### Configuration
 
@@ -151,7 +151,7 @@ spring.datasource.sampledb.platform=sampledb
 Now, you can define above properties in `deploymentconfig.yml` instead of `application.properties` by defining below
 
 ```
-- name: SPRING_DATASOURCE_SAMPLEDB_JDBC_URL
+- name: SPRING_DATASOURCE_SAMPLEDB_JDBCURL
   value: jdbc:postgresql://localhost/sampledb
 ```
 > NOTE: When defining a environment property, characters like `.` are not allowed, but you can replace them with character `_` and application will convert them automatically at runtime.
@@ -159,7 +159,7 @@ Now, you can define above properties in `deploymentconfig.yml` instead of `appli
 The same property, if you defined a value for `url` inside a `secret` can be rewritten as
 
 ```
-- name: SPRING_DATASOURCE_SAMPLEDB_JDBC_URL
+- name: SPRING_DATASOURCE_SAMPLEDB_JDBCURL
   valueFrom:
      secretKeyRef:
        name: postgresql
@@ -205,11 +205,11 @@ $mvn clean install -Popenshift -Dfabric8.namespace=`oc project -q`
 Once the build is completed, go back to the OpenShift web-console application and make sure you do not have any errors with deployment. Now go to "Applications/Routes" and find the OData endpoint. Click on the endpoint and then issue requests like below using browser.
 
 ```bash
-http://rdbms-example-odata-myproject.{ip}.nip.io/odata/CustomerZip?$format=json
+http://rdbms-example-odata-myproject.{ip}.nip.io/odata/portfolio/CustomerZip?$format=json
 
 Response:
 {
-  "@odata.context": "http://rdbms-example-odata-myproject.192.168.99.100.nip.io/odata/$metadata#CustomerZip",
+  "@odata.context": "http://rdbms-example-odata-myproject.192.168.99.100.nip.io/odata/portfolio/$metadata#CustomerZip",
   "value": [
     {
       "id": 10,
@@ -219,6 +219,7 @@ Response:
     },
     {
       "id": 11,
+      "name": "Nicholas Ferguson",
       "name": "Nicholas Ferguson",
       "ssn": "CST01003                 ",
       "zip": null
@@ -246,9 +247,34 @@ discovery.3scale.net/description-path: "/swagger.json"
 
 If the 3Scale system is defined to same cluster and namespace then your OData API is automatically discovered by 3Scale, where user can configure the API management features.  
 
-### JDBC
+### JDBC Connection
 
-If you want to use the JDBC, it is not exposed to outside applications by default (no route created). It is only suitable for applications in the cloud. 
+If you want to use JDBC to connect to your virtual databases. You can use 
+this [JDBC Driver](https://oss.sonatype.org/service/local/repositories/releases/content/org/teiid/teiid/12.2.1/teiid-12.2.1-jdbc.jar). If you 
+would like to use it in your application, use the maven dependency:
+
+```
+<dependency>
+  <groupId>org.teiid</groupId>
+  <artifactId>teiid</artifactId>
+  <classifier>jdbc</classifier>
+  <version>${version.teiid}</version>
+</dependency>
+```
+
+To connect to the database, use the following:
+
+URL: `jdbc:teiid:customer@mm://localhost:31000`
+
+JDBC Class: `org.teiid.jdbc.TeiidDriver`
+
+JDBC Driver: `teiid-12.2.1-jdbc.jar`
+
+As this example don't use authentication, no credentials are needed.
+
+### JDBC on Openshift
+
+JDBC it is not exposed to outside applications by default (no route created). It is only suitable for applications in the cloud. 
 
 If you have an external application that is using JDBC or the Postgres protocol issue the following:
 
