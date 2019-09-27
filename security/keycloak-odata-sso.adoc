@@ -1,0 +1,83 @@
+= Securing an OData API with Keycloak 
+
+This example is continuation of "rdbms-example".  The tasks in there should be completed first before going through this example.
+
+The main aim in this example is to secure the Data Virtualization's OData API interface with Keycloak. We will use OpenID-Connect as authentication mechanism to secure the API and use OAuth2 as the authorization mechanism. 
+
+This example also shows how to implement RBAC roles on a VDB and enforced using the Keycloak.
+
+Note that this functionality overlaps with securing PG/JDBC with Keycloak.
+
+== Prerequisites
+
+=== Install Keycloak or RH-SSO
+Before we can proceed with the example, link:keycloak-setup.adoc[install keycloak] and make sure it is available for use. The RBAC roles are defined and users are assigned these roles.
+
+
+== Keycloak based Security on OData API
+
+The enable Keycloak based security on the OData API, the following additional configuration need to be added to the link:../rdbs-example/readme.adoc[rdbms-example] custom resource yaml file.
+
+[source, yaml]
+----
+  env:
+  - name: KEYCLOAK_REALM
+    value: master
+  - name: KEYCLOAK_AUTH_SERVER_URL
+    value: http://keycloak-myproject.192.168.99.100.nip.io/auth
+  - name: KEYCLOAK_SSL_REQUIRED
+    value: external
+    value: di
+  - name: KEYCLOAK_PUBLIC_CLIENT
+    value: true
+  build:
+    source:
+      dependencies:
+        - org.teiid:spring-keycloak
+----
+
+
+NOTE: Depending on your environment, the above properties may have different values, especially from environment to environment and how you setup your Keycloak server.
+
+==== Changes to the VDB's DDL content
+
+The previous example's virtual database does not define any Data Roles. To add RBAC policies, edit the DDL portion of the custom resource and add those data policies. For example, 
+
+[source, sql]
+----
+CREATE ROLE ReadRole WITH FOREIGN ROLE ReadRole;
+GRANT SELECT ON TABLE "portfolio.CustomerZip" TO ReadRole
+----
+
+In the above, the first line is creating role called "ReadRole" and mapping to the role we created earlier in Keycloak's role with same name of "ReadRole". They can be different, but here for simplicity the same name is used. The second line gives the SELECT permissions to the `portfolio.CustomerZip` View to the user with "ReadRole" grant.
+
+== Deploy the Virtualization
+
+The complete modified custom resource can be seen link:dv-customer.yaml[here]
+
+----
+oc create -f dv-customer.yaml
+----
+
+
+== Post Deployment
+
+Now you should see that the image you deployed into the OpenShift is active and running. It has an OData route to it. Before we proceed, we need to add a "Valid Redirect URIs" for the "di" client we created in Keycloak. Log into Keycloak admin console, click on "clients" from left navigation, select "di" client and provide the "Valid Redirect URIs" field as your OData services root URL appended with "*", for example:
+
+----
+http://security-example-odata-myproject.192.168.99.100.nip.io/*
+----
+
+NOTE: Click "Save", for saving the profile.
+
+==  Testing
+
+Now using the browser you can issue an OData API call such as
+
+----
+http://security-example-odata-myproject.192.168.99.100.nip.io/odata/CustomerZip
+----
+
+You will presented with a login page, where you use the user credentials you created in previous steps and access the service. If you use `user` as the user name, when you login you will be granted to view the data of the customer view. If you used `developer` as the user name, the permission to view the customer data is not granted, as the `developer` user does not have the `ReadRole` role. 
+
+Note that urls like `odata/$metadata` are specifically excluded from security such that they can be discovered by other services.

@@ -1,0 +1,65 @@
+= Installing the Operator  [[dv-install]]
+Before you install the Operator for Teiid, make sure you have access to a OpenShift Instance. You can install a local  xref:minishift.adoc[minishift] instance following the link.
+
+
+== On OpenShift 3.11 [[ocp311]]
+if you are working with OpenShift 3.11 then follow the below instructions. Make sure you have access to a OpenShift instance and you have `Cluster Admin` privileges to install the Operator. If you are working with local `minishift` instance then all permissions needed are available in through the `admin` user. Follow the below instructions
+
+[source,bash]
+----
+oc login 
+
+export OP_ROOT=https://raw.githubusercontent.com/teiid/teiid-operator/master/deploy
+oc create -f $OP_ROOT/deploy/crds/virtualdatabase.crd.yaml
+oc create -f $OP_ROOT/deploy/service_account.yaml
+oc create -f $OP_ROOT/deploy/role.yaml
+oc create -f $OP_ROOT/deploy/role_binding.yaml
+oc delete -f $OP_ROOT/deploy/operator.yaml
+----
+
+
+If there were no errors, you should have a Teiid Operator deployed in your OpenShift instance in the logged in namespace. You can now, use the `VirtualDatabase Deployment` section to create and deploy VDB as image.
+
+
+== On OpenShift 4.2 or later [[ocp4]]
+On the OpenShift 4.2 later the Teiid Operator is available through OperatorHub. Go to the Operator catalog and find and install the `Teiid Operator`
+
+== Operatorions on VDB with Operator
+
+Once the Operator is available on your OpenShift cluster you deploy a VDB by executing below command given the custom resource is defined as `dv-customer.yml`
+
+[source,bash]
+----
+oc create -f dv-customer.yml
+----
+
+You can list all the virtualizations available in the OpenShift cluster by executing
+
+[source,bash]
+----
+oc get vdbs
+----
+
+or get perticular one by executing 
+[source,bash]
+----
+oc get vdb dv-customer
+
+# or below to see whole yaml resource for the vdb
+oc get vdb dv-customer -o yaml
+----
+
+The `status` field in the yaml file defines the status of the virtualization.
+
+One can delete a virtualization completely by executing below. This will remove all the resources belong to the virtualization
+
+[source,bash]
+----
+oc create -f dv-customer
+----
+
+if you want to make modification to a virtualization, you can do by 
+
+----
+oc edit vdb dv-customer
+----

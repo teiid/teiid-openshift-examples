@@ -1,0 +1,62 @@
+= Securing an OData API through 3scale and Keycloak 
+
+This example is continuation or very similar to link:keycloak-odata-sso.adoc[Securing an OData API with Keycloak].  The tasks in there should be completed first before going through this example.
+
+The main aim in this example is to secure the Data Virtualization's OData API interface using 3scale and Keycloak. We will use OpenID-Connect as authentication mechanism to secure the API and use OAuth2 as the authorization mechanism. 
+
+Note that in this example, the installation of Keycloak is done using a template file from Keycloak, however if you already have Keycloak environment set up in OpenShift then we suggest you use that instance. We only showing this step here for illustration purposes only.
+
+== 3scale based API Management
+
+Using 3scale one can manage/monetize on APIs that are available for consumption. Here in this example, the OData API is being managed through 3scale, however the API is secured through Keycloak/RH-SSO. When the user logs in, 3scale will engage in authentication with Keycloak, upon success it will then delegate the security token down to the OData API. OData API will verify the token, and read permissions from token and apply those to the data roles defined on the virtual database. The below diagram illustrates authentication flow.
+
+image:images/3scale-sso.png[]
+
+== Configure 3scale with Keycloak
+
+Here is link:https://developers.redhat.com/blog/2017/11/21/setup-3scale-openid-connect-oidc-integration-rh-sso/[excellent article] written on this subject here rather than duplicate the information follow this one to install the Keycloak and configure it for 3scale use.
+
+In the above article, go through until Keycloak security realms, and users, roles are created, just short of configuration in the 3scale. You only need to do this very fist time. Then go to next section to configure the Data Virtualization service, once that service is discovered in 3scale, follow through rest of the article.
+
+== Configure Data Virtualization with 3scale and Keycloak
+
+So far we have setup the Keycloak server in OpenShift and configured it for to be used with Data Virtualization. But before we can use KeyCloak based security on OData API, the example needs to be modified to make use of the Keycloak. For it make the below code changes.
+
+To the previous custom resource from example, add following `env` variables.
+
+----
+  env:
+  - name: KEYCLOAK_PRINCIPAL_ATTRIBUTE
+    value: preferred_username
+  - name: KEYCLOAK_CREDENTIALS_SECRET
+    value: 4078a69a-9da9-45b8-84d9-5f1171a19aba
+----
+
+Find the value `KEYCLOAK_CREDENTIALS_SECRET` from in keycloak's administrative console, after registration of the application in 3scale.
+
+NOTE: Depending on your environment, the above properties may have different values, especially from environment to environment and how you setup your Keycloak server, like realm, auth-server-url.
+
+No further changes to DDL are needed here, as this is example is extending the previous example by supporting the 3scale.
+
+== Deploy the Virtualization
+
+The complete modified custom resource can be seen link:dv-customer.yaml[here]
+
+----
+oc create -f dv-customer.yaml
+----
+
+
+==  Testing
+
+Now using the browser you can issue an OData API call such as
+
+----
+http://keycloak-rdbms-example-odata-teiid-dataservice.192.168.99.100.nip.io/odata/CustomerZip
+----
+
+You will presented with a login page, where you use the user credentials you created in previous steps and access the service. If you use `user` as user name when you login you will be granted to view the data of the customer view. If you used `developer` as the user name the permission to view the customer data is not granted, as the `developer` user does not have the `ReadRole` role. 
+
+Note that urls like `odata/$metadata` are specifically excluded from security such that they can be discovered by other services.
+
+

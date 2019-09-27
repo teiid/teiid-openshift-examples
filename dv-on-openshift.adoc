@@ -1,0 +1,72 @@
+= DV on OpenShift
+
+This guide provides documentation and code recipes for deploying and configuring the Data Virtualization on OpenShift. Typically a deployment of Data Virtualization includes defining a Virtual Datbase (VDB) using SQL/DDL and then configuring any of the data sources this VDB uses to connect and read and write data. Additionally, there may be scenarios where one maybe also configuring the Authentication to RH-SSO.
+
+There are couple different ways one can deploy Data Virtualization.
+
+- Defining a Maven based Java project with a VDB file, and using fabric8 maven plugin to deploy into OpenShift.
+- Using a OpenShift Teiid Operator.
+
+In this guide we will primarily focus on ways use the Teiid Operator. The user is expected that they have knowledge of of Operator model and how it works.
+
+If you have not already installed the operator in your OpenShift instance, please install using directions xref:install-operator.adoc[here]
+
+== VirtualDatabase Deployment [[deployment-cr]]
+
+Once the Operator is available on your OpenShift cluster you deploy a VDB by executing 
+
+[source,bash]
+----
+oc create -f dv-customer.yml
+----
+
+where `dv-customer.yml` is the CR (custom resource) file that defines your virtualization artifact. 
+
+IMPORTANT:  Before you need to deploy above virtualization, we need to prepare and gather all the configuration that needed for connecting to the data sources involved. For example below checkout the "Configuring Relational Database" section.
+
+For example, a sample virtualization looks like (not a complete example, see xref:rdbms-example/Readme.adoc[rdbms_example] for full example)
+
+[source,yaml]
+----
+apiVersion: teiid.io/v1alpha1
+kind: VirtualDatabase
+metadata:
+  name: dv-customer
+spec:
+  replicas: 1
+  env:
+  - name: SPRING_DATASOURCE_SAMPLEDB_USERNAME
+    value: user
+  - name: SPRING_DATASOURCE_SAMPLEDB_PASSWORD
+    value: mypassword
+  - name: SPRING_DATASOURCE_SAMPLEDB_JDBCURL
+    value: jdbc:postgresql://postgresql/$(SPRING_DATASOURCE_SAMPLEDB_DATABASENAME)
+  build:
+    source:
+      dependencies:
+        - org.postgresql:postgresql:42.1.4
+      ddl: |
+        CREATE DATABASE customer OPTIONS (ANNOTATION 'Customer VDB');
+        USE DATABASE customer;
+        ...   
+----
+
+- `spec/replicas` define number of instances that you want to deploy. By default this is set to 1.
+
+- `spec/env` defines the list of all the configuration properties for this virtualization. Mainly connection configuration to the data sources. In above example, it is showing properties to connect to a `PostgreSQL` database. See section on "Data Source Support" for different data sources supported and their required properties to configure.
+
+- `spec/build/source/dependencies` defines a list of maven dependency JAR files in GAV format (groupId:artifactid:version) especially for defining the JDBC driver files or any custom dependencies for data source. Check specific data source support under "Data Source Support" section. Typically most libraries that are available in public maven repositories are automatically added to the Operator build.
+
+- `spec/build/source/ddl` defines VDB in DDL form. Consult the Teiid documentation on for how to build a VDB using DDL. Defining all DDL is beyond scope of this document. 
+
+==== Created Service and Routes
+When the virtualization completed with its deployment, it will create a Service with name of the custom resource (`dv-customer` from above example), 
+
+- Port `31000` is available for JDBC connection. 
+- Port `35432` will be open for any `PG` specific client including a ODBC client
+- A `http` endpoint with route will be available for a `odata`. In above CR, if there is a property `spec/exposeVia3scale` set to `true` then this route will not be created, and it is expected that user will use _3scale_ to manage the endpoint.
+
+== Attach Private Libraries
+
+- You can use the Java based build mechanism where using the fabric8 maven plugin can be used to publish an image to OpenShift.
+- You can attach libraries into a .vdb module under "lib" directory. Note, that the "DV on OpenShift" does not yet support this feature, but on road map for future release.

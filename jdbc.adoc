@@ -1,0 +1,55 @@
+:toc:
+
+= JDBC Connection in OpenShift
+
+If you want to use JDBC to connect to your virtual databases. You can use this link:https://oss.sonatype.org/service/local/repositories/releases/content/org/teiid/teiid/12.2.1/teiid-12.2.1-jdbc.jar[JDBC Driver]. If you would like to use it in your application, use the maven dependency:
+
+----
+<dependency>
+  <groupId>org.teiid</groupId>
+  <artifactId>teiid</artifactId>
+  <classifier>jdbc</classifier>
+  <version>${version.teiid}</version>
+</dependency>
+----
+
+To connect to the database, use the following:
+
+URL: `jdbc:teiid:customer@mm://<service-host>:31000`
+
+JDBC Class: `org.teiid.jdbc.TeiidDriver`
+
+JDBC Driver: `teiid-12.2.1-jdbc.jar`
+
+As this example don't use authentication, no credentials are needed. Also note this connection only works from an application inside the OpenShift as there is no route created for it.
+
+== External JDBC Connection
+
+JDBC is not exposed to outside applications by default (no route created). It is only suitable for applications in the cloud. 
+
+If you have an external application that is using JDBC or the Postgres protocol issue the following:
+
+----
+$oc create -f - <<INGRESS
+apiVersion: v1
+kind: Service
+metadata:
+  name: <name>-ingress
+spec:
+  ports:
+  - name: teiid
+    port: 31000
+  type: LoadBalancer 
+  selector:
+    app: <service-name>
+  sessionAffinity: ClientIP
+INGRESS
+----
+
+To determine the ip/port run: 
+
+----
+$oc get svc <name>-ingress
+----
+
+NOTE: The above INGRESS may not be possible with public OpenShift instances as it requires opening a port. Change the <name> and <service-name> accordingly.

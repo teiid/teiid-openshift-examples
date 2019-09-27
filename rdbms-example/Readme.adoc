@@ -1,0 +1,165 @@
+= Virtualization with Relational Database [[rdbms-example]]
+
+This example gives necessary scripts, files and configuration to deploy a single relational database (Postgresql) as virtualization.
+
+== Prerequisites
+
+=== Access to OpenShift
+Log into your OpenShift instance using `oc login` command. If you do not have already access to a OpenShift instance, you can install a local `minishift` instance following these xref:../minishift.adoc[directions] 
+
+=== Install or subscribe to the Teiid/DV Operator 
+
+Once the OpenShift is available then install the Operator from OperatorHub or directions from xref:../install-operator.adoc[here]
+
+Learn basics of "DV on Openshift" xref:../dv-on-openshift.adoc[here] before you proceed.
+
+=== Set up a PostgreSQL Database (Testing Purpose Only)
+If you already have a database running on your network, then gather credentials to access that data source. Otherwise execute following scripts to create a PostgreSQL database on the OpenShift instance.
+
+[source,bash]
+----
+# DEPLOY POSTGRES DATABASE
+oc new-app \
+  -e POSTGRESQL_USER=user \
+  -e POSTGRESQL_PASSWORD=mypassword \
+  -e POSTGRESQL_DATABASE=sampledb \
+  postgresql:9.5
+
+# CREATE SECRET TO CONNECT TO DATABASE (ADJUST TO YOUR VALUES)
+oc create -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgresql
+type: Opaque
+stringData:
+  database-user: user
+  database-name: sampledb
+  database-password: mypassword
+EOF
+----
+
+Now, that the database is created find the OpenShift pod created for this database using
+
+[source,bash]
+----
+oc get pods 
+----
+
+Find the pod starting with `postgres-xxxxx` and then connect to by executing
+
+[source,bash]
+----
+# connect using remote shell
+oc rsh postgres-xxxxx
+
+# this will be shown
+sh-4.2$
+
+# use psql to connect to database and create some tables
+sh-4.2$ psql -U user sampledb
+----
+
+And at the prompt add in the following schema
+
+[source,sql]
+----
+CREATE TABLE CUSTOMER
+(
+   ID bigint,
+   SSN char(25),
+   NAME varchar(64),
+   CONSTRAINT CUSTOMER_PK PRIMARY KEY(ID)
+);
+
+CREATE TABLE ADDRESS
+(
+   ID bigint,
+   STREET char(25),
+   ZIP char(10),
+   CUSTOMER_ID bigint,
+   CONSTRAINT ADDRESS_PK PRIMARY KEY(ID),
+   CONSTRAINT CUSTOMER_FK FOREIGN KEY (CUSTOMER_ID) REFERENCES CUSTOMER (ID)
+);
+
+INSERT INTO CUSTOMER (ID,SSN,NAME) VALUES (10, 'CST01002','Joseph Smith');
+INSERT INTO CUSTOMER (ID,SSN,NAME) VALUES (11, 'CST01003','Nicholas Ferguson');
+INSERT INTO CUSTOMER (ID,SSN,NAME) VALUES (12, 'CST01004','Jane Aire');
+INSERT INTO ADDRESS (ID, STREET, ZIP, CUSTOMER_ID) VALUES (10, 'Main St', '12345', 10);
+----
+
+Database is setup now.
+
+
+== Deploy the Virtualization
+
+Once the database is ready, you can deploy the by executing below command. You can reference link:dv-customer.yaml[dv-customer.yaml]
+
+----
+oc create -f dv-customer.yaml
+----
+
+once completed it will have a Service called `dv-customer` with ports open for jdbc and pg protocols.
+
+If you want to delete the above virtualization, execute
+
+----
+oc delete vdb dv-customer
+----
+
+== JDBC Connection In OpenShift
+
+If you want to use JDBC to connect to your virtual databases. You can use this link:https://oss.sonatype.org/service/local/repositories/releases/content/org/teiid/teiid/12.2.1/teiid-12.2.1-jdbc.jar[JDBC Driver]. If you would like to use it in your application, use the maven dependency:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.teiid</groupId>
+  <artifactId>teiid</artifactId>
+  <classifier>jdbc</classifier>
+  <version>${version.teiid}</version>
+</dependency>
+----
+
+To connect to the database, use the following:
+
+URL: `jdbc:teiid:customer@mm://dv-customer.myproject.svc:31000`
+
+JDBC Class: `org.teiid.jdbc.TeiidDriver`
+
+JDBC Driver: `teiid-12.2.1-jdbc.jar`
+
+As this example don't use authentication, no credentials are needed.
+
+=== External JDBC Connection
+
+JDBC it is not exposed to outside applications by default (no route created). It is only suitable for applications in the cloud. 
+
+If you have an external application that is using JDBC or the Postgres protocol issue the following:
+
+[source,yaml]
+----
+$oc create -f - <<INGRESS
+apiVersion: v1
+kind: Service
+metadata:
+  name: dv-customer-ingress
+spec:
+  ports:
+  - name: teiid
+    port: 31000
+  type: LoadBalancer 
+  selector:
+    app: dv-customer
+  sessionAffinity: ClientIP
+INGRESS
+----
+
+To determine the ip/port run: 
+
+[source,bash]
+----
+$oc get svc dv-customer-ingress
+----
+
+NOTE: The above INGRESS may not be possible with public OpenShift instances as it requires opening a port.
