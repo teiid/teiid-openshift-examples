@@ -1,20 +1,20 @@
 = Installing the Operator  [[dv-install]]
-Before you install the Operator for Teiid, make sure you have access to a OpenShift Instance. You can install a local  xref:minishift.adoc[minishift] instance following the link.
+Before you install the Operator for Teiid, make sure you have access to an OpenShift Instance. You may also install a local xref:minishift.adoc[minishift].
 
 
 == On OpenShift 3.11 [[ocp311]]
-if you are working with OpenShift 3.11 then follow the below instructions. Make sure you have access to a OpenShift instance and you have `Cluster Admin` privileges to install the Operator. If you are working with local `minishift` instance then all permissions needed are available in through the `admin` user. Follow the below instructions
+If you are working with OpenShift 3.11 then follow the below instructions. Make sure you have access to a OpenShift instance and you have `Cluster Admin` privileges to install the Operator. If you are working with local `minishift` instance then all permissions needed are available in through the `admin` user.
 
 [source,bash]
 ----
 oc login 
 
 export OP_ROOT=https://raw.githubusercontent.com/teiid/teiid-operator/master/deploy
-oc create -f $OP_ROOT/deploy/crds/virtualdatabase.crd.yaml
-oc create -f $OP_ROOT/deploy/service_account.yaml
-oc create -f $OP_ROOT/deploy/role.yaml
-oc create -f $OP_ROOT/deploy/role_binding.yaml
-oc delete -f $OP_ROOT/deploy/operator.yaml
+oc create -f $OP_ROOT/crds/virtualdatabase.crd.yaml
+oc create -f $OP_ROOT/service_account.yaml
+oc create -f $OP_ROOT/role.yaml
+oc create -f $OP_ROOT/role_binding.yaml
+oc create -f $OP_ROOT/operator.yaml
 ----
 
 
@@ -26,11 +26,12 @@ On the OpenShift 4.2 later the Teiid Operator is available through OperatorHub. 
 
 == Operatorions on VDB with Operator
 
-Once the Operator is available on your OpenShift cluster you deploy a VDB by executing below command given the custom resource is defined as `dv-customer.yml`
+Once the Operator is available on your OpenShift cluster you can deploy a crd yaml file of your VDB.  This document will show deploying and interacting with the customer vdb from the rdbms-example.
 
 [source,bash]
 ----
-oc create -f dv-customer.yml
+cd rdbms-example
+oc create -f dv-customer.yaml
 ----
 
 You can list all the virtualizations available in the OpenShift cluster by executing
@@ -40,7 +41,7 @@ You can list all the virtualizations available in the OpenShift cluster by execu
 oc get vdbs
 ----
 
-or get perticular one by executing 
+or get a particular one by executing 
 [source,bash]
 ----
 oc get vdb dv-customer
@@ -51,14 +52,14 @@ oc get vdb dv-customer -o yaml
 
 The `status` field in the yaml file defines the status of the virtualization.
 
-One can delete a virtualization completely by executing below. This will remove all the resources belong to the virtualization
+To remove a virtualization and all of its resources, use
 
 [source,bash]
 ----
-oc create -f dv-customer
+oc delete vdb dv-customer
 ----
 
-if you want to make modification to a virtualization, you can do by 
+If you want to make modification to a virtualization, you can do
 
 ----
 oc edit vdb dv-customer
