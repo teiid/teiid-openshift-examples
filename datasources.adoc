@@ -81,7 +81,7 @@ User does not need to add any dependencies. The currently supported version is v
 == Configuring Salesforce [[config-sf]]
 The translator name to use in the VDB's DDL is _salesforce_ with its `Server` definition.
 
-For connecting to Salesforce and importing/querying all `SObject`, the user fist needs to make `OAuth` based connection in the Salesforce. Log into your Salesforce account, go to
+For connecting to Salesforce and importing/querying all `SObject`, the user fist needs to create `OAuth` based connection in the Salesforce. Log into your Salesforce account, go to
 `SetUp -> Create -> Apps`. Then, create a new "Connected App" and provide details there. When you are done, should get a `client-id` and `client-secret` values. Then to use this application from Teiid to connect to Salesforce by configuring the below properties.
 
 [Attributes]
@@ -101,7 +101,7 @@ The translator name to use in the VDB's DDL is _odata_ with its `Server` definit
 As per the connection underneath, follow the same properties as <<config-rest, REST based connection>>
 
 == Configuring SAP Gateway Based Source [[config-sap]]
-The translator name to use in the VDB's DDL is _sap-gateway_ with its `Server` definition. this uses OData V2 translator underneath to connect to SAP Gateway. Only _Http Basic_ auth has been verified.
+The translator name to use in the VDB's DDL is _sap-gateway_ with its `Server` definition. This uses OData V2 translator underneath to connect to SAP Gateway. Only _Http Basic_ auth has been verified.
 
 As per the connection underneath, follow the same properties as <<config-rest, REST based connection>>
 
@@ -143,7 +143,7 @@ if the _security type_ is defined as _openid-connect_ the following properties a
 |SPRING_TEIID_REST_{NAME}_SCOPE | clientSecret from connected app | No | n/a
 |===
 
-Alternatively, for the _openid-connect_ you can also supply 'SPRING_TEIID_REST_{NAME}_REFRESH_TOKEN' property and avoid the `USER_NAME` and `PASSWORD` properties, however describing on how to obtaining a refresh token is beyond this document as it different for different services.
+Alternatively, for the _openid-connect_ you can also supply 'SPRING_TEIID_REST_{NAME}_REFRESH_TOKEN' property and avoid the `USER_NAME` and `PASSWORD` properties, however describing on how to obtaining a refresh token is beyond this document as it is different for different services.
 
 == Configuring Google Sheets as Source [[config-googlesheets]]
 The translator name to use in the VDB's DDL is _google-spreadsheet_ with its `Server` definition. This will represent each _Sheet_ on a google spread sheet as a _table_ in Teiid.
