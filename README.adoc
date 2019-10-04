@@ -29,7 +29,7 @@ The following documents are available
 
 This VDB Migration Utility is used to convert a VDB (xml format) file to DDL.   If you have a .vdb file, first use Teiid Designer to export the .vdb to an .xml formatted file.
 
-There are two options to running this utility.  The first option is to run the utility, to report any validation errors, by providing only the path to the vdb file to convert.  The second option will also perform the validation reportiing, but will write the converted vdb (assuming no validation errors) to a .ddl file.  This can be executed by providing the second output argument. 
+There are two options to running this utility.  The first option is to run the utility, to report any validation errors, by providing only the path to the vdb file to convert.  The second option will also perform the validation reporting, but will write the converted vdb (assuming no validation errors) to a .ddl file.  This can be executed by providing the second output argument. 
 
 
 === Migrate VDB
