@@ -1,11 +1,11 @@
 = DV on OpenShift
 
-This guide provides documentation and code recipes for deploying and configuring the Data Virtualization on OpenShift. Typically a deployment of Data Virtualization includes defining a Virtual Datbase (VDB) using SQL/DDL and then configuring any of the data sources this VDB uses to connect and read and write data. Additionally, there may be scenarios where one maybe also configuring the Authentication to RH-SSO.
+This guide provides documentation and code recipes for deploying and configuring the Data Virtualization on OpenShift. Typically a deployment of Data Virtualization includes defining a Virtual Database (VDB) using SQL/DDL and then configuring any of the data sources this VDB uses to connect and read and write data. Additionally, there may be scenarios where one maybe also configuring the Authentication to RH-SSO.
 
 There are couple different ways one can deploy Data Virtualization.
 
 - Defining a Maven based Java project with a VDB file, and using fabric8 maven plugin to deploy into OpenShift.
-- Using a OpenShift Teiid Operator.
+- Using the OpenShift Teiid Operator.
 
 In this guide we will primarily focus on ways use the Teiid Operator. The user is expected that they have knowledge of of Operator model and how it works.
 
@@ -22,9 +22,9 @@ oc create -f dv-customer.yml
 
 where `dv-customer.yml` is the CR (custom resource) file that defines your virtualization artifact. 
 
-IMPORTANT:  Before you need to deploy above virtualization, we need to prepare and gather all the configuration that needed for connecting to the data sources involved. For example below checkout the "Configuring Relational Database" section.
+IMPORTANT:  Before you need to deploy above virtualization, we need to prepare and gather all the configuration that needed for connecting to the data sources involved. For example checkout the "Configuring Relational Database" section below.
 
-For example, a sample virtualization looks like (not a complete example, see xref:rdbms-example/Readme.adoc[rdbms_example] for full example)
+For example, a sample virtualization looks like this (for a complete example see xref:rdbms-example/Readme.adoc[rdbms_example])
 
 [source,yaml]
 ----
