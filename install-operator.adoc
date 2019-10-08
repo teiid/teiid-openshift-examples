@@ -17,6 +17,15 @@ oc create -f $OP_ROOT/role_binding.yaml
 oc create -f $OP_ROOT/operator.yaml
 ----
 
+or there is script available with above, execute
+
+[source,bash]
+----
+oc login
+
+./install-operator.sh
+----
+
 
 If there were no errors, you should have a Teiid Operator deployed in your OpenShift instance in the logged in namespace. You can now, use the `VirtualDatabase Deployment` section to create and deploy VDB as image.
 
