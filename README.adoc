@@ -9,6 +9,7 @@ The following documents are available
 * xref:dv-on-openshift.adoc[How to write custom resource for DV]
 * xref:datasources.adoc[How to configure physical data sources for VDB]
 * xref:jdbc.adoc[How to configure JDBC connection to a VDB]
+* xref:monitoring-with-prometheus.adoc[Monitoring with Prometheus]
 * xref:jdv-changes.adoc[JDV to "Teiid on OpenShift" changes]
 
 ## Available Examples and Utility
