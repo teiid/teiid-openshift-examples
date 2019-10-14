@@ -2,9 +2,11 @@
 
 This example is continuation of "rdbms-example", so if you have not gone through that project yet, the tasks in there should be completed first before going through this example.
 
-The main aim in this example is to expose the Data Integration metrics that you deployed in the previous project using Prometheus. Note that in this example, the installation of Prometheus is done using a template file `prometheus.yml`, however if you already have Syndesis environment set up Prometheus is already installed for you. Also, there is Prometheus Operator avilable but in this example not going to be using it. Hopefully very near future this example will be updated to use Prometheus Operator for install.
+The main aim in this example is to expose the Data Integration metrics that you deployed in the previous project using Prometheus. Note that in this example, the installation of Prometheus is done using a template file `prometheus.yml`, however if you already have Syndesis environment set up Prometheus is already installed for you. 
 
-## Install
+## Prometheus Template
+
+### Install
 To install Prometheus, make sure you have a running OpenShift environment and logged into using
 
 ```
@@ -27,3 +29,23 @@ oc process prometheus -p OPENSHIFT_PROJECT=`oc project -q` | oc create -f -
 At this time, if you log into your OpenShift console, you should see the Prometheus installed in the same namespace as your project.
 
 Grafana dashboard integration is upcoming as an extension to this example, until then you can create route to Prometheus service and see some simple graphs. To do that, go to services page, find `prometheus` service and client `create route` and access the console using the url provided.
+
+### App Configuration
+
+Unfortunately things are broken at the moment as we have started down the operator path.  Your application needs to have an exporter configured to provide the metrics for prometheus to scrape.  This is typically done with an agent using a configuration file such as https://github.com/teiid/teiid-openshift-examples/blob/7.4-1.1.x/rdbms-example/src/main/fabric8-includes/prometheus-config.yml
+
+On our Java base image there is an AB_JMX_EXPORTER_CONFIG property that needs to be set to that file location.  The Prometheus install will discover things to monitor by annotations - prometheus.io/scrape and prometheus.io/port. See the example deployment config with agent, port, and annotation properties https://github.com/teiid/teiid-openshift-examples/blob/7.4-1.1.x/rdbms-example/src/main/fabric8/deploymentconfig.yml  
+
+## Prometheus Operator
+
+### Install
+
+TODO - start with https://github.com/coreos/prometheus-operator there are several options including a helm chart.
+
+### App Configuration
+
+Same as above except the annotations are not needed as Prometheus needs explicit service monitors configured.  Please see  https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/running-exporters.md
+
+Example CRD for monitoring a Teiid Service:
+
+TODO
