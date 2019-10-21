@@ -9,7 +9,7 @@ If you are working with OpenShift 3.11 then follow the below instructions. Make 
 ----
 oc login 
 
-export OP_ROOT=https://raw.githubusercontent.com/teiid/teiid-operator/7.5-1.2.x/deploy
+export OP_ROOT=https://raw.githubusercontent.com/teiid/teiid-operator/7.5-0.0.x/deploy
 oc create -f $OP_ROOT/crds/virtualdatabase.crd.yaml
 oc create -f $OP_ROOT/service_account.yaml
 oc create -f $OP_ROOT/role.yaml
