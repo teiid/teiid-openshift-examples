@@ -3,7 +3,7 @@
 set -eu
 set -o pipefail
 
-export OP_ROOT=https://raw.githubusercontent.com/teiid/teiid-operator/master/deploy
+export OP_ROOT=https://raw.githubusercontent.com/teiid/teiid-operator/7.5-0.0.x/deploy
 export REGISTRY=registry.redhat.io
 
 create_secret_if_not_present() {
@@ -18,6 +18,25 @@ create_secret_if_not_present() {
     local result=$(oc create secret docker-registry dv-pull-secret --docker-server=${REGISTRY} --docker-username=$username --docker-password=$password)
     check_error $result
   fi
+}
+
+# check error
+check_error() {
+    local msg="$*"
+    if [ "${msg//ERROR/}" != "${msg}" ]; then
+        if [ -n "${ERROR_FILE:-}" ] && [ -f "$ERROR_FILE" ] && ! grep "$msg" $ERROR_FILE ; then
+            local tmp=$(mktemp /tmp/error-XXXX)
+            echo ${msg} >> $tmp
+            if [ $(wc -c <$ERROR_FILE) -ne 0 ]; then
+              echo >> $tmp
+              echo "===============================================================" >> $tmp
+              echo >> $tmp
+              cat $ERROR_FILE >> $tmp
+            fi
+            mv $tmp $ERROR_FILE
+        fi
+        exit 0
+    fi
 }
 
 # Check if a resource exist in OCP
@@ -37,9 +56,33 @@ create_secret_if_not_present
 oc secrets link builder dv-pull-secret
 oc secrets link builder dv-pull-secret --for=pull
 
-oc create -f $OP_ROOT/crds/virtualdatabase.crd.yaml
-oc create -f $OP_ROOT/service_account.yaml
-oc create -f $OP_ROOT/role.yaml
-oc create -f $OP_ROOT/role_binding.yaml
-oc create -f $OP_ROOT/operator.yaml
+if $(check_resource crd virtualdatabases.teiid.io) ; then 
+  echo "CRD Already exists, skipping.."
+else
+  oc create -f $OP_ROOT/crds/virtualdatabase.crd.yaml 
+fi
 
+if $(check_resource ServiceAcccount dv-operator) ; then 
+  echo "Service Account already exists, skipping.."
+else
+  echo "creating sa"
+  oc create -f $OP_ROOT/service_account.yaml
+fi
+
+if $(check_resource role dv-operator) ; then 
+  echo "Role already exists, skipping.."
+else
+  oc create -f $OP_ROOT/role.yaml
+fi
+
+if $(check_resource rolebinding dv-operator) ; then 
+  echo "RoleBinding already exists, skipping.."
+else
+  oc create -f $OP_ROOT/role_binding.yaml
+fi
+
+if $(check_resource deployment dv-operator) ; then 
+  echo "Operator already exists, skipping.."
+else
+  oc create -f $OP_ROOT/operator.yaml
+fi
