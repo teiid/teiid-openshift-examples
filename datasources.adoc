@@ -106,7 +106,19 @@ The translator name to use in the VDB's DDL is _sap-gateway_ with its `Server` d
 As per the connection underneath, follow the same properties as <<config-rest, REST based connection>>
 
 == Configuring OpenAPI Based Source [[config-openapi]]
-The translator name to use in the VDB's DDL is _openapi_ with its `Server` definition. When this translator is used, the source will look for either `swagger.json` or `openapi.json` files and build the source model based on it. Security aspects of the service are not understood automatically, only the API document and its responses.
+The translator name to use in the VDB's DDL is _openapi_ with its `Server` definition. When this translator is used, the source will look for endpoint `/openapi` files and build the source model based on it. However if the API document endpoint is defined as something else, one could configure that in the VDB's DDL on schema statement as
+
+----
+CREATE SCHEMA sourceModel SERVER oService OPTIONS ("importer.metadataUrl" '/swagger.json');
+----
+
+alternatively, one can define a ENVIRONMENT property instead for the same
+
+----
+SPRING_TEIID_REST_OSERVICE_IMPORTER_METADATAURL=/swagger.json
+----
+
+If the API is secured, security aspects of the service are not understood automatically, only the API document and its responses are understood by the translator. Those should be defined using REST properties below
 
 As per the connection underneath, follow the same properties as <<config-rest, REST based connection>>
 
