@@ -1,0 +1,20 @@
+apiVersion: teiid.io/v1alpha1
+kind: VirtualDatabase
+metadata:
+  name: dv-customer
+spec:
+  replicas: 1
+  env:
+  - name: SPRING_DATASOURCE_SAMPLEDB_USERNAME
+    value: user
+  - name: SPRING_DATASOURCE_SAMPLEDB_PASSWORD
+    value: mypassword
+  - name: SPRING_DATASOURCE_SAMPLEDB_DATABASENAME
+    value: sampledb
+  - name: SPRING_DATASOURCE_SAMPLEDB_JDBCURL
+    value: jdbc:postgresql://postgresql/$(SPRING_DATASOURCE_SAMPLEDB_DATABASENAME)
+  build:
+    git:
+      uri: https://github.com/teiid/teiid-openshift-examples      
+      contextDir: rdbms-example/vdb-as-maven-artifact
+      reference: master

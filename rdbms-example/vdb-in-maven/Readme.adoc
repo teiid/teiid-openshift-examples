@@ -1,0 +1,50 @@
+== Virtualization using Maven Project
+
+This example gives necessary scripts, files and configuration to deploy a single relational database (Postgresql) as virtualization using a Maven project then show how to deploy that using the Operator `Custom Resource` file. The user is expected that they already have sufficient knowledge in working with Maven based projects.
+
+The directory structure of this example reflects that of maven project. It is expected that any java based sources to support custom UDF and Custom translators to be defined in `src/main/java` folder with appropriate package names. Any further java library dependencies must be defined in the link:pom.xml[pom.xml] file. 
+
+The DDL for virtualization is defined in link:src/main/resources/customer-vdb.ddl[customer-vdb.ddl]. 
+
+To configure virtualization user can provide configuration values in link:src/main/resources/application.properties[application.properties]. The required properties to define depends the data source, this example shows the properties to configure connecting to a local PostgreSQL database.
+
+Once you define the above files, one can build the virtualization using the command
+
+[source,bash]
+----
+mvn clean install
+----
+
+make sure the build is completed without any errors. Now, if the database is accessible from the machine where this build is ran, and configuration in the `application.properties` file points to the correct database, then you can run the virtualization locally for any testing by executing
+
+[source,bash]
+----
+java -jar target/rdbms-example-1.0.0.jar
+----
+
+Once the above program is started fully without any errors, then you can connect your JDBC/ODBC or any other clients to access the data.
+
+NOTE: The above is only for local testing.
+
+== Deployment to OpenShift
+When project is defined in this fashion, it is expected that project is available in a git repository location, which then be used by the Operator to reference and deploy.
+
+The configuration for the data source(s) is defined in a `custom resource` file. For this example, `custom resource` defined in  link:dv-customer.yaml[dv-customer.yaml]
+
+Once the full fill the prerequisites, one can issue following command to deploy the virtualization into OpenShift.
+
+[source,bash]
+----
+oc create -f dv-customer.yaml
+----
+
+once completed it will have a Service called `dv-customer` with ports open for jdbc and pg protocols.
+
+If you want to delete the above virtualization, execute
+
+[source,bash]
+----
+oc delete vdb dv-customer
+----
+
+Once the above program is started fully without any errors, then you can connect your JDBC/ODBC or any other clients to access the data. See link:../Readme.adoc#vdb-access[Accessing the deployed Virtualization]

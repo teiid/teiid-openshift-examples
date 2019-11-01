@@ -1,19 +1,21 @@
+:toc:
+
 = Virtualization with Relational Database [[rdbms-example]]
 
-This example gives necessary scripts, files and configuration to deploy a single relational database (Postgresql) as virtualization.
+This example gives necessary guideline as to how to develop and deploy a virtualization using a single relational database (Postgresql).
 
 == Prerequisites
 
-=== Access to OpenShift
-Log into your OpenShift instance using `oc login` command. If you do not have already access to a OpenShift instance, you can install a local `minishift` instance following these xref:../minishift.adoc[directions] 
+==== Access to OpenShift
+Log into your OpenShift instance using `oc login` command. If you do not have already access to a OpenShift instance, you can install a local `minishift` instance following these xref:../../minishift.adoc[directions] 
 
-=== Install or subscribe to the Teiid/DV Operator 
+==== Install or subscribe to the Teiid/DV Operator 
 
 Once the OpenShift is available then install the Operator from OperatorHub or directions from xref:../install-operator.adoc[here]
 
 Learn basics of "DV on Openshift" xref:../dv-on-openshift.adoc[here] before you proceed.
 
-=== Set up a PostgreSQL Database (Testing Purpose Only)
+==== Set up a PostgreSQL Database (Testing Purpose Only)
 If you already have a database running on your network, then gather credentials to access that data source. Otherwise execute following scripts to create a PostgreSQL database on the OpenShift instance.
 
 [source,bash]
@@ -90,24 +92,77 @@ INSERT INTO ADDRESS (ID, STREET, ZIP, CUSTOMER_ID) VALUES (10, 'Main St', '12345
 
 Database is setup now.
 
+== Development of Virtualization
 
-== Deploy the Virtualization
+Depending upon the complexity of the project, development environment and needs to test on and off the OpenShift platform, user can develop a Virtualization a few different ways. Each of the option mentioned below have their advantages and dis-advantages. In the end, all options use Operator to deploy the Virtualization to OpenShift and yield _exactly same_ virtualization runtime with the same features. The choice depends on ones needs during development cycle.
 
-Once the database is ready, you can deploy the by executing below command. You can reference link:dv-customer.yaml[dv-customer.yaml]
+NOTE: Each option below shows *same* example with different ways of development.
 
-----
-oc create -f dv-customer.yaml
-----
+=== Directly Using the Operator
+Using this option user can directly define the VDB contents in the form of DDL in the `Custom Resource` file directly and use the Operator to deploy this virtualization. When deployed, the Operator will put together S2I build on OpenShift based dependencies it can glean from the VDB artifact. This may fail, if certain dependencies are not found, like if user omits the dependencies of JDBC drivers etc.
 
-once completed it will have a Service called `dv-customer` with ports open for jdbc and pg protocols.
+===== Pros
+* Simple and minimalistic
+* All the code and configuration related this virtualization is in single file. 
+* The management becomes really easy. 
 
-If you want to delete the above virtualization, execute
+===== Cons
+* `Custom Resource` file can get large with amount of DDL.
+* VDB is embedded in `Custom Resource`
+* VDB can not be versionable independently.
+* When working with multiple environments, need to move properties to known config-maps or secrets to be independent of `Custom Resource`
 
-----
-oc delete vdb dv-customer
-----
+Find an example for this in `vdb-in-operator` folder, with xref:vdb-in-operator/Readme.adoc[Readme here].
 
-== JDBC Connection In OpenShift
+=== Using Maven Project
+Using Maven project option user can define a virtualization file (VDB) *"as part of"* a maven based Java project. The VDB is defined as resource file and the `pom.xml` defines required dependencies to build this into a Spring Boot Java executable. User can use this executable locally to test. In the end, the user is expected to commit this working project to a GIT repository, and use the GIT repository location as source of build in the `Custom Resource` for the Operator.
+
+Any data source configuration is defined as part of Operator's `Custom Resource` file. When deployed, Operator will do S2I build using the above mentioned GIT repository, no introspection of the VDB is done in this step, it is expected user has provided all the required dependencies.
+
+==== Pros
+* Clean seperation of DDL code that represents the VDB and Configuration.
+* Local testing of the virtualization without OpenShift. Note, some of the details like caching, authentication will not work locally.
+* Any extensions like UDF, custom translators and be included as part of the project and they will be folded into runtime automatically.
+* Suitable for deployment into multiple environments.
+* Versioning is done at the level of the overall project.
+
+==== Cons
+* User is required to have the Maven working knowledge. Also, to extend the knowledge of Java development is required. 
+
+Find an example for this in `vdb-in-maven` folder, with xref:vdb-in-maven/Readme.adoc[Readme here].
+
+
+=== Using Virtualization as Maven Artifact
+Using this option one can define a virtualization *as* a maven artifact. Basically instead of providing DDL file as Virtualization, you can provide a perticular Maven artifact as a Virtualization.
+
+Teiid provides tools in the form of Maven plugins to convert a given DDL file into a maven artifact. The DDL file(s) are converted that into a Maven artifact that can be pushed to a maven repository with a given version defined in your `pom.xml` file. 
+
+Then this artifact can deployed directly using Operator. For deployment of the virtualization one need use either of above options in concert with this. This only creates virtualization as maven artifact.
+
+This is advanced option, however, most probably suitable for any projects with some level of complexity, as this provides most flexible options. Typically this is multi module maven project, where suitable for vdb sharing using the `vdb-import` features.
+
+==== Pros
+* Flexible, clean seperation of DDL code that represents the VDB and configuration.
+* Suitable for deployment into multiple environments.
+* Versioning is done at the VDB level.
+* A must have when using the `vdb-import` feature to import this VDB into other vdbs.
+* Virtualization can be sharable with other projects and other teams in a consistent way.
+* Consistent with CI/CD workflows.
+
+==== Cons
+* User is required to have the Maven working knowledge.
+* Relatively complex when considered with other options.
+
+Find an example for this in `vdb-as-maven-artifact` folder, with xref:vdb-as-maven-artifact/Readme.adoc[Readme here].
+
+== Deployment of Virtualization
+
+Deployment of the virtualization is *always* done using the Operator. However, how the `Custom Resource` defined for the deployment of virtualization depends upon the type of development model used from above. Each of the above models define how the Virtualizations can be deployed in their respective sections.
+
+== Accessing the deployed Virtualization [vdb-access]
+One virtualization is deployed in the OpenShift, it can be accessed using JDBC/ODBC and with variety of PostgreSQL clients along with OData. Below only shows one option as to how to use JDBC based connection to a virtualization from a Java based application.
+
+=== JDBC Connection From Client In OpenShift
 
 If you want to use JDBC to connect to your virtual databases. You can use this link:https://oss.sonatype.org/service/local/repositories/releases/content/org/teiid/teiid/12.2.1/teiid-12.2.1-jdbc.jar[JDBC Driver]. If you would like to use it in your application, use the maven dependency:
 
@@ -131,7 +186,7 @@ JDBC Driver: `teiid-12.2.1-jdbc.jar`
 
 As this example don't use authentication, no credentials are needed.
 
-=== External JDBC Connection
+=== JDBC Connection From External Client 
 
 JDBC it is not exposed to outside applications by default (no route created). It is only suitable for applications in the cloud. 
 

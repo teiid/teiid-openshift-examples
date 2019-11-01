@@ -1,0 +1,25 @@
+== Virtualization using Custom Resource 
+
+This example gives necessary scripts, files and configuration to deploy a single relational database (Postgresql) as virtualization using Operator `Custom Resource` file, where DDL for virtualization and configuration for the data source is all defined in a single custom resource file. 
+
+== Deployment to OpenShift
+
+Once the full fill the prerequisites, one can issue following command to deploy the virtualization into OpenShift. For this example, `custom resource` defined in  link:dv-customer.yaml[dv-customer.yaml]
+
+[source,bash]
+----
+oc create -f dv-customer.yaml
+----
+
+once completed it will have a Service called `dv-customer` with ports open for jdbc and pg protocols.
+
+If you want to delete the above virtualization, execute
+
+[source,bash]
+----
+oc delete vdb dv-customer
+----
+
+NOTE: There is no local testing available in this mode.
+
+Once the above program is started fully without any errors, then you can connect your JDBC/ODBC or any other clients to access the data. See link:../Readme.adoc#vdb-access[Accessing the deployed Virtualization]
