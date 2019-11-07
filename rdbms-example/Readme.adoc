@@ -7,7 +7,7 @@ This example gives necessary guideline as to how to develop and deploy a virtual
 == Prerequisites
 
 ==== Access to OpenShift
-Log into your OpenShift instance using `oc login` command. If you do not have already access to a OpenShift instance, you can install a local `minishift` instance following these xref:../../minishift.adoc[directions] 
+Log into your OpenShift instance using `oc login` command. If you do not have already access to a OpenShift instance, you can install a local `minishift` instance following these xref:../minishift.adoc[directions] 
 
 ==== Install or subscribe to the Teiid/DV Operator 
 
