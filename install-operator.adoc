@@ -1,4 +1,4 @@
-= Installing the Operator  [[dv-install]]
+= Installing the Operator [[dv-install]]
 Before you install the Operator for Teiid, make sure you have access to an OpenShift Instance. You may also install a local xref:minishift.adoc[minishift].
 
 
@@ -33,7 +33,7 @@ If there were no errors, you should have a Teiid Operator deployed in your OpenS
 == On OpenShift 4.2 or later [[ocp4]]
 On the OpenShift 4.2 later the Teiid Operator is available through OperatorHub. Go to the Operator catalog and find and install the `Teiid Operator`
 
-== Operatorions on VDB with Operator
+== Operations on VDB with Operator
 
 Once the Operator is available on your OpenShift cluster you can deploy a crd yaml file of your VDB.  This document will show deploying and interacting with the customer vdb from the rdbms-example.
 
