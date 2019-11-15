@@ -39,7 +39,7 @@ Once the Operator is available on your OpenShift cluster you can deploy a crd ya
 
 [source,bash]
 ----
-cd rdbms-example
+cd rdbms-example/vdb-in-operator
 oc create -f dv-customer.yaml
 ----
 
