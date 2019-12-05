@@ -103,13 +103,13 @@ Using this option user can directly define the VDB contents in the form of DDL i
 
 ===== Pros
 * Simple and minimalistic
-* All the code and configuration related this virtualization is in single file. 
+* All the code and configuration related to this virtualization is in single file. 
 * The management becomes really easy. 
 
 ===== Cons
 * `Custom Resource` file can get large with amount of DDL.
 * VDB is embedded in `Custom Resource`
-* More difficulte to version the VDB independently.
+* More difficult to version the VDB independently.
 * When working with multiple environments, need to move properties to config-maps or secrets to be independent of the `Custom Resource`
 
 Find an example for this in `vdb-in-operator` folder, with xref:vdb-in-operator/Readme.adoc[Readme here].
@@ -121,7 +121,7 @@ Any data source configuration is defined as part of Operator's `Custom Resource`
 
 ==== Pros
 * Clean separation of DDL code that represents the VDB and Configuration.
-* Local testing of the virtualization without OpenShift. Note: caching, authentication, that is enviornmentally dependent on OpenShift will not work locally.
+* Local testing of the virtualization without OpenShift. Note: caching, authentication, that is environmentally dependent on OpenShift will not work locally.
 * Any extensions like UDF, custom translators, etc. can be included as part of the project and they will be folded into runtime automatically.
 * Suitable for deployment into multiple environments.
 * Versioning is done at the level of the overall project.
