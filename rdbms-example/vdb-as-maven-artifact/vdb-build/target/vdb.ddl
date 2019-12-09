@@ -7,10 +7,6 @@
 CREATE DATABASE customer VERSION '1' OPTIONS (ANNOTATION 'Customer VDB');
 USE DATABASE customer VERSION '1';
 
---############ Translators ############
-CREATE FOREIGN DATA WRAPPER postgresql;
-
-
 --############ Servers ############
 CREATE SERVER sampledb TYPE 'NONE' FOREIGN DATA WRAPPER postgresql;
 

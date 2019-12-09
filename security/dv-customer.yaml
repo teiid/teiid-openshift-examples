@@ -23,7 +23,6 @@ spec:
         
         CREATE ROLE ReadRole WITH FOREIGN ROLE ReadRole;
         
-        CREATE FOREIGN DATA WRAPPER postgresql;
         CREATE SERVER sampledb TYPE 'NONE' FOREIGN DATA WRAPPER postgresql;
 
         CREATE SCHEMA accounts SERVER sampledb;

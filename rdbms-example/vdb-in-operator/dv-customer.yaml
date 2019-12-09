@@ -19,7 +19,6 @@ spec:
         CREATE DATABASE customer OPTIONS (ANNOTATION 'Customer VDB');
         USE DATABASE customer;
 
-        CREATE FOREIGN DATA WRAPPER postgresql;
         CREATE SERVER sampledb TYPE 'NONE' FOREIGN DATA WRAPPER postgresql;
 
         CREATE SCHEMA accounts SERVER sampledb;
