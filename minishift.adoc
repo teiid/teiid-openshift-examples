@@ -20,7 +20,7 @@ $minishift start --cpus 2 --memory 8GB --disk-size 40GB
 $oc login
 ----
 
-The ip of the minishift instance will be shown by the login, or may be obtained by running `$minishif ip`
+The ip of the minishift instance will be shown by the login, or may be obtained by running `$minishit ip`
 
 * Create a new namespace in the OpenShift, i.e. a new project in OpenShift, this is the namespace we will be deploying the vdb-service into.
 
