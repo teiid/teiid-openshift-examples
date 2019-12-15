@@ -3,5 +3,5 @@
 This guide has several examples
 
 * link:keycloak-odata-sso.adoc[Secure OData API through Keycloak] 
-* link:keycloak-db-sso.adoc[Secure pg/JDBC through Keycloak] 
+* link:keycloak-db-security.adoc[Secure pg/JDBC through Keycloak] 
 * link:3scale-odata-sso.adoc[Secure OData API through 3scale and Keycloak] 
