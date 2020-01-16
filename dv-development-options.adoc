@@ -18,7 +18,7 @@ Using this option user can directly define the VDB contents in the form of DDL i
 * More difficult to version the VDB independently.
 * When working with multiple environments, need to move properties to config-maps or secrets to be independent of the `Custom Resource`.
 
-Find an example DDL based VDB xref:dv-on-openshift.doc#YML_DDL[here].
+Find an example DDL based VDB <<dv-on-openshift.adoc#YML_DDL,here>>.
 
 === Virtual Database defined as FAT JAR
 Using this option user can define a virtualization file (VDB) *"as part of"* a maven based Java project. The VDB is defined as resource file and the `pom.xml` defines required dependencies to build this into a Spring Boot Java executable. User can use this executable locally to test. In the end, the user is expected push the generated JAR file (Fat jar) to a maven repository, then this JAR localtion is referenced in the `Custom Resource` file for the Operator for deployment.
@@ -35,7 +35,7 @@ Any data source configuration is defined as part of Operator's `Custom Resource`
 ==== Cons
 * User is required to have the working knowledge of Java, maven and Teiid Spring Boot starters, spring and Teiid.
 
-Find an example DDL based VDB xref:dv-on-openshift.doc#YML_FATJAR[here].
+Find an example DDL based VDB <<dv-on-openshift.adoc#YML_FATJAR,here>>.
 
 === Using Virtualization as Maven Artifact
 Using this option one can define a virtualization *as* a maven artifact. Basically instead of providing DDL file as Virtualization, you can provide a particular Maven artifact as a Virtualization.
@@ -55,7 +55,7 @@ Then this artifact can be deployed directly using the Operator. This is an advan
 ==== Cons
 * User is required to have the Maven working knowledge.
 
-Find an example DDL based VDB xref:dv-on-openshift.doc#YML_MAVEN[here].
+Find an example DDL based VDB <<dv-on-openshift.adoc#YML_MAVEN,here>>.
 
 == Deployment of Virtualization
 
