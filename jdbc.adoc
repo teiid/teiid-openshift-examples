@@ -1,9 +1,11 @@
 :toc:
+= JDBC Connection
 
-= JDBC Connection in OpenShift
+== JDBC Connection in OpenShift
 
-If you want to use JDBC to connect to your virtual databases. You can use this link:https://oss.sonatype.org/service/local/repositories/releases/content/org/teiid/teiid/12.2.1/teiid-12.2.1-jdbc.jar[JDBC Driver]. If you would like to use it in your application, use the maven dependency:
+If you want to use JDBC to connect to your virtual databases, you can use link:https://oss.sonatype.org/service/local/repositories/releases/content/org/teiid/teiid/12.2.1/teiid-12.2.1-jdbc.jar[Teiid JDBC Driver]. If you are using Maven for your java application development use the folowing maven dependency:
 
+[source, xml]
 ----
 <dependency>
   <groupId>org.teiid</groupId>
@@ -13,15 +15,17 @@ If you want to use JDBC to connect to your virtual databases. You can use this l
 </dependency>
 ----
 
-To connect to the database, use the following:
+To connect to the database, use the following properties while establishing connection:
 
 URL: `jdbc:teiid:customer@mm://<service-host>:31000`
 
 JDBC Class: `org.teiid.jdbc.TeiidDriver`
 
-JDBC Driver: `teiid-12.2.1-jdbc.jar`
+JDBC Driver: `teiid-12.2.1-jdbc.jar` or above
 
-As this example don't use authentication, no credentials are needed. Also note this connection only works from an application inside the OpenShift as there is no route created for it.
+As this example don't use authentication, no credentials are needed. Also note this connection only works from an application inside the OpenShift as there is no route created for it. If Keycloak installed as security provider, then one must use the credentials to login.
+
+NOTE: The transport layer of JDBC/PG is encrypted by default.
 
 == External JDBC Connection
 

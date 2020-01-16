@@ -1,0 +1,85 @@
+= Prerequisites For Examples
+
+==== Access to OpenShift
+Log into your OpenShift instance using `oc login` command. If you do not have already access to a OpenShift instance, you can install a local `minishift` instance following these xref:../minishift.adoc[directions] 
+
+==== Install or subscribe to the Teiid/DV Operator 
+
+Once the OpenShift is available then install the Operator from OperatorHub or the directions from xref:../install-operator.adoc[here]
+
+==== Set up a PostgreSQL Database (Testing Purpose Only)
+If you already have a database running on your network, then gather credentials to access that data source. Otherwise execute following scripts to create a PostgreSQL database on the OpenShift instance.
+
+[source,bash]
+----
+# DEPLOY POSTGRES DATABASE
+oc new-app \
+  -e POSTGRESQL_USER=user \
+  -e POSTGRESQL_PASSWORD=mypassword \
+  -e POSTGRESQL_DATABASE=sampledb \
+  postgresql:9.5
+
+# CREATE SECRET TO CONNECT TO DATABASE (ADJUST TO YOUR VALUES)
+oc create -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgresql
+type: Opaque
+stringData:
+  database-user: user
+  database-name: sampledb
+  database-password: mypassword
+EOF
+----
+
+Now, that the database is created find the OpenShift pod created for this database using
+
+[source,bash]
+----
+oc get pods 
+----
+
+Find the pod starting with `postgres-xxxxx` and then connect to by executing
+
+[source,bash]
+----
+# connect using remote shell
+oc rsh postgres-xxxxx
+
+# this will be shown
+sh-4.2$
+
+# use psql to connect to database and create some tables
+sh-4.2$ psql -U user sampledb
+----
+
+And at the prompt add in the following schema
+
+[source,sql]
+----
+CREATE TABLE CUSTOMER
+(
+   ID bigint,
+   SSN char(25),
+   NAME varchar(64),
+   CONSTRAINT CUSTOMER_PK PRIMARY KEY(ID)
+);
+
+CREATE TABLE ADDRESS
+(
+   ID bigint,
+   STREET char(25),
+   ZIP char(10),
+   CUSTOMER_ID bigint,
+   CONSTRAINT ADDRESS_PK PRIMARY KEY(ID),
+   CONSTRAINT CUSTOMER_FK FOREIGN KEY (CUSTOMER_ID) REFERENCES CUSTOMER (ID)
+);
+
+INSERT INTO CUSTOMER (ID,SSN,NAME) VALUES (10, 'CST01002','Joseph Smith');
+INSERT INTO CUSTOMER (ID,SSN,NAME) VALUES (11, 'CST01003','Nicholas Ferguson');
+INSERT INTO CUSTOMER (ID,SSN,NAME) VALUES (12, 'CST01004','Jane Aire');
+INSERT INTO ADDRESS (ID, STREET, ZIP, CUSTOMER_ID) VALUES (10, 'Main St', '12345', 10);
+----
+
+Database is setup now.

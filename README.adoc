@@ -1,25 +1,27 @@
 = Teiid OpenShift Examples
 
-This repository contains example projects, designed to be deployed on OpenShift using Teiid, and the VDB Migration Utility.
+This repository contains examples and documention on how to develop and deploy Data Virtualization (Teiid) projects, on Openshift using Teiid Operator.
 
-The following documents are available 
 
 * xref:minishift.adoc[How to Install Minishift]
 * xref:install-operator.adoc[How to Install Teiid OpenShift Operator]
+* xref:dv-development-options.adoc[Virtual Database Development Options ]
 * xref:dv-on-openshift.adoc[How to write custom resource for DV]
 * xref:datasources.adoc[How to configure physical data sources for VDB]
 * xref:jdbc.adoc[How to configure JDBC connection to a VDB]
 * xref:monitoring-with-prometheus.adoc[Monitoring with Prometheus]
 * xref:jdv-changes.adoc[JDV to "Teiid on OpenShift" changes]
 
+Before running the examples, a test database is required. Follow the steps xref:example-setup.adoc[here] to install one, or use an existing development database.
+
 ## Available Examples and Utility
 [Attributes]
 |===
 
 | Example Name  | Description   | Prerequisite  
-| xref:rdbms-example/Readme.adoc[rdbms-example] | Shows how to deploy a single relational source VDB into OpenShift | None 
+| xref:dv_on_openshift.adoc[starter example] | Shows how to deploy a single relational source VDB into OpenShift | None 
 
-| xref:security/keycloak-odata-sso.adoc[keycloak-odata-sso] | Securing the virtualizations OData API Interface |rdbms-example 
+| xref:security/keycloak-odata-sso.adoc[keycloak-odata-sso] | Securing the virtualizations OData API Interface |starter example 
 
 | xref:security/keycloak-db-security.adoc[keycloak-jdbc-sso] | Securing the virtualizations JDBC API | keycloak-odata-sso 
 
