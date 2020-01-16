@@ -84,7 +84,7 @@ spec:
 
 A full example is provided here link:https://github.com/teiid/teiid-operator/blob/master/deploy/crs/vdb_from_maven.yaml[dv-customer.yaml]
 
-== Virtual Database defined as FAT JAR [[YML_DDL]]
+== Virtual Database defined as FAT JAR [[YML_FATJAR]]
 This example shows how to deploy a VDB that is defined as FAT JAR that is built using `teiid-springboot` starter.
 
 An example project is defined link:https://github.com/teiid/dv-customer-fatjar[here] shows you how you can use java based project to develop a Virtual Database as a FAT JAR.
