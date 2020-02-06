@@ -1,6 +1,6 @@
 = Securing an OData API with Keycloak 
 
-This example is continuation of "rdbms-example".  The tasks in there should be completed first before going through this example.
+This example is continuation of "Starter Example".  The tasks in there should be completed first before going through this example.
 
 The main aim in this example is to secure the Data Virtualization's OData API interface with Keycloak. We will use OpenID-Connect as authentication mechanism to secure the API and use OAuth2 as the authorization mechanism. 
 
@@ -11,7 +11,7 @@ Note that this functionality overlaps with securing PG/JDBC with Keycloak.
 == Prerequisites
 
 === Install Keycloak or RH-SSO
-Before we can proceed with the example, link:keycloak-setup.adoc[install keycloak] and make sure it is available for use. The RBAC roles are defined and users are assigned these roles.
+Before we can proceed with the example, xref:keycloak-setup.adoc[install keycloak] and make sure it is available for use. The RBAC roles are defined and users are assigned these roles.
 
 
 == Keycloak based Security on OData API

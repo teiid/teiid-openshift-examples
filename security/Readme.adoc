@@ -2,6 +2,7 @@
 
 This guide has several examples
 
-* link:keycloak-odata-sso.adoc[Secure OData API through Keycloak] 
-* link:keycloak-db-security.adoc[Secure pg/JDBC through Keycloak] 
-* link:3scale-odata-sso.adoc[Secure OData API through 3scale and Keycloak] 
+* xref:keycloak-setup.adoc [Setup of Keycloak Server]
+* xref:keycloak-odata-sso.adoc[Secure OData API through Keycloak] 
+* xref:keycloak-db-security.adoc[Secure pg/JDBC through Keycloak] 
+* xref:3scale-odata-sso.adoc[Secure OData API through 3scale and Keycloak] 

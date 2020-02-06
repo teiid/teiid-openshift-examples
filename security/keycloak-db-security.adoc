@@ -1,12 +1,15 @@
 = Securing PG/JDBC with Keycloak 
 
-NOTE: This feature is incomplete with Operator, see previous versions with JAVA based build until this is fixed in the Operator.
-
-This example is continuation of "keycloak-odata-sso".  The tasks in there should be completed first before going through this example.
+This example is continuation of xref:keycloak-odata-sso.adoc[OData with Keycloak].  The tasks in there should be completed first before going through this example.
 
 The main aim in this example is to secure the Data Virtualization's PG/JDBC socket transports with Keycloak. We will use OpenID-Connect as authentication mechanism via Direct Access Grants and use OAuth2 as the authorization mechanism. 
 
-Note that this functionality overlaps with securing link:keycloak-odata-sso.adoc[OData with Keycloak]. Run through the example and setup all the steps. You can optionally skip the "Post Deployment" section, form that example and continue below.
+
+NOTE: Configuration wise it is exactly same as the xref:keycloak-odata-sso.adoc[OData with Keycloak]. 
+
+If the user is using jdbc/pg service ports to access the Virtual Database, now they will be subject to authentication based on userid and password.
+
+If the user has need to expose these ports beyond OpenShift then follow through the Post Deployment section.
 
 == Post Deployment
 
@@ -37,7 +40,7 @@ To determine the ip/port run:
 $oc get svc security-example-ingress
 ----
 
-Note that the secure transport will use a private key based upon the OpenShift managed service signing certificate.  See the annotation: "service.alpha.openshift.io/serving-cert-secret-name: service-certs" in the link:pg-secure-svc.yml[pg-secure-svc.yml].
+Note that the secure transport will use a private key based upon the OpenShift managed service signing certificate.  
 
 You may similarly choose to expose the Teiid JDBC port, or modify the example to expose the secure Teiid JDBC port.
 
@@ -45,6 +48,4 @@ You may similarly choose to expose the Teiid JDBC port, or modify the example to
 
 If you use `user` as the user name when you login, you will be granted to view the data of the customer view. If you used `developer` as the user name, the permission to view the customer data is not granted, as the `developer` user does not have the `ReadRole` role.
 
-There is a simple-jdbc-client example in the directory above.  You may test against the PG host/port exposed by the LoadBalancer by altering its application-pg-secure.properties to match the host and port.  You may of course test against a locally launched instance as well.
-
-Note that if you deploy you client on OpenShift it is possible to trust the service serving certificate, but the mechanics will vary depending upon your platform - for Java please see link:https://developers.redhat.com/blog/2017/11/22/dynamically-creating-java-keystores-openshift/[Dynamically Createing Java Keystores in OpenShift].  This example users the server initContainer logic from that example, but references the upstream Keycloak image rather than RHSSO.
+There is a `simple-jdbc-client` example in the directory above.  You may test against the PG host/port exposed by the LoadBalancer by altering its `application-pg-secure.properties` to match the host and port.  You may of course test against a locally launched instance as well.
