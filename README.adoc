@@ -6,7 +6,7 @@ This repository contains examples and documention on how to develop and deploy D
 * xref:minishift.adoc[How to Install Minishift]
 * xref:install-operator.adoc[How to Install Teiid OpenShift Operator]
 * xref:dv-development-options.adoc[Virtual Database Development Options ]
-* xref:dv-on-openshift.adoc[How to write custom resource for DV]
+* xref:dv-on-openshift.adoc[How to write custom resource and VDB for DV]
 * xref:datasources.adoc[How to configure physical data sources for VDB]
 * xref:jdbc.adoc[How to configure JDBC connection to a VDB]
 * xref:monitoring-with-prometheus.adoc[Monitoring with Prometheus]
@@ -19,7 +19,7 @@ Before running the examples, a test database is required. Follow the steps xref:
 |===
 
 | Example Name  | Description   | Prerequisite  
-| xref:dv-on-openshift.adoc[starter example] | Shows how to deploy a single relational source VDB into OpenShift | None 
+| xref:dv-on-openshift.adoc[starter example] | Shows how to deploy a single relational source VDB into OpenShift | xref:example-setup.adoc[example-setup]
 
 | xref:security/keycloak-odata-sso.adoc[keycloak-odata-sso] | Securing the virtualizations OData API Interface |starter example 
 

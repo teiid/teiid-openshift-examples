@@ -17,23 +17,26 @@ NOTE: When defining a environment property, characters like `.` are not allowed,
 == Configuring Relational Database [[config-jdbc]]
 For configuring the translator name in VDB, the follwing translators are supported
 
+- _amazon-athena_
 - _db2_
 - _derby_
 - _h2_
 - _hana_ (SAP Hana using the JDBC driver)
-- _hive-jdbc_ (Hive using the Hive JDBC Driver)
+- _hive_ (Hive using the Hive JDBC Driver)
 - _hsql_
 - _impala_ (Cloudera Impala)
 - _informix_
 - _ingres_
 - _jtds_ (Connect Microsoft SQLServer using JTDS drivers)
-- _mysql5_
+- _mysql_
 - _netezza_
 - _oracle_
 - _osisoft-pi_ (OSISOFT's PI Database using osisoft's JDBC Driver)
 - _phoenix_ (Apache Phenix using the Phoenix JDBC Driver)
 - _postgresql_
-- _presto-jdbc_ (PrestoDB connecting using JDBC Driver)
+- _prestodb_ (PrestoDB connecting using JDBC Driver)
+- _redshift_ (Amazon Red Shift)
+- _sapiq_ 
 - _sqlserver_ (Microsoft SQLServer)
 - _sybase_
 - _teradata_
@@ -77,6 +80,43 @@ For configuring the MongoDB database the following properties are needed
 |===
 
 User does not need to add any dependencies. The currently supported version is version 3 of the MongoDB.
+
+== [[config-s3]]Configuring Amazon S3 as Source
+The translator name to use in the VDB's DDL is _amazon-s3_ with its `Server` definition.
+
+For configuring the Amazon S3 the following properties are needed
+
+[Attributes]
+|===
+|Property Name |Description |Required|Default value
+|SPRING_TEIID_DATA_AMAZON_S3_{NAME}_REGION | S3 region ex: us-east-2 | Yes | n/a
+|SPRING_TEIID_DATA_AMAZON-S3_{NAME}_BUCKET | Bucket Name | Yes | n/a
+|SPRING_TEIID_DATA_AMAZON_S3_{NAME}_ACCESSKEY | Access Key | Yes | n/a
+|SPRING_TEIID_DATA_AMAZON_S3_{NAME}_SECRETKEY | SECRETKEY | Yes | n/a
+|===
+
+When Amazon-S3 is setup, one will create a bucket and will also can find out the the access-key and secret-key.
+
+User does not need to add any dependencies.
+
+== [[config-ispn]]Configuring Infinispan as source
+The translator name to use in the VDB's DDL is _infinispan-hotrod_ with its `Server` definition.
+
+For configuring the Infinispan the following properties are needed
+
+[Attributes]
+|===
+|Property Name |Description |Required|Default value
+|SPRING_TEIID_DATA_INFINISPAN_{NAME}_URL | URL to connect to Infinispan | Yes | n/a
+|SPRING_TEIID_DATA_INFINISPAN_{NAME}_USERNAME | User Name| Yes | n/a
+|SPRING_TEIID_DATA_INFINISPAN_{NAME}_PASSWORD | Password | Yes | n/a
+|SPRING_TEIID_DATA_INFINISPAN_{NAME}_CACHENAME | default cache name | No | n/a
+|SPRING_TEIID_DATA_INFINISPAN_{NAME}_AUTHENTICATION_REALM | Auth Realm | No | n/a
+|SPRING_TEIID_DATA_INFINISPAN_{NAME}_AUTHENTICATION_SERVER_NAME | Auth Server | No | n/a
+
+|===
+
+User does not need to add any dependencies.
 
 == Configuring Salesforce [[config-sf]]
 The translator name to use in the VDB's DDL is _salesforce_ with its `Server` definition.
