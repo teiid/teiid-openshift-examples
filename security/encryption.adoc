@@ -1,8 +1,8 @@
-= Securing Teiid Enpoints
+= Securing Teiid Enpoints with Encryption
 
-Configure Teiid pods to encrypt network traffic between clients and endpoints with TLS certificates.
+This section shows how to configure Teiid pods to encrypt network traffic between jdbc and odbc clients and endpoint on Teiid Service with TLS certificates.
 
-You can generate OpenShift service certificates or use custom TLS certificates for this purpose
+There are two options, generate OpenShift service certificates or use custom TLS certificates for this purpose
 
 == Generating Service Certificates for Encryption
 The Teiid Operator can generate OpenShift service certificates that:
@@ -15,7 +15,6 @@ The service certificates are default option, when custom TLS certificates are no
 
 == Adding TLS Certificates to Encryption Secrets
 To use custom certificates, add a TLS certificate/key pair to a OpenShift secret and configure Teiid to use it for endpoint encryption.
-
 
 Add the encryption secret to your OpenShift namespace.
 

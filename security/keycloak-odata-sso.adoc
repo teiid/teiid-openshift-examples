@@ -16,7 +16,7 @@ Before we can proceed with the example, xref:keycloak-setup.adoc[install keycloa
 
 == Keycloak based Security on OData API
 
-The enable Keycloak based security on the OData API, the following additional configuration need to be added to the link:../rdbs-example/readme.adoc[rdbms-example] custom resource yaml file.
+The enable Keycloak based security on the OData API, the following additional configuration need to be added to the link:../dv-on-openshift.adoc#virtual-database-defined-in-ddl[starter-example] custom resource yaml file.
 
 [source, yaml]
 ----
