@@ -57,7 +57,3 @@ Then this artifact can be deployed directly using the Operator. This is an advan
 
 Find an example DDL based VDB <<dv-on-openshift.adoc#YML_MAVEN,here>>.
 
-== Deployment of Virtualization
-
-Deployment of the virtualization is *always* done using the Operator. However, how the `Custom Resource` is defined for the deployment of virtualization depends upon the type of development model used. Each of the methods define how the Virtualizations can be deployed in their respective sections.
-

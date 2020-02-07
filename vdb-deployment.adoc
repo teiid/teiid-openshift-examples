@@ -1,0 +1,57 @@
+= Virtual Database Deployment [[deployment-cr]]
+
+Deployment of the virtualization is *always* done using the Operator. However, how the `Custom Resource` is defined for the deployment of virtualization depends upon the type of development model used.
+
+Once the Operator is available on your OpenShift cluster you deploy a VDB by executing below and supplying YAML file created
+
+[source,bash]
+----
+oc create -f dv-customer.yml
+----
+
+where `dv-customer.yml` is the CR (custom resource) file that defines your virtualization artifact. 
+
+IMPORTANT:  Before you deploy above virtualization, we need to prepare and gather all the configuration that needed for connecting to the data sources involved. For example checkout the xref:datasources.adoc["datasources"] section.
+
+You can list all the virtualizations available in the OpenShift cluster on a given namespace by executing
+
+[source,bash]
+----
+oc get vdbs
+----
+
+or get a particular one by executing 
+[source,bash]
+----
+oc get vdb dv-customer
+
+# or below to see whole yaml resource for the vdb
+oc get vdb dv-customer -o yaml
+----
+
+The `status` field in the yaml file defines the status of the virtualization.
+
+If you want to make inline modifications to a virtualization, you can do
+
+----
+oc edit vdb dv-customer
+----
+
+it will present a editor, once you finish the Operator will do another deployment of the service with new contents.
+
+One can delete the above virtualization by executing
+
+[source,bash]
+----
+oc delete vdb dv-customer
+----
+
+=== Created Service and Routes
+When the virtualization completed with its deployment, it will create a Service with name of the custom resource (`dv-customer` from above example), 
+- Port `31000` is available for JDBC connection. 
+- Port `35432` will be open for any `PG` specific client including a ODBC client
+- A `http` endpoint with route will be available for a `odata`. In above CR, if there is a property `spec/exposeVia3scale` set to `true` then this route will not be created, and it is expected that user will use _3scale_ to manage the endpoint.
+
+== Accessing the deployed Virtualization 
+Once virtualization is deployed in the OpenShift, it can be accessed using JDBC/ODBC and with variety of PostgreSQL clients along with OData.  See instructions xref:jdbc.adoc[here]
+

@@ -21,7 +21,8 @@ URL: `jdbc:teiid:customer@mm://<service-host>:31000`
 
 JDBC Class: `org.teiid.jdbc.TeiidDriver`
 
-JDBC Driver: `teiid-12.2.1-jdbc.jar` or above
+JDBC Driver: link:https://oss.sonatype.org/service/local/repositories/releases/content/org/teiid/teiid/13.0.2/teiid-13.0.2-jdbc.jar[`teiid-13.0.2-jdbc.jar`]
+ or above
 
 As this example don't use authentication, no credentials are needed. Also note this connection only works from an application inside the OpenShift as there is no route created for it. If Keycloak installed as security provider, then one must use the credentials to login.
 

@@ -105,31 +105,4 @@ A full example is provided here link:https://github.com/teiid/teiid-operator/blo
 
 == VirtualDatabase Deployment [[deployment-cr]]
 
-Once the Operator is available on your OpenShift cluster you deploy a VDB by executing below and supplying YAML file created
-
-[source,bash]
-----
-oc create -f dv-customer.yml
-----
-
-where `dv-customer.yml` is the CR (custom resource) file that defines your virtualization artifact. 
-
-IMPORTANT:  Before you need to deploy above virtualization, we need to prepare and gather all the configuration that needed for connecting to the data sources involved. For example checkout the "Configuring Relational Database" section below.
-
-One can delete the above virtualization by executing
-
-[source,bash]
-----
-oc delete vdb dv-customer
-----
-
-=== Created Service and Routes
-When the virtualization completed with its deployment, it will create a Service with name of the custom resource (`dv-customer` from above example), 
-
-- Port `31000` is available for JDBC connection. 
-- Port `35432` will be open for any `PG` specific client including a ODBC client
-- A `http` endpoint with route will be available for a `odata`. In above CR, if there is a property `spec/exposeVia3scale` set to `true` then this route will not be created, and it is expected that user will use _3scale_ to manage the endpoint.
-
-== Accessing the deployed Virtualization [vdb-access]
-Once virtualization is deployed in the OpenShift, it can be accessed using JDBC/ODBC and with variety of PostgreSQL clients along with OData.  See instructions xref:jdbc.adoc[here]
-
+For deployment of Virtual Database check xref:vdb-deployment.adoc[VDB Deployment]
