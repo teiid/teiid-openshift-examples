@@ -1,0 +1,11 @@
+apiVersion: infinispan.org/v1
+kind: Infinispan
+metadata:
+  name: mat-infinispan
+spec:
+  replicas: 2
+  security:
+    endpointSecretName: connect-secret
+  service:
+    type: DataGrid
+  

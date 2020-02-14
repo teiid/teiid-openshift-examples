@@ -1,0 +1,93 @@
+apiVersion: teiid.io/v1alpha1
+kind: VirtualDatabase
+metadata:
+  name: mat-example
+spec:
+  replicas: 1
+  env:
+  - name: SPRING_TEIID_DATA_INFINISPAN_ISPN_USERNAME
+    valueFrom:
+          secretKeyRef:
+            name: infinispan-teiid
+            key: username
+  - name: SPRING_TEIID_DATA_INFINISPAN_ISPN_PASSWORD
+    valueFrom:
+          secretKeyRef:
+            name: infinispan-teiid
+            key: password
+  - name: SPRING_TEIID_DATA_INFINISPAN_ISPN_URL
+    valueFrom:
+          secretKeyRef:
+            name: infinispan-teiid
+            key: url
+  - name: SPRING_TEIID_DATA_INFINISPAN_ISPN_TRANSACTIONMODE
+    value: NON_XA
+  - name: SPRING_TEIID_DATA_INFINISPAN_ISPN_CACHENAME
+    value: default
+  build:
+    source:
+      dependencies:
+        - org.teiid:spring-data-infinispan:jar:1.4.0-SNAPSHOT
+      ddl: |
+        CREATE DATABASE "mat-example";
+        USE DATABASE "mat-example";
+        
+        CREATE SERVER web FOREIGN DATA WRAPPER rest;
+        CREATE SERVER ispn FOREIGN DATA WRAPPER "infinispan-hotrod";
+
+        CREATE SCHEMA vix_source SERVER web;
+        CREATE SCHEMA vix_mat SERVER ispn;
+        CREATE VIRTUAL SCHEMA vix_virt;
+
+        IMPORT FROM server web into vix_source;
+
+        SET SCHEMA vix_mat;
+        
+        CREATE FOREIGN TABLE vixcache (
+            "date" date primary key,
+            "open" double, 
+            "high" double,
+            "low" double,
+            "close" double,
+            MA10 double,
+            loadNumber long
+        ) OPTIONS(UPDATABLE true, "teiid_ispn:cache" 'vixcache');
+        
+        CREATE FOREIGN TABLE status (
+            VDBName varchar(50) not null,
+            VDBVersion varchar(50) not null,
+            SchemaName varchar(50) not null,
+            Name varchar(256) not null,
+            TargetSchemaName varchar(50),
+            TargetName varchar(256) not null,
+            Valid boolean not null,
+            LoadState varchar(25) not null,
+            Cardinality long,
+            Updated timestamp not null,
+            LoadNumber long not null,
+            NodeName varchar(25) not null,
+            StaleCount long,
+            PRIMARY KEY (VDBName, VDBVersion, SchemaName, Name)
+        ) OPTIONS(UPDATABLE true, "teiid_ispn:cache" 'status');
+        
+        IMPORT FROM server ispn into vix_mat;
+
+        SET SCHEMA vix_virt;
+
+        CREATE VIEW vix (
+            "date" date primary key,
+            "open" double, 
+            "high" double,
+            "low" double,
+            "close" double,
+            MA10 double
+        ) OPTIONS (
+            MATERIALIZED 'TRUE',
+            MATERIALIZED_TABLE 'vix_mat.vixcache',
+            "teiid_rel:ALLOW_MATVIEW_MANAGEMENT" 'true',
+            "teiid_rel:MATVIEW_LOADNUMBER_COLUMN" 'LoadNumber',
+            "teiid_rel:MATVIEW_STATUS_TABLE" 'vix_mat.status'
+        ) AS 
+            select t.*, AVG("close") OVER (ORDER BY "date" ASC ROWS 9 PRECEDING) AS MA10 from 
+              (call vix_source.invokeHttp(action=>'GET', endpoint=>'https://datahub.io/core/finance-vix/r/vix-daily.csv')) w, 
+              texttable(to_chars(w.result, 'ascii') COLUMNS "date" date, "open" HEADER 'Vix Open' double, "high" HEADER 'Vix High' double, "low" HEADER 'Vix Low' double, "close" HEADER 'Vix Close' double HEADER) t;

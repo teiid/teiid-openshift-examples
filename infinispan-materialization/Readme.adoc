@@ -1,0 +1,157 @@
+:toc:
+
+= Materialization with Infinispan Datagrid [[inifinspan-materialization]]
+
+This example shows how to utilize an Infinispan DataGrid on OpenShift as a materialization target.
+
+This will process vix data from link:https://datahub.io/core/finance-vix in the form of a csv file that is updated daily.
+
+== Prerequisites
+
+==== Access to OpenShift
+Log into your OpenShift instance using `oc login` command. If you do not have already access to a OpenShift instance, you can install a local `okd` by downloading a 3.11+ client an running 'oc cluster up'
+
+The quickest path for the demo is to use okd cluter up run the following:
+----
+oc cluster up
+
+export KUBECONFIG=`pwd`/openshift.local.clusterup/openshift-controller-manager/admin.kubeconfig
+----
+
+To keep things simple we'll just use the default project and give admin access to it:
+----
+oc adm policy --as system:admin add-cluster-role-to-user cluster-admin admin
+----
+
+==== Install or subscribe to the Infinispan Operator 
+'
+Once the OpenShift is available then install the Operator from https://operatorhub.io/operator/infinispan[OperatorHub] or their https://github.com/infinispan/infinispan-operator[github project].
+
+Learn more about the https://infinispan.org/infinispan-operator/master/operator.html[Infinispan Operator].
+
+To install the operator from the github project do the following:
+----
+git clone https://github.com/infinispan/infinispan-operator
+
+cd infinispan-operator
+
+make run
+
+cd ..
+----
+
+==== Install or subscribe to the Teiid/DV Operator 
+
+Once the OpenShift is available then install the Operator from OperatorHub or xref:../install-operator.adoc[these directions].
+
+Learn basics of "DV on Openshift" xref:../dv-on-openshift.adoc[here] before you proceed.
+
+If you have already run oc cluter up and want to install from the github project do the following:
+
+----
+git clone https://github.com/teiid/teiid-operator
+
+cd teiid-operator
+
+oc create -f deploy/crds/virtualdatabase.crd.yaml
+oc create -f deploy/service_account.yaml
+oc create -f deploy/role.yaml
+oc create -f deploy/role_binding.yaml
+oc create -f deploy/operator.yaml
+
+cd ..
+----
+
+==== Set up an Infinispan DataGrid
+
+Use the yaml custom resource definition to start an Infinispan DataGrid with 2 pods.  Note that for this example we're creating default user accounts with a dummy password.  In a real scenario the passwords in the connect_secret.yaml and infinispan_teiid_secret.yaml would need to be changed in accordance with applicable security policy.
+
+----
+oc apply -f connect_secret.yaml
+oc apply -f cr_datagrid_minimal.yaml
+----
+
+Now, that the DatGrid is created find the OpenShift pod created using:
+
+[source,bash]
+----
+oc get pods -w
+----
+
+You should see 2 pods starting with the name mat-infinispan.
+
+== Deployment of Virtualization
+
+Deployment of the virtualization is *always* done using the Operator. In this example we'll use a yaml file to define a custom resource.
+
+Deploy the secret for accessing the DataGrid and the VDB with:
+
+----
+oc apply -f infinispan_teiid_secret.yaml
+oc create -f dv-mat.yaml
+----
+
+== Accessing the deployed Virtualization [vdb-access]
+
+Once the virtualization is deployed in the OpenShift, it can be accessed using JDBC/ODBC and with variety of PostgreSQL clients along with OData.
+
+=== OData Access
+
+The operator will automatically create a route.  It will be in the form of vdb-project.externalIp.nip.io/odata/vix_virt/vix.  If you are using oc cluster up, the full url will be https://mat-example-default.127.0.0.1.nip.io/odata/vix_virt/vix
+
+=== JDBC Connection From Client In OpenShift
+
+If you want to use JDBC to connect to your virtual databases, choose a Teiid release version from link:https://mvnrepository.com/artifact/org.teiid/teiid[the repository].  Then include the maven dependency with the appropriate version:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.teiid</groupId>
+  <artifactId>teiid</artifactId>
+  <classifier>jdbc</classifier>
+  <version>${version.teiid}</version>
+</dependency>
+----
+
+To connect to the database, use the following:
+
+URL: `jdbc:teiid:mat-example@mm://mat-example:31000`
+
+JDBC Class: `org.teiid.jdbc.TeiidDriver`
+
+JDBC Driver JAR: `teiid-{version}-jdbc.jar`
+
+As this example does not use authentication, no credentials are needed.
+
+=== JDBC Connection From External Client 
+
+JDBC is not exposed to outside applications by default - there is only an internal service created.
+
+If you have an external application that is using JDBC or the Postgres protocol issue the following:
+
+[source,yaml]
+----
+$oc create -f - <<INGRESS
+apiVersion: v1
+kind: Service
+metadata:
+  name: dv-customer-ingress
+spec:
+  ports:
+  - name: teiid
+    port: 31000
+  type: LoadBalancer 
+  selector:
+    app: dv-customer
+  sessionAffinity: ClientIP
+INGRESS
+----
+
+To determine the ip/port run: 
+
+[source,bash]
+----
+$oc get svc dv-customer-ingress
+----
+
+NOTE: The above INGRESS may not be possible with public OpenShift instances as it requires opening a port.
