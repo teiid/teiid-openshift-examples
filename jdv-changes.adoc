@@ -35,16 +35,13 @@ TIP: If you have a .vdb file, convert that to a single -vdb.xml file using desig
 
 == What’s not supported *yet*
 
-* Relational databases, REST based sources, file and MongoDB data sources are supported to be sources where the VDB can integrate the data from. Support for other sources is coming in future versions.
-* The distributed cache (materialization, resultset cache) are not supported yet.
-* XA based transactions
-* VDB import feature is not directly supported, however user can manually combine the all the VDBs involved before deployment.
+* Not all sources are supported yet.
+* The internal distributed cache (materialization, resultset cache) is not supported yet.
+* VDB import is not based upon runtime metadata, so its use generally requires VDBs that have all of the metadata fully specified in DDL.
 * Runtime lists from the Admin API - sessions, queries, transactions, etc. will be available via system tables.
 * Data source level security at resource adapter level including the passthrough authentication is not supported. Some features like Kerberos and OAuth2 delegate models will be considered for future versions.
-* Custom translators and Extension of translators is not supported, planned for future versions.
-* PreParser support is currently not available, planned for future versions.
 * No prebuilt scraping of Audit/Command log is provided. ELK/LogStash being considered for future versions.
-* Multisource vdbs
+* Runtime manipulation of multisource vdb sources
 
 == What’s not supported
 
@@ -57,7 +54,3 @@ TIP: If you have a .vdb file, convert that to a single -vdb.xml file using desig
 ** Resource Adapters are not supported.
 ** No Admin API support. Since the application instance is immutable, the instance started can NOT be modified.  Monitoring will utilize JMX and exposure via jolokia or jmx_exporter.
 ** Teiid Web-Console is no longer supported.
-
-
- 
- 
