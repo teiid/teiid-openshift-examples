@@ -7,8 +7,8 @@ The main aim in this exercise is to expose the tracing information of Data Virtu
 == Working with existing Jaeger Instance
 the Teiid Operator will NOT automatically find a Jaeger instance to be used with the tracing. Teiid Operator expects the user to configure a Jaeger instance, and then provide the name of the instance to the Data Virtualization service. Currently the expectation is that the Jaeger instance is also running in the same Namespace. This information is provided in Custom Resource of Virtual Database. Installing the Jaeger instance is beyond the scope of this document, however one can refer to documentation for https://www.jaegertracing.io/docs/1.16/operator/[Jaeger Operator]
 
-== Changes to VirtualDatabase Custom Resource
-The follwoing shows the changes required to the Custom Resource file of the Virtual Database to enable the Jaeger based tracing.
+== Jaeger Related Changes to Custom Resource
+The following shows the changes required to the Custom Resource file of the Virtual Database to enable the Jaeger based tracing.
 
 [source, yaml]
 ----
@@ -23,4 +23,46 @@ spec:
 <1> Name of the Jaeger Server instance in the Namespace. 
 
 == How it works
-During the deployment, the Teiid Operator will verify the existence of the Jaeger instance, if instance is found it will inject a Jaeger agent as sidecar into the same pod where the Virtual Database is running and configure the VDB service to talk to the agent to participate in active tracing spans.
+During the deployment, the Teiid Operator will verify the existence of the Jaeger instance, if instance is found it will inject a Jaeger agent as sidecar into the same pod where the Virtual Database is running and configure the VDB service to talk to the agent to participate in active tracing spans. Active spans are supported over JDBC, OData, and OpenAPi interfaces.
+
+
+== Full Example (for testing)
+It is expected that user is already have OpenShift environment and Teiid Operator running before running this example. If not please take look at instructions at xref:README.adoc[README]
+
+To show data virtualization service working with Open Tracing one need to install a Jaeger Operator first. If you are working with OpenShift 4.x install the Operator first from Operator Hub. Then create a instance of Jaeger server by executing the following snippet
+
+[source, sh]
+----
+kubectl apply -f - <<EOF
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: simplest
+EOF
+----
+
+his will install the default AllInOne strategy, which deploys the “all-in-one” image (agent, collector, query, ingestor, Jaeger UI) in a single pod, using in-memory storage by default.
+
+Now, your Virtual Database like the one shown here xref:dv_on_openshift.adoc[Virtual Database defined in DDL] add the following to the YAML
+
+[source,yaml]
+.dv-customer.yaml
+----
+apiVersion: teiid.io/v1alpha1
+kind: VirtualDatabase
+metadata:
+  name: dv-customer
+spec:
+  replicas: 1 
+  jaeger: simplest <1>
+  env:
+    - name: ORG_TEIID_TRACING_WITH_ACTIVE_SPAN_ONLY <2>
+      value: "false"  
+----
+
+<1> Insert the name of the Jaeger instance from above, note this could be different for your instance.
+<2> Enable all tracing, not just active tracing. i.e this will report if in coming requests do not have spans even then Data Virtualization will report a independent span. Good for easy testing. Note this is not required if your client program is sending in a active span into the Data Virtualization. Active spans are supported over JDBC, OData, and OpenAPi interfaces.
+
+Once you deploy the above custom resource then OpenTracing is setup for Data Virtualization service.
+
+Now user can go to the Jaeger web console and look up the traces for spans they created and/or with service name. For example in this test you can use `dv-customer` as service and find out the traces that occurred.
