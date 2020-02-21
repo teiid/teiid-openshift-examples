@@ -41,9 +41,9 @@ metadata:
 EOF
 ----
 
-his will install the default AllInOne strategy, which deploys the “all-in-one” image (agent, collector, query, ingestor, Jaeger UI) in a single pod, using in-memory storage by default.
+This will install the default AllInOne strategy, which deploys the “all-in-one” image (agent, collector, query, ingestor, Jaeger UI) in a single pod, using in-memory storage by default. 
 
-Now, your Virtual Database like the one shown here xref:dv_on_openshift.adoc[Virtual Database defined in DDL] add the following to the YAML
+Now, continuing with previous examples as one shown here xref:dv_on_openshift.adoc[Virtual Database defined in DDL] add the following to the YAML file to configure Jaeger instance.
 
 [source,yaml]
 .dv-customer.yaml
@@ -60,9 +60,17 @@ spec:
       value: "false"  
 ----
 
-<1> Insert the name of the Jaeger instance from above, note this could be different for your instance.
-<2> Enable all tracing, not just active tracing. i.e this will report if in coming requests do not have spans even then Data Virtualization will report a independent span. Good for easy testing. Note this is not required if your client program is sending in a active span into the Data Virtualization. Active spans are supported over JDBC, OData, and OpenAPi interfaces.
+<1> Name of the Jaeger instance from above, note this could be different for your instance.
+<2> Enable all tracing, not just active spans. i.e this will report if in coming requests do not have span information even then Data Virtualization will report as a independent span. Good for easy testing. Note this is not required if your client program is sending in a active span into the Data Virtualization. Active spans are supported over JDBC, OData, and OpenAPI interfaces.
 
-Once you deploy the above custom resource then OpenTracing is setup for Data Virtualization service.
+Deploy the YAML using
+
+----
+oc create -f dv-customer.yaml
+----
+
+Once you deploy the above custom resource then OpenTracing is setup for Data Virtualization service. Make sure the service is up and running without any issues. 
+
+User can now issue queries into Data Virtualization system using JDBC protocol (using Teiid Driver) or over OData (REST calls) or OpenAPI (REST calls), if these requests have active span information defined then those spans will be carried through the Data Virtualization system and reported accordingly to the Jaeger system. See how to setup spans https://opentracing.io/docs/best-practices/instrumenting-frameworks/#java[here]
 
 Now user can go to the Jaeger web console and look up the traces for spans they created and/or with service name. For example in this test you can use `dv-customer` as service and find out the traces that occurred.
