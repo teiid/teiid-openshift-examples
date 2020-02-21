@@ -1,0 +1,26 @@
+:toc:
+
+= Tracing with Jaeger
+
+The main aim in this exercise is to expose the tracing information of Data Virtualization service that was deployed in the previous steps using OpenTracing and Jaeger.
+
+== Working with existing Jaeger Instance
+the Teiid Operator will NOT automatically find a Jaeger instance to be used with the tracing. Teiid Operator expects the user to configure a Jaeger instance, and then provide the name of the instance to the Data Virtualization service. Currently the expectation is that the Jaeger instance is also running in the same Namespace. This information is provided in Custom Resource of Virtual Database. Installing the Jaeger instance is beyond the scope of this document, however one can refer to documentation for https://www.jaegertracing.io/docs/1.16/operator/[Jaeger Operator]
+
+== Changes to VirtualDatabase Custom Resource
+The follwoing shows the changes required to the Custom Resource file of the Virtual Database to enable the Jaeger based tracing.
+
+[source, yaml]
+----
+apiVersion: teiid.io/v1alpha1
+kind: VirtualDatabase
+metadata:
+  name: dv-customer
+spec:
+  jaeger: simplest <1>
+----
+
+<1> Name of the Jaeger Server instance in the Namespace. 
+
+== How it works
+During the deployment, the Teiid Operator will verify the existence of the Jaeger instance, if instance is found it will inject a Jaeger agent as sidecar into the same pod where the Virtual Database is running and configure the VDB service to talk to the agent to participate in active tracing spans.
