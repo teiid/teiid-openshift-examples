@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export OP_ROOT=https://raw.githubusercontent.com/teiid/teiid-operator/master/deploy
+export OP_ROOT=https://raw.githubusercontent.com/teiid/teiid-operator/7.6-1.3.x/deploy
 export REGISTRY=quay.io
 export RESOURCE=teiid-operator
 
