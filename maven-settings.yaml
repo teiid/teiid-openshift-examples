@@ -1,0 +1,76 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: teiid-maven-settings
+  namespace: myproject
+data:
+  settings.xml: >-
+    <?xml version="1.0" encoding="UTF-8"?>
+
+    <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+    https://maven.apache.org/xsd/settings-1.0.0.xsd">
+      <servers>
+          <server>
+            <id>jboss-developer-repository-group</id>
+            <username>user</username>
+            <password>xxxx</password>
+          </server>      
+      </servers>    
+      <localRepository />
+      <profiles>
+          <profile>
+            <id>maven-settings</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                  <id>central</id>
+                  <url>https://repo.maven.apache.org/maven2</url>
+                  <snapshots>
+                      <enabled>false</enabled>
+                  </snapshots>
+                  <releases>
+                      <enabled>true</enabled>
+                      <updatePolicy>never</updatePolicy>
+                  </releases>
+                </repository>
+                <repository>
+                  <id>snapshots-repo</id>
+                  <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                  <snapshots>
+                      <enabled>true</enabled>
+                  </snapshots>
+                  <releases>
+                      <enabled>false</enabled>
+                  </releases>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                  <id>central</id>
+                  <url>https://repo.maven.apache.org/maven2</url>
+                  <snapshots>
+                      <enabled>false</enabled>
+                  </snapshots>
+                  <releases>
+                      <enabled>true</enabled>
+                      <updatePolicy>never</updatePolicy>
+                  </releases>
+                </pluginRepository>
+                <pluginRepository>
+                  <id>snapshots-repo</id>
+                  <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                  <snapshots>
+                      <enabled>true</enabled>
+                  </snapshots>
+                  <releases>
+                      <enabled>false</enabled>
+                  </releases>
+                </pluginRepository>
+            </pluginRepositories>
+          </profile>
+      </profiles>
+    </settings>
