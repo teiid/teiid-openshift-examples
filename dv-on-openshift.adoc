@@ -2,16 +2,16 @@
 
 = Data Virtualization on OpenShift
 
-This guide provides documentation and code recipes for deploying and configuring the Data Virtualization on OpenShift. Typically a deployment of Data Virtualization includes defining a Virtual Database (VDB) using SQL/DDL and then configuring any of the data sources this VDB uses to connect and read and write data. Additionally, there may be scenarios where one maybe also configuring the Authentication to RH-SSO.
+This guide provides documentation and code recipes for deploying and configuring Data Virtualization on OpenShift. Typically a deployment of Data Virtualization includes defining a Virtual Database (VDB) using SQL/DDL and then configuring any of the data sources this VDB uses to connect and read and write data. Additionally, there may be scenarios where one may also need to configure the Authentication to RH-SSO.
 
 There are couple different ways one can develop & deploy Data Virtualization.
 
-- Define a YAML file vdb contents, then using the OpenShift Teiid Operator to deploy. Example below.
+- Defining a YAML file with the vdb contents, then using the OpenShift Teiid Operator to deploy. Example below.
 - Defining a maven based Java project with a VDB file, using Teiid Spring Boot, then using the Teiid Operator to deploy the generated Fat Jar.
 
-The user is expected that they have knowledge of of Openshift and  Operator model and how it works. If you have not already installed the teiid operator in your OpenShift instance, please install using directions xref:install-operator.adoc[here]
+The user is expected to have working knowledge of of Openshift and the Operator model. If you have not already installed the teiid operator in your OpenShift instance, please install using directions xref:install-operator.adoc[here]
 
-NOTE: Each option shown, is the *same* example with different ways of development.
+NOTE: Each option below represents the *same* example with different ways of development.
 
 == Virtual Database defined in DDL [[YML_DDL]]
 
@@ -47,28 +47,28 @@ spec:
           name: my-maven-settings      
 ----
 
-<1> define number of instances that you want to deploy. By default this is set to 1
+<1> defines the number of instances that you want to deploy. By default this is set to 1
 
-<2> defines the list of all the configuration properties for this virtualization. Mainly connection configuration to the data sources. In above example, it is showing properties to connect to a `PostgreSQL` database. See section on "Data Source Support" for different data sources supported and their required properties to configure.
+<2> defines the list of all the configuration properties for this virtualization. Mainly connection configuration to the data sources. The example above shows properties to connect to a `PostgreSQL` database. See the section on "Data Source Support" for the different supported data sources and the properties required for their configuration.
 
-<3> defines a list of maven dependency JAR files in GAV format (groupId:artifactid:version) especially for defining the JDBC driver files or any custom dependencies for data source. Check specific data source support under "Data Source Support" section. Typically most libraries that are available in public maven repositories are automatically added to the Operator build.
+<3> defines a list of maven dependency JAR files in GAV format (groupId:artifactid:version) especially for defining the JDBC driver files or any custom dependencies for data sources. Check specific data source support under "Data Source Support" section. Typically most libraries that are available in public maven repositories are automatically added to the Operator build.
 
-<4> defines VDB in DDL form. Consult the Teiid documentation on for how to build a VDB using DDL. Defining all DDL is beyond scope of this document. 
+<4> defines the VDB in DDL form. Consult the Teiid documentation on how to build a VDB using DDL. Defining all DDL is beyond the scope of this document. 
 
-<5> If in case any dependencies or VDB are defined in a private or non public repositories then use this property to define that repository location. One can configure more than one repository.
+<5> In case any dependencies or VDB are defined in a private or non-public repository then use this property to define that repository location. One can configure more than one repository.
 
-<6> If in case any dependencies or VDB are defined in a private or non public repositories, and requires more customization than what is provided in 5 like providing a access credentials (passwords etc), you can skip 5 and provide a complete `settings.xml` using a `ConfigMap` or a `Secret`. The configuration shown above referencing a `ConfigMap` of name `my-maven-settings` with a key to content at `settings.xml`. Where data of this key contains a full content of a Maven Settings file.
+<6> In case any dependencies or VDB are defined in a private or non public repository, and more customization than what is provided in 5 is needed, such as providing access credentials (passwords etc), you can skip 5 and provide a complete `settings.xml` using a `ConfigMap` or a `Secret`. The configuration above references a `ConfigMap` of name `my-maven-settings` with a key pointing to the full content of a Maven Settings file at `settings.xml`.
 
-NOTE: User can create a ConfigMap with name `teiid-maven-settings` with key name `settings.xml` then that will be used as default maven `settings.xml` file without any configuration in the Custom Resource as above. Where data of this key contains a full content of a Maven Settings file. This can be optionally overridden by either options 5 or 6 options. See example of link:maven-settings.yaml[ConfigMap here]. Which can be created using `oc create -f maven-settings.yaml` command.
+NOTE: The User can create a ConfigMap with name `teiid-maven-settings` with key name `settings.xml` which will then be used as default maven `settings.xml` file without any configuration in the Custom Resource as above. This can be optionally overridden by either options 5 or 6. See example of link:maven-settings.yaml[ConfigMap here]. Which can be created using `oc create -f maven-settings.yaml` command.
 
-A full example is provided here link:https://github.com/teiid/teiid-operator/blob/master/deploy/crs/vdb_from_ddl.yaml[dv-customer.yaml]
+A full example is provided here link:https://github.com/teiid/teiid-operator/blob/master/deploy/crds/vdb_from_ddl.yaml[dv-customer.yaml]
 
 == Virtual Database defined as Maven Artifact [[YML_MAVEN]]
-This example shows how to deploy a VDB that is defined as maven artifact using the Teiid Operator.
+This example shows how to deploy a VDB that is defined as a maven artifact using the Teiid Operator.
 
 After your VDB is available in a maven repository, you can use a YAML based custom resource similar to below to deploy the VDB in OpenShift.
 
-NOTE: The below YAML file very similar to example above, most portions are are omitted for space and clarity. Looks for full example below.
+NOTE: The below YAML file is very similar to example above, most portions are omitted for space and clarity. Look for a link to a full example below.
 
 [source, yaml]
 .dv-customer.yaml
@@ -86,7 +86,7 @@ spec:
       central: https://repo.maven.apache.org/maven2
 ----
 
-<1> Define maven coordinates to locate the VDB in GAV format. An example VDB that is defined as Maven Artifact is defined here link:https://github.com/teiid/dv-customer[dv-customer]. If you are sharing your VDB, or colloborating and would like to keep the versioned history then one should select to develop the VDB in this fashion. When using VDB-Import feature VDB must be defined in this fashion
+<1> Define maven coordinates to locate the VDB in GAV format. An example VDB that is defined as Maven Artifact is defined here link:https://github.com/teiid/dv-customer[dv-customer]. If you are sharing your VDB, or collaborating and would like to keep the versioned history then one should select to develop the VDB in this fashion. When using the VDB-Import feature the VDB must be defined in this fashion.
 
 <2> If your maven repository is at private location, then provide the link here.
 
@@ -95,13 +95,13 @@ NOTE: The options to provide the `settings.xml` file also apply here from above 
 A full example is provided here link:https://github.com/teiid/teiid-operator/blob/master/deploy/crs/vdb_from_maven.yaml[dv-customer.yaml]
 
 == Virtual Database defined as FAT JAR [[YML_FATJAR]]
-This example shows how to deploy a VDB that is defined as FAT JAR that is built using `teiid-springboot` starter.
+This example shows how to deploy a VDB that is defined as a FAT JAR that is built using `teiid-springboot` starter.
 
-An example project is defined link:https://github.com/teiid/dv-customer-fatjar[here] shows you how you can use java based project to develop a Virtual Database as a FAT JAR.
+An example project defined link:https://github.com/teiid/dv-customer-fatjar[here] shows you how you can use a java based project to develop a Virtual Database as a FAT JAR.
 
 After your FAT JAR is available in a maven repository, you can use a YAML based custom resource similar to below to deploy the VDB in OpenShift.
 
-NOTE: The below YAML file is exactly same as the VDB in maven example above, but the <maven> GAV is different. see blow partial fragment with the differences.
+NOTE: The below YAML file is exactly the same as the VDB in the maven example above, but the <maven> GAV is different. see the partial fragment below with the differences.
 
 [source, yaml]
 .dv-customer.yaml

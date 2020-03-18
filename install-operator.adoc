@@ -3,7 +3,7 @@ Before you install the Operator for Teiid, make sure you have access to an OpenS
 
 
 == On OpenShift 3.11 [[ocp311]]
-If you are working with OpenShift 3.11 then follow the below instructions. Make sure you have access to a OpenShift instance and you have `Cluster Admin` privileges to install the Operator. If you are working with local `minishift` instance then all permissions needed are available in through the `admin` user.
+If you are working with OpenShift 3.11 then follow the instructions below. Make sure you have access to an OpenShift instance and you have `Cluster Admin` privileges to install the Operator. If you are working with local a `minishift` instance then all the permissions needed are available through the `admin` user.
 
 [source,bash]
 ----
@@ -17,7 +17,7 @@ oc create -f $OP_ROOT/role_binding.yaml
 oc create -f $OP_ROOT/operator.yaml
 ----
 
-or there is script available with above, execute
+or, there is a script available with the above, execute
 
 [source,bash]
 ----
@@ -27,7 +27,7 @@ oc login
 ----
 
 
-If there were no errors, you should have a Teiid Operator deployed in your OpenShift instance in the logged in namespace. You can now, use the `VirtualDatabase Deployment` section to create and deploy VDB as image.
+If there were no errors, you should have a Teiid Operator deployed in your OpenShift instance in the logged in namespace. You can now use the `VirtualDatabase Deployment` section to create and deploy a VDB as an image.
 
 
 == On OpenShift 4.2 or later [[ocp4]]
