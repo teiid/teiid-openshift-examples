@@ -101,7 +101,7 @@ NOTE: The below YAML file is exactly same as the VDB in maven example above, but
      maven  org.teiid:dv-customer-fatjar:1.1
 ----
 
-A full example is provided here link:https://github.com/teiid/teiid-operator/blob/master/deploy/crs/vdb_from_fatjar.yaml[dv-customer.yaml]
+A full example is provided here link:https://github.com/teiid/teiid-operator/blob/7.6-0.1.x/deploy/crs/vdb_from_fatjar.yaml[dv-customer.yaml]
 
 == VirtualDatabase Deployment [[deployment-cr]]
 
