@@ -1,14 +1,14 @@
 = Prerequisites For Examples
 
 ==== Access to OpenShift
-Log into your OpenShift instance using `oc login` command. If you do not have already access to a OpenShift instance, you can install a local `minishift` instance following these xref:../minishift.adoc[directions] 
+Log into your OpenShift instance using `oc login` command. If you do not have already access to a OpenShift instance, you can install a local `minishift` instance following these xref:minishift.adoc[directions] 
 
 ==== Install or subscribe to the Teiid/DV Operator 
 
-Once the OpenShift is available then install the Operator from OperatorHub or the directions from xref:../install-operator.adoc[here]
+Once the OpenShift console is available install the Operator from OperatorHub or follow the directions from xref:install-operator.adoc[here]
 
 ==== Set up a PostgreSQL Database (Testing Purpose Only)
-If you already have a database running on your network, then gather credentials to access that data source. Otherwise execute following scripts to create a PostgreSQL database on the OpenShift instance.
+If you already have a database running on your network, then gather the credentials to access that data source. Otherwise execute following scripts to create a PostgreSQL database on the OpenShift instance.
 
 [source,bash]
 ----
@@ -17,7 +17,7 @@ oc new-app \
   -e POSTGRESQL_USER=user \
   -e POSTGRESQL_PASSWORD=mypassword \
   -e POSTGRESQL_DATABASE=sampledb \
-  postgresql:9.5
+  postgresql:latest
 
 # CREATE SECRET TO CONNECT TO DATABASE (ADJUST TO YOUR VALUES)
 oc create -f - <<EOF
@@ -33,14 +33,14 @@ stringData:
 EOF
 ----
 
-Now, that the database is created find the OpenShift pod created for this database using
+Once the database is created you can find the OpenShift pod created for this database by using
 
 [source,bash]
 ----
 oc get pods 
 ----
 
-Find the pod starting with `postgres-xxxxx` and then connect to by executing
+Find the pod starting with `postgres-xxxxx` and connect to it by executing
 
 [source,bash]
 ----
@@ -82,4 +82,4 @@ INSERT INTO CUSTOMER (ID,SSN,NAME) VALUES (12, 'CST01004','Jane Aire');
 INSERT INTO ADDRESS (ID, STREET, ZIP, CUSTOMER_ID) VALUES (10, 'Main St', '12345', 10);
 ----
 
-Database is setup now.
+The example Database is now set up.
