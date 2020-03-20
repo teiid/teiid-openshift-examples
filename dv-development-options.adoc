@@ -2,47 +2,47 @@
 
 = Development of a Virtualization
 
-A user can develop a Virtualization (VDB) a few different ways. Each of the options have advantages and disadvantages. In the end all options use the Operator to deploy the Virtualization to OpenShift and yield _exactly same_ virtualization runtime with the same features. The choice depends upon the complexity of the project and the need for testing on and off the OpenShift platform.  
+A User can develop a Virtualization (VDB) in a few different ways. Each of the options has advantages and disadvantages. In the end all options use the Operator to deploy the Virtualization to OpenShift and yield _exactly the same_ virtualization runtime with the same features. The choice depends upon the complexity of the project and the need for testing on and off the OpenShift platform.  
 
 === Virtual Database defined as DDL on Operator Resource
-Using this option user can directly define the VDB contents in the form of DDL in the `Custom Resource` file directly and use the Operator to deploy this virtualization. When deployed, the Operator will put together S2I build on OpenShift based on dependencies it can glean from the VDB artifact. This may fail if certain dependencies are not found - like if the developer omits the dependencies of JDBC drivers, etc.
+Using this option the User can directly define the VDB contents in the form of DDL in the `Custom Resource` VDB definition and use the Operator to deploy this virtualization. When deployed, the Operator will put together an S2I build on OpenShift based on dependencies it can glean from the VDB artifact. This may fail if certain dependencies are not found - such as if the developer omits the dependencies of JDBC drivers, etc.
 
 ===== Pros
 * Simple and minimalistic
-* All the code and configuration related to this virtualization is in single file. 
-* The management becomes really easy. 
+* All the code and configuration related to this virtualization is in one single file. 
+* Easy management. 
 
 ===== Cons
-* `Custom Resource` file can get large with amount of DDL.
-* VDB is embedded in `Custom Resource`, aka in YAML file
+* The `Custom Resource` YAML file can quickly become large with the amount of required DDL.
+* The VDB is embedded in the `Custom Resource` YAML file
 * More difficult to version the VDB independently.
-* When working with multiple environments, need to move properties to config-maps or secrets to be independent of the `Custom Resource`.
+* When working with multiple environments, properties need to be moved to config-maps or secrets to be independent of the `Custom Resource` VDB definition.
 
-Find an example DDL based VDB <<dv-on-openshift.adoc#YML_DDL,here>>.
+Find an example of a DDL based VDB <<dv-on-openshift.adoc#YML_DDL,here>>.
 
 === Virtual Database defined as FAT JAR
-Using this option user can define a virtualization file (VDB) *"as part of"* a maven based Java project. The VDB is defined as resource file and the `pom.xml` defines required dependencies to build this into a Spring Boot Java executable. User can use this executable locally to test. In the end, the user is expected push the generated JAR file (Fat jar) to a maven repository, then this JAR localtion is referenced in the `Custom Resource` file for the Operator for deployment.
+Using this option the User can define a virtualization file (VDB) *"as part of"* a maven based Java project. The VDB is defined as a resource file and the `pom.xml` defines required dependencies to build this into a Spring Boot Java executable. The User can use this executable locally to test. In the end, the User is expected to push the generated JAR file (Fat jar) to a maven repository, and then reference this JAR location in the `Custom Resource` VDB file for the Operator for deployment.
 
-Any data source configuration is defined as part of Operator's `Custom Resource` file. When deployed, Operator will download the FAT JAR from maven directly and create a container image, no introspection of the VDB is done in this step, it is expected user has provided all the required dependencies.
+Any data source configuration is defined as part of the `Custom Resource` file. When deployed, the Operator will download the FAT JAR from maven directly and create a container image, so no introspection of the VDB is done in this step, the User is expected to have provided all the required dependencies.
 
 ==== Pros
 * Clean separation of DDL code that represents the VDB and Configuration.
-* Local testing of the virtualization without OpenShift. Note: caching, authentication, that is environmentally dependent on OpenShift will not work locally.
+* Local testing of the virtualization without OpenShift. Note: caching, authentication and such that are environmentally dependent on OpenShift will not work locally.
 * Any extensions like UDF, custom translators, etc. can be included as part of the project and they will be folded into runtime automatically.
 * Suitable for deployment into multiple environments.
 * Versioning is done at the level of the overall project.
 
 ==== Cons
-* User is required to have the working knowledge of Java, maven and Teiid Spring Boot starters, spring and Teiid.
+* The User is required to have working knowledge of Java, maven and Teiid Spring Boot starters, Spring and Teiid.
 
-Find an example DDL based VDB <<dv-on-openshift.adoc#YML_FATJAR,here>>.
+Find an example of a FAT JAR based VDB <<dv-on-openshift.adoc#YML_FATJAR,here>>.
 
 === Using Virtualization as Maven Artifact
-Using this option one can define a virtualization *as* a maven artifact. Basically instead of providing DDL file as Virtualization, you can provide a particular Maven artifact as a Virtualization.
+Using this option you can define a virtualization *as* a maven artifact. Basically, instead of providing a DDL file as a Virtualization, you can provide a particular Maven artifact as a Virtualization.
 
-Teiid provides tools in the form of Maven plugins to convert a given DDL file into a maven artifact. The DDL file(s) are converted that into a Maven artifact that can be pushed to a maven repository with a given version defined in your `pom.xml` file. 
+Teiid provides tools in the form of Maven plugins to convert a given DDL file into a maven artifact that can be pushed to a maven repository with a given version defined in your `pom.xml` file. 
 
-Then this artifact can be deployed directly using the Operator. This is an advanced option.  However it may be suitable for projects with some level of complexity, as this provides the most flexible options. Typically this can be developed as a multi-module maven project, with vdb sharing when using the `vdb-import` feature.
+From then on, this artifact can be deployed directly using the Operator. This is an advanced option.  However it may be suitable for projects with some level of complexity, as this provides the most flexible options. Typically this can be developed as a multi-module maven project, with vdb sharing when using the `vdb-import` feature.
 
 ==== Pros
 * Flexible, clean separation of DDL code that represents the VDB and configuration.
@@ -53,7 +53,7 @@ Then this artifact can be deployed directly using the Operator. This is an advan
 * Consistent with CI/CD workflows.
 
 ==== Cons
-* User is required to have the Maven working knowledge.
+* The User is required to have Maven working knowledge.
 
 Find an example DDL based VDB <<dv-on-openshift.adoc#YML_MAVEN,here>>.
 
