@@ -116,3 +116,20 @@ A full example is provided here link:https://github.com/teiid/teiid-operator/blo
 == VirtualDatabase Deployment [[deployment-cr]]
 
 For deployment of Virtual Database check xref:vdb-deployment.adoc[VDB Deployment]
+
+== VirtualDatabase DDL Limitations
+
+The above sections have shown different ways of configuring and deploying VDB, however the VDB is always built using DDL. To develop VDB using DDL please refer to Teiid's Reference Guide, which will provide details about different statements and syntax that Teiid supports.  When a VDB is being deployed in OpenShift as described above, the images that are generated needs to be in "immutable" state. That means, no matter how many times the image is stopped and started the same behavior must persist. However, when VDB is defined using the stataments like
+
+[source, SQL]
+----
+IMPORT FOREIGN SCHEMA public FROM SERVER sampledb INTO accounts;
+----
+
+the metadata (schema) of the data source is imported at deployment time of the VDB, that happens when the image is being started. That also means image contents itself is being modified, which goes against the "immutable" principles of this architecture. However, as long as the underlaying data source always returns same metadata this is not an issue, if the data source returns different metadata each time image is started then that will be a issue. 
+
+It is *strongly recommended* that instead of using above `IMPORT FOREIGN SCHEMA` statement, one can physically define all the metadata of the underlying source, such as all the tables, procedures and functions that data source represents, then the image contents will always remain constant.
+
+Also, `IMPORT FOREIGN SCHEMA` statement is an expensive operation, as it needs to query the underlying physical data source every time a pod restarts, not only it is going to place strain on the underlying physical data source and amount of time it takes can vary on data source which will contribute to Pod startup time. Imagine if you are starting 100 pods at a given time, all of them accessing the physical data source all at the same time and brining down the data source. 
+
+For these reasons, try to provide the full metadata rather than using above statement. There will be futher work to improve this process in upcoming releases.
