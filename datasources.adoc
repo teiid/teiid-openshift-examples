@@ -14,6 +14,8 @@ Please note _any_ property that you want to configure, you can define reference 
 
 NOTE: When defining a environment property, characters like `.` are not allowed, but you can replace them with character `_` and application will convert them automatically at runtime.
 
+NOTE: If any configured property in a ConfigMap or Secret is missing, the Operator will not start the build until such configuration value is supplied. Also if the configuration changes after the service is running, the service will be automatically redeployed with new values.
+
 == Configuring Relational Database [[config-jdbc]]
 For configuring the translator name in VDB, the follwing translators are supported
 
