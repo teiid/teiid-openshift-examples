@@ -3,7 +3,7 @@
 
 == JDBC Connection in OpenShift
 
-If you want to use JDBC to connect to your virtual databases, you can use link:https://oss.sonatype.org/service/local/repositories/releases/content/org/teiid/teiid/12.2.1/teiid-12.2.1-jdbc.jar[Teiid JDBC Driver]. If you are using Maven for your java application development use the folowing maven dependency:
+If you want to use JDBC to connect to your virtual databases, you can use link:https://oss.sonatype.org/service/local/repositories/releases/content/org/teiid/teiid/12.2.1/teiid-12.2.1-jdbc.jar[Teiid JDBC Driver] to connect this virtual database from your java program. If you are using Maven for your java application development use the folowing as the maven dependency:
 
 [source, xml]
 ----
@@ -24,15 +24,17 @@ JDBC Class: `org.teiid.jdbc.TeiidDriver`
 JDBC Driver: link:https://oss.sonatype.org/service/local/repositories/releases/content/org/teiid/teiid/13.0.2/teiid-13.0.2-jdbc.jar[`teiid-13.0.2-jdbc.jar`]
  or above
 
-As this example don't use authentication, no credentials are needed. Also note this connection only works from an application inside the OpenShift as there is no route created for it. If Keycloak installed as security provider, then one must use the credentials to login.
+As this example does not use authentication, no credentials are needed. Also note that this connection only works from an application inside the OpenShift as there is no route/Ingress created for it. If Keycloak installed as security provider, then one must use the credentials to login.
 
-NOTE: The transport layer of JDBC/PG is encrypted by default.
+NOTE: In this repository, see example called "simple-jdbc-client" which shows a JDBC example you can execute.
+
+NOTE: The transport layer of JDBC/PG is encrypted by default, but only over the secure ports. So, be cautious when creating external facing connections.
 
 == External JDBC Connection
 
 JDBC is not exposed to outside applications by default (no route created). It is only suitable for applications in the cloud. 
 
-If you have an external application that is using JDBC or the Postgres protocol issue the following:
+If you have an external application that is using JDBC or the Postgres protocol issue the following. The below example shows JDBC, to use PG protocol use port 3 
 
 ----
 $oc create -f - <<INGRESS
@@ -55,6 +57,11 @@ To determine the ip/port run:
 
 ----
 $oc get svc <name>-ingress
+
+NAME                          TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                                                              AGE
+<name>-ingress                LoadBalancer   172.30.233.178   <pending>     31000:30430/TCP                                                      22m
 ----
 
 NOTE: The above INGRESS may not be possible with public OpenShift instances as it requires opening a port. Change the <name> and <service-name> accordingly.
+
+NOTE: When working with OpenShift 4.x/Code Ready Containers, if the EXTERNAL-IP value is set, your environment has an external load balancer that you can use for the ingress gateway. If the EXTERNAL-IP value is <none> (or perpetually <pending>), your environment does not provide an external load balancer for the ingress gateway. In this case, you can access the gateway using the service’s node port. For CRC you can see it by `crc ip` and in output of the above command you will see a Node level port. In above example, a pod's 31000 port is assigned to 30430, you will need to connect to 30430 as JDBC port
