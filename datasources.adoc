@@ -77,6 +77,28 @@ datasources:
         value: jdbc:postgresql://database/postgres
 ----
 
+or 
+[source, yaml]
+.A sample configuration using secrets
+----
+datasources:
+  - name: sampledb
+    type: postgresql
+    properties:
+      - name: username
+        valueFrom:
+          secretKeyRef:
+            name: sampledb-secret
+            key: username
+      - name: password
+        valueFrom:
+          secretKeyRef:
+            name: sampledb-secret
+            key: password
+      - name: jdbc-url
+        value: jdbc:postgresql://database/postgres
+----
+
 NOTE: where {NAME} denotes the custom name given by the user, that defines the `server` in the VDB's DDL. For example, `CREATE SERVER sampledb FOREIGN DATA WRAPPER postgresql` in your DDL where names match EXACTLY to above.
 
 You define many more properties to further tune the JDBC translator and schema import behavior. Please check Teiid translator documentation.
