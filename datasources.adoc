@@ -16,6 +16,8 @@ NOTE: When defining a environment property, characters like `.` are not allowed,
 
 NOTE: If any configured property in a ConfigMap or Secret is missing, the Operator will not start the build until such configuration value is supplied. Also if the configuration changes after the service is running, the service will be automatically redeployed with new values.
 
+NOTE: All the data sources below in addition to what is defined here support "importer.xxxxx" properties are defined on their translator page for further customization. Pleas refer to that documentation on available properties and their possible values and descriptions.
+
 == Configuring Relational Database [[config-jdbc]]
 For configuring the translator name in VDB, the follwing translators are supported
 
@@ -51,16 +53,33 @@ For configuring the relational database like Oracle, MS-SQLServer, PostgreSQL et
 |===
 |Property Name |Description |Required|Default value
 
-|SPRING_DATASOURCE_{NAME}_JDBCURL | URL For the connection | Yes| n/a
-|SPRING_DATASOURCE_{NAME}_USERNAME| User Name| Yes | n/a
-|SPRING_DATASOURCE_{NAME}_PASSWORD| Password | Yes | n/a
-|SPRING_DATASOURCE_{NAME}_DRIVER_CLASS_NAME| Driver Name | No |n/a
-|SPRING_DATASOURCE_{NAME}_IMPORTER_SCHEMA_NAME| Schema Name for import| Yes |n/a
+|jdbc-url | URL For the connection | Yes| n/a
+|username| User Name| Yes | n/a
+|Pasword | Yes | n/a | n/a
+|driver-class-name| Driver Name | No | n/a
+|importer.schemaName| Schema Name for import| Yes |n/a
 |===
 
-NOTE: where {NAME} denotes the custom name given by the user in UPPER case, that defines the `server` in the VDB's DDL.
+A sample configuration showing the properties for a sample `postgresql` database
 
-You define many more properties to further tune the JDBC translator and schema import behavior. Please check Teiid documentation.
+[source, yaml]
+.A sample configuration
+----
+datasources:
+  - name: sampledb
+    type: postgresql
+    properties:
+      - name: username
+        value: postgres
+      - name: password
+        value: postgres
+      - name: jdbc-url
+        value: jdbc:postgresql://database/postgres
+----
+
+NOTE: where {NAME} denotes the custom name given by the user, that defines the `server` in the VDB's DDL. For example, `CREATE SERVER sampledb FOREIGN DATA WRAPPER postgresql` in your DDL where names match EXACTLY to above.
+
+You define many more properties to further tune the JDBC translator and schema import behavior. Please check Teiid translator documentation.
 
 The user is also required to provide a maven dependency for JDBC driver class for the above data source in `spec/dependencies` line in the CR. It is expected that the maven repository is *reachable* by the Operator. If in case the resource is not available in the public/private maven repository then there are other options to solve the issue. Look at section "Attach Private Libraries".
 
@@ -73,15 +92,32 @@ For configuring the MongoDB database the following properties are needed
 [Attributes]
 |===
 |Property Name |Description |Required|Default value
-|SPRING_TEIID_DATA_MONGODB_{NAME}_REMOTE_SERVER_LIST | List of MongoDb servers ex:(localhost:27012) | Yes | n/a
-|SPRING_TEIID_DATA_MONGODB_{NAME}_USER | User Name | Yes | n/a
-|SPRING_TEIID_DATA_MONGODB_{NAME}_PASSWORD | Password | Yes | n/a
-|SPRING_TEIID_DATA_MONGODB_{NAME}_DATABASE | Database name to connect to | Yes | n/a
-|SPRING_TEIID_DATA_MONGODB_{NAME}_AUTH_DATABASE | Database name for authorization | No | n/a
-|SPRING_TEIID_DATA_MONGODB_{NAME}_SSL | Use SSL Connection | No | n/a
+|remoteServerList | List of MongoDb servers ex:(localhost:27012) | Yes | n/a
+|user| User Name | Yes | n/a
+|password | Password | Yes | n/a
+|database | Database name to connect to | Yes | n/a
+|authDatabase | Database name for authorization | No | n/a
+|ssl | Use SSL Connection | No | n/a
 |===
 
 User does not need to add any dependencies. The currently supported version is version 3 of the MongoDB.
+
+[source, yaml]
+.A sample configuration
+----
+datasources:
+  - name: sampledb
+    type: mongodb
+    properties:
+      - name: user
+        value: user
+      - name: password
+        value: pass
+      - name: remoteServerList
+        value: localhost:27012
+      - name: database
+        value: test
+----
 
 == [[config-s3]]Configuring Amazon S3 as Source
 The translator name to use in the VDB's DDL is _amazon-s3_ with its `Server` definition.
@@ -91,17 +127,34 @@ For configuring the Amazon S3 the following properties are needed
 [Attributes]
 |===
 |Property Name |Description |Required|Default value
-|SPRING_TEIID_DATA_AMAZON_S3_{NAME}_REGION | S3 region ex: us-east-2 | Yes | n/a
-|SPRING_TEIID_DATA_AMAZON-S3_{NAME}_BUCKET | Bucket Name | Yes | n/a
-|SPRING_TEIID_DATA_AMAZON_S3_{NAME}_ACCESSKEY | Access Key | Yes | n/a
-|SPRING_TEIID_DATA_AMAZON_S3_{NAME}_SECRETKEY | SECRETKEY | Yes | n/a
+|region | S3 region ex: us-east-2 | Yes | n/a
+|bucket | Bucket Name | Yes | n/a
+|accesskey| Access Key | Yes | n/a
+|secretkey| Secret key | Yes | n/a
 |===
 
-When Amazon-S3 is setup, one will create a bucket and will also can find out the the access-key and secret-key.
+When Amazon-S3 is setup, one will need to create a bucket and will also can find out the the access-key and secret-key for access from AWS website before configuration for the VDB. User does not need to add any dependencies for this.
 
-User does not need to add any dependencies.
+[source, yaml]
+.A sample configuration
+----
+datasources:
+  - name: sampledb
+    type: amazon-s3
+    properties:
+      - name: region
+        value: us-east-2
+      - name: bucket
+        value: mybucket
+      - name: accesskey
+        value: xxxxxxxx
+      - name: secretkey
+        value: xxxxxx
+----
 
-== [[config-ispn]]Configuring Infinispan as source
+
+
+== [[config-ispn]] Configuring Infinispan as source
 The translator name to use in the VDB's DDL is _infinispan-hotrod_ with its `Server` definition.
 
 For configuring the Infinispan the following properties are needed
@@ -109,16 +162,34 @@ For configuring the Infinispan the following properties are needed
 [Attributes]
 |===
 |Property Name |Description |Required|Default value
-|SPRING_TEIID_DATA_INFINISPAN_{NAME}_URL | URL to connect to Infinispan | Yes | n/a
-|SPRING_TEIID_DATA_INFINISPAN_{NAME}_USERNAME | User Name| Yes | n/a
-|SPRING_TEIID_DATA_INFINISPAN_{NAME}_PASSWORD | Password | Yes | n/a
-|SPRING_TEIID_DATA_INFINISPAN_{NAME}_CACHENAME | default cache name | No | n/a
-|SPRING_TEIID_DATA_INFINISPAN_{NAME}_AUTHENTICATION_REALM | Auth Realm | No | n/a
-|SPRING_TEIID_DATA_INFINISPAN_{NAME}_AUTHENTICATION_SERVER_NAME | Auth Server | No | n/a
+|url | URL to connect to Infinispan | Yes | n/a
+|username | User Name| Yes | n/a
+|password | Password | Yes | n/a
+|cacheName| default cache name | No | n/a
+|authenticationRealm| Auth Realm | No | n/a
+|authenticationServerName | Auth Server | No | n/a
 
 |===
 
-User does not need to add any dependencies.
+User does not need to add any dependencies, as the required client libraries are already provided.
+
+[source, yaml]
+.A sample configuration
+----
+datasources:
+  - name: sampledb
+    type: infinispan-hotrod
+    properties:
+      - name: url
+        value: localhost:11222
+      - name: user
+        value: user
+      - name: password
+        value: pass
+      - name: cacheName
+        value: test
+----
+
 
 == Configuring Salesforce [[config-sf]]
 The translator name to use in the VDB's DDL is _salesforce_ with its `Server` definition.
@@ -129,23 +200,77 @@ For connecting to Salesforce and importing/querying all `SObject`, the user fist
 [Attributes]
 |===
 |Property Name |Description |Required|Default value
-|SPRING_TEIID_DATA_SALESFORCE_{NAME}_USER_NAME | User for salesforce.com | Yes | n/a
-|SPRING_TEIID_DATA_SALESFORCE_{NAME}_PASSWORD | Password for salesforce.com| Yes | n/a
-|SPRING_TEIID_DATA_SALESFORCE_{NAME}_CLIENT_ID | ClientId from connected app | Yes | n/a
-|SPRING_TEIID_DATA_SALESFORCE_{NAME}_CLIENT_SECRET | clientSecret from connected app | No | n/a
+|url| URL of the salesforce|No|https://login.salesforce.com/services/Soap/u/45.0
+|userName | User for salesforce.com | Yes | n/a
+|password | Password for salesforce.com| Yes | n/a
+|clientId | ClientId from connected app | Yes | n/a
+|clientSecret | clientSecret from connected app | No | n/a
+|refreshToken | Refresh Token | No |n/a
 |===
 
-NOTE: if user does not want to connect using the `username` and `password`, then the module also supports using the `refreshToken`. So for above you can provide `SPRING_TEIID_DATA_SALESFORCE_{NAME}_REFRESH_TOKEN` property and remove username and password properties. Obtaining refresh token is beyond scope of this document.
+NOTE: if user does not want to connect using the `username` and `password`, then the module also supports using the `refreshToken`. So for above you can provide `refreshToken` property and remove username and password properties. Documenting obtaining of the `refresh token` from is beyond scope of this document.
+
+No further dependencies from user is required for this.The below showing simple user name and password based login.
+
+[source, yaml]
+.A sample configuration
+----
+datasources:
+  - name: sampledb
+    type: salesforce
+    properties:
+      - name: userName
+        value: user
+      - name: password
+        value: pass
+----
+
+`clientId` and `clientSecret` can be obtained from Salesforce when you create your Salesforce application.
 
 == Configuring OData Based Source [[config-odata]]
 The translator name to use in the VDB's DDL is _odata_ with its `Server` definition for any OData V2 services. For OData V4 service use _odata4_
 
 As per the connection underneath, follow the same properties as <<config-rest, REST based connection>>
 
+The below configuration showing `openid_connect` security type with a OData service
+[source, yaml]
+.A sample configuration
+----
+datasources:
+  - name: sampledb
+    type: odata4
+    properties:
+      - name: endpoint
+        value: https://dv-customer-myproject.apps-crc.testing/odata/accounts/customer
+      - name: securityType
+        value: openid-connect
+      - name: clientId
+        value: dv
+      - name: clientSecret
+        value: xxxxxxxxxxx
+      - name: authorizeUrl
+        value: https://keycloak-myproject.apps-crc.testing/auth/realms/master/protocol/openid-connect/auth
+      - name: accessTokenUrl
+        value: https://keycloak-myproject.apps-crc.testing/auth/realms/master/protocol/openid-connect/token        
+----
+
 == Configuring SAP Gateway Based Source [[config-sap]]
 The translator name to use in the VDB's DDL is _sap-gateway_ with its `Server` definition. This uses OData V2 translator underneath to connect to SAP Gateway. Only _Http Basic_ auth has been verified.
 
 As per the connection underneath, follow the same properties as <<config-rest, REST based connection>>
+
+[source, yaml]
+.A sample configuration
+----
+datasources:
+  - name: sampledb
+    type: sap-gateway
+    properties:
+      - name: userName
+        value: user
+      - name: password
+        value: pass
+----
 
 == Configuring OpenAPI Based Source [[config-openapi]]
 The translator name to use in the VDB's DDL is _openapi_ with its `Server` definition. When this translator is used, the source will look for endpoint `/openapi` files and build the source model based on it. However if the API document endpoint is defined as something else, one could configure that in the VDB's DDL on schema statement as
@@ -156,9 +281,21 @@ CREATE SCHEMA sourceModel SERVER oService OPTIONS ("importer.metadataUrl" '/swag
 
 alternatively, one can define a ENVIRONMENT property instead for the same
 
+[source, yaml]
+.A sample configuration
 ----
-SPRING_TEIID_REST_OSERVICE_IMPORTER_METADATAURL=/swagger.json
+datasources:
+  - name: sampledb
+    type: openapi
+    properties:
+      - name: userName
+        value: user
+      - name: password
+        value: pass
+      - name: importer.metadataUrl
+        value: /swagger.json
 ----
+
 
 If the API is secured, security aspects of the service are not understood automatically, only the API document and its responses are understood by the translator. Those should be defined using REST properties below
 
@@ -172,32 +309,32 @@ The REST API based connection uses the following properties
 [Attributes]
 |===
 |Property Name |Description |Required|Default value
-|SPRING_TEIID_REST_{NAME}_ENDPOINT | Endpoint for the service | Yes | n/a
-|SPRING_TEIID_REST_{NAME}_SECURITY_TYPE | Security type used. Available options are _http-basic_, _openid-connect_ or empty | No | no security
+| endpoint | Endpoint for the service | Yes | n/a
+|securityType | Security type used. Available options are _http-basic_, _openid-connect_ or empty | No | no security
 |===
 
 if the _security type_ is defined as _http_basic_ the following properties are needed
 [Attributes]
 |===
 |Property Name |Description |Required|Default value
-|SPRING_TEIID_REST_{NAME}_USER_NAME | User Name | Yes | n/a
-|SPRING_TEIID_REST_{NAME}_PASSWORD | Password | Yes | n/a
+|userName | User Name | Yes | n/a
+|password | Password | Yes | n/a
 |===
 
 if the _security type_ is defined as _openid-connect_ the following properties are needed
 [Attributes]
 |===
 |Property Name |Description |Required|Default value
-|SPRING_TEIID_REST_{NAME}_USER_NAME | User Name | Yes | n/a
-|SPRING_TEIID_REST_{NAME}_PASSWORD | Password | Yes | n/a
-|SPRING_TEIID_REST_{NAME}_CLIENT_ID | ClientId from connected app | Yes | n/a
-|SPRING_TEIID_REST_{NAME}_CLIENT_SECRET | clientSecret from connected app | Yes | n/a
-|SPRING_TEIID_REST_{NAME}_AUTHORIZE_URL | clientSecret from connected app | Yes | n/a
-|SPRING_TEIID_REST_{NAME}_ACCESS_TOKEN_URL | clientSecret from connected app | Yes | n/a
-|SPRING_TEIID_REST_{NAME}_SCOPE | clientSecret from connected app | No | n/a
+|userName | User Name | Yes | n/a
+|password | Password | Yes | n/a
+|clientId | ClientId from connected app | Yes | n/a
+|clientSecret | clientSecret from connected app | Yes | n/a
+|authorizeUrl | clientSecret from connected app | Yes | n/a
+|accessTokenUrl | clientSecret from connected app | Yes | n/a
+|scope | clientSecret from connected app | No | n/a
 |===
 
-Alternatively, for the _openid-connect_ you can also supply 'SPRING_TEIID_REST_{NAME}_REFRESH_TOKEN' property and avoid the `USER_NAME` and `PASSWORD` properties, however describing on how to obtaining a refresh token is beyond this document as it is different for different services.
+Alternatively, for the _openid-connect_ you can also supply 'refreshToken' property and avoid the `userName` and `password` properties, however describing on how to obtaining a refresh token is beyond this document as it is different for different services.
 
 == Configuring Google Sheets as Source [[config-googlesheets]]
 The translator name to use in the VDB's DDL is _google-spreadsheet_ with its `Server` definition. This will represent each _Sheet_ on a google spread sheet as a _table_ in Teiid.
@@ -207,9 +344,9 @@ Before you can access the Google Spreadsheet using Teiid, one needs to provide O
 [Attributes]
 |===
 |Property Name |Description |Required|Default value
-|SPRING_TEIID_DATA_GOOGLE_SHEETS_{NAME}_SPREAD_SHEET_NAME |Name of the Google Spreadsheet | Yes | n/a
-|SPRING_TEIID_DATA_GOOGLE_SHEETS_{NAME}_SPREAD_SHEET_ID |Spread Sheet Id | Yes | Sheet Id, Look in URL of the Spreadsheet. For more info see https://developers.google.com/sheets/api/guides/concepts#spreadsheet_id
-|SPRING_TEIID_DATA_GOOGLE_SHEETS_{NAME}_CLIENT_ID |OAuth2 client id for google sheets | Yes | n/a
-|SPRING_TEIID_DATA_GOOGLE_SHEETS_{NAME}_CLIENT_SECRET |OAuth2 client secret for google sheets | Yes | n/a
-|SPRING_TEIID_DATA_GOOGLE_SHEETS_{NAME}_REFRESH_TOKEN |OAuth2 refreshToken for google sheets | Yes | n/a
+|spreadSheetName |Name of the Google Spreadsheet | Yes | n/a
+|spreadSheetId |Spread Sheet Id | Yes | Sheet Id, Look in URL of the Spreadsheet. For more info see https://developers.google.com/sheets/api/guides/concepts#spreadsheet_id
+|clientId |OAuth2 client id for google sheets | Yes | n/a
+|clientSecret |OAuth2 client secret for google sheets | Yes | n/a
+|refreshToken |OAuth2 refreshToken for google sheets | Yes | n/a
 |===
