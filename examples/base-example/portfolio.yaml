@@ -1,0 +1,77 @@
+apiVersion: teiid.io/v1alpha1
+kind: VirtualDatabase
+metadata:
+  name: portfolio
+spec:
+  replicas: 1
+  datasources:
+    - name: accountdb
+      type: postgresql
+      properties:
+        - name: username
+          value: user
+        - name: password
+          value: password
+        - name: jdbc-url
+          value: jdbc:postgresql://accounts/accounts
+    - name: quotesvc
+      type: rest
+      properties:
+        - name: endpoint
+          value: https://finnhub.io/api/v1/
+  build:
+    source:
+      ddl: |
+        CREATE DATABASE Portfolio OPTIONS (ANNOTATION 'The Portfolio VDB');
+        USE DATABASE Portfolio;
+
+        --############ translators ############
+        CREATE FOREIGN DATA WRAPPER rest;
+        CREATE FOREIGN DATA WRAPPER postgresql;
+
+        --############ Servers ############
+        CREATE SERVER "accountdb" FOREIGN DATA WRAPPER postgresql;
+        CREATE SERVER "quotesvc" FOREIGN DATA WRAPPER rest;
+
+        --############ Schemas ############
+        CREATE SCHEMA marketdata SERVER "quotesvc";
+        CREATE SCHEMA accounts SERVER "accountdb";
+
+        CREATE VIRTUAL SCHEMA Portfolio;
+
+        --############ Schema:marketdata ############
+        SET SCHEMA marketdata;
+
+        IMPORT FROM SERVER "quotesvc" INTO marketdata;
+
+        --############ Schema:accounts ############
+        SET SCHEMA accounts;
+
+        IMPORT FROM SERVER "accountdb" INTO accounts OPTIONS (
+                "importer.useFullSchemaName" 'false',
+                "importer.tableTypes" 'TABLE,VIEW');
+
+        --############ Schema:Portfolio ############
+        SET SCHEMA Portfolio;
+                  
+        CREATE VIEW StockPrice (
+            symbol string PRIMARY KEY,
+            price double,
+            CONSTRAINT ACS ACCESSPATTERN (symbol)
+        ) AS  
+            SELECT p.symbol, y.price
+            FROM accounts.PRODUCT as p, TABLE(call invokeHttp(action=>'GET', endpoint=>QUERYSTRING('quote', p.symbol as "symbol", 'bq0bisvrh5rddd65fs70' as "token"), headers=>jsonObject('application/json' as "Content-Type"))) as x, 
+            JSONTABLE(JSONPARSE(x.result,true), '$' COLUMNS price double path '@.c') as y
+
+        CREATE VIEW AccountValues (
+            LastName string PRIMARY KEY,
+            FirstName string,
+            StockValue double
+        ) AS
+            SELECT c.lastname as LastName, c.firstname as FirstName, sum((h.shares_count*sp.price)) as StockValue 
+            FROM Customer c JOIN Account a on c.SSN=a.SSN 
+            JOIN Holdings h on a.account_id = h.account_id 
+            JOIN product p on h.product_id=p.id 
+            JOIN StockPrice sp on sp.symbol = p.symbol
+            WHERE a.type='Active'
+            GROUP BY c.lastname, c.firstname;

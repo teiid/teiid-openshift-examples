@@ -1,0 +1,180 @@
+:toc:
+# Keycloak Integration with Teiid for Security
+
+## Goal
+
+This example will demonstrate the ability of Teiid to integrate with Keycloak to be used as Identity Provider. Using the Keycloak, all of the Teiid's client access can be secured.
+
+Time: 30 mins to 1hr
+Skill: Beginner
+Prerequisites: Finish the "Hello World" example.
+
+## Install of Keycloak
+
+For this example to work we need following software modules be available. * Login to OpenShift console using the credentials, and from the OperatorHub menu item make sure 
+
+* Keycloak Operator is installed.
+
+if not install this. If you already have Keycloak instance installed in a different namespace, one can also use that for configuring the security.
+
+## Example Explanation
+
+The "Hello World" example leaves the access to the Virtual Database wide open to be accessed by anyone, which is major security flaw. This data may represent sensitive information that needs to be secured. In this example, we will go through configuration of the Keycloak to enable this security layer.
+
+## Setting up Keycloak 
+
+### Setup an Keycloak instance
+
+If you installed the Keycloak Operator above in your namespace, then once the Operator is installed, one need to create a instance of "Keycloak". You can create one by executing a sample CR in this example
+
+[source, bash]
+----
+oc create -f keycloak.yaml
+----
+
+NOTE: It is recommended that Keycloak is installed in separate namespace and used with different applications rather than installing for a specific application.
+
+### Setup Keycloak Realm
+
+Once the Keycloak is up and running it is good practice to create a new realm such that all your applications will be using this realm and will not conflict with other applications that are supported. One can create a realm by executing the below script.
+
+[source, bash]
+----
+oc create -f realm.yaml
+----
+
+The above execution will create a realm with name `Teiid` in the keycloak instance, which will be used for this example. If you need use a different name, please edit the `realm.yaml` file accordingly.
+
+### Setup Keycloak Client
+
+Once the realm is setup, then we need to create a client that represents the Teiid application created in the previous "Hello World" example. A Keyclock client represents the end application that is Keycloak is being used to secure. The follwing Custom Resource can be used to create the Keyclock client, one can customize the name and other properties before creating the client.
+
+[source, yaml]
+----
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakClient
+metadata:
+  name: portfolio
+  labels:
+    app: sso
+spec:
+  realmSelector:
+    matchLabels:
+      app: sso
+  client:
+    redirectUris:
+      - https://portfolio-demo.apps-crc.testing/*   <-- CHANGE THIS
+    clientId: portfolio
+    secret: changeit
+    clientAuthenticatorType: client-secret
+    publicClient: true
+    directAccessGrantsEnabled: true
+----
+
+An example script is provided, you can edit and then execute below to create a keyclock client that represents the this application
+
+To add the `redirectUri`, we need to find URL for the Teiid Virtual Database that was deployed in the previous example and configure in this client where `<-- CHANGE THIS` is shown. For that execute
+
+[source,bash]
+----
+oc get vdb portfolio -o yaml | grep route
+----
+
+Should give a result like 
+
+[source,bash]
+----
+route: https://portfolio-demo.apps-crc.testing/odata
+----
+
+Take the host portion of the URL and update the Client CR above. Save. Create Keycloak client by executing below
+
+[source, bash]
+----
+oc create -f client.yaml
+----
+
+NOTE: The labels in above needs be matched with configured value in the `realm` for the client to match up. The label `sso` is used as example
+
+### Setup Keycloak Test User
+
+Now lets create Keycloak user that we can use in the Teiid application as end user. For that create this script
+
+[source,yaml]
+----
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakUser
+metadata:
+  name: dv-test-user
+  labels:
+    app: sso
+spec:
+  user:
+    username: doej
+    firstName: John
+    lastName: Doe
+    email: user@example.com
+    enabled: true
+    emailVerified: true
+    credentials:
+      - temporary: false
+        type: password
+        value: changeit
+  realmSelector:
+    matchLabels:
+      app: sso
+----
+
+There is already a file provided with above, you can execute following to create above user
+
+[source,bash]
+----
+oc create -f user.yaml
+----
+
+We have configured the Keycloak for use with Teiid.
+
+## Setting up Virtual Database with configured Keycloak
+
+In the previous example, we have configured a Virtual Database using Teiid Operator, above we have configured a Keycloak with a Realm, and a Client that represents this Virtual Database and a test User. Now, the Virtual Database needs to be modified to use with the configured Keycloak. First we need to remove the non secure version of it by executing
+
+[source, bash]
+----
+oc delete vdb portfolio
+----
+
+then, add the following ENV properties to the Portfolio Virtual Database's CR
+
+[source,bash]
+----
+env:
+  - name: KEYCLOAK_REALM
+    value: dv
+  - name: KEYCLOAK_RESOURCE
+    value: portfolio
+  - name: KEYCLOAK_AUTH_SERVER_URL
+    value: http://keycloak-myproject.192.168.99.100.nip.io/auth <-- CHANGE THIS
+  - name: KEYCLOAK_DISABLE_TRUST_MANAGER
+    value: "true"
+----
+
+To find the above `KEYCLOAK_AUTH_SERVER_URL`, execute the following 
+
+[source,bash]
+----
+oc get Keycloak dv-keycloak -o yaml | grep internalURL:
+----
+
+should see a result like 
+
+[source,bash]
+----
+internalURL: https://keycloak-demo.apps-crc.testing
+----
+
+which should taken and *ADD `/auth`* to it. Then update in the CR. For this example the CR for Portfolio is provided in `portfolio.yaml`, edit this file and update the value there. Once finished execute
+
+[source,bash]
+----
+oc create -f portfolio.yaml
+----

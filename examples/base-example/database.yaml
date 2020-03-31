@@ -1,0 +1,18 @@
+apiVersion: postgresql.dev4devs.com/v1alpha1
+kind: Database
+metadata:
+  name: accounts
+spec:
+  databaseCpu: 30m
+  databaseCpuLimit: 60m
+  databaseMemoryLimit: 512Mi
+  databaseMemoryRequest: 128Mi
+  databaseNameKeyEnvVar: POSTGRESQL_DATABASE
+  databaseName: accounts
+  databaseUserKeyEnvVar: POSTGRESQL_USER
+  databaseUser: user
+  databasePasswordKeyEnvVar: POSTGRESQL_PASSWORD
+  databasePassword: password
+  databaseStorageRequest: 1Gi
+  image: centos/postgresql-96-centos7
+  size: 1

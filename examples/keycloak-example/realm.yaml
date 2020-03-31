@@ -1,0 +1,15 @@
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakRealm
+metadata:
+  name: dv
+  labels:
+    app: sso
+spec:
+  realm:
+    id: dv
+    realm: dv
+    enabled: true
+    displayName: Data Virtualization Realm
+  instanceSelector:
+    matchLabels:
+      app: sso
