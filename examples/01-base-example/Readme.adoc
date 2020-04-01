@@ -195,7 +195,7 @@ A PHYSICAL schema represents the data elements in FOREIGN source, thus they refe
 
 ### Importing of Metadata
 
-We have defined the SCHEMA in previous step and associated with SERVER, however by default Teiid does not know underlying schema in those sources, the metdata for those schema's can be explicitly imported by add following. One can also give full metadata (Tables, Procedures etc) here which is highly recommended, however for this example purpose, we will dynamically import that information.
+We have defined the SCHEMA in previous step and associated with SERVER, however by default Teiid does not know underlying schema in those sources, the metdata for those schema's can be explicitly imported by adding the following. One can also give full metadata (Tables, Procedures etc) here which is highly recommended, however for this example purpose, we will dynamically import that information.
 
 [source, sql]
 ----
@@ -210,7 +210,7 @@ IMPORT FROM SERVER "accountdb" INTO accounts OPTIONS (
 
 ### Defining the VIRTUAL Schema
 
-This is where data abstraction layer of the Virtual Database is defind. Here one can define a schema using the elements of the metadata that is defined in the PHYSICAL schemas from above. The usr can define any number of VIRTUAL schema layers as they want, here we are showing a single layer.
+This is where data abstraction layer of the Virtual Database is defind. Here one can define a schema using the elements of the metadata that is defined in the PHYSICAL schemas from above. The user can define any number of VIRTUAL schema layers as they want, here we are showing a single layer.
 
 [source, sql]
 ----
@@ -240,7 +240,7 @@ CREATE VIEW AccountValues (
 
 We setup two virtual VIEWS above, `StockPrice` gets stock price from the `quotessvc`, and the `AccountValues` view using `StockPrice` view builds the account value of the customers in the `AccountsDB` database.
 
-This is the value proposition of the Data Virtualization is the end user is only sees `AccoutValue` and `StockPrice` view, they do not know how this data is integrated together.
+This value proposition of the Data Virtualization is the end user is only sees `AccoutValue` and `StockPrice` view, they do not know how this data is integrated together.
 
 ### Full Example CR
 
