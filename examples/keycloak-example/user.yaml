@@ -1,12 +1,12 @@
 apiVersion: keycloak.org/v1alpha1
 kind: KeycloakUser
 metadata:
-  name: doej
+  name: john
   labels:
     app: sso
 spec:
   user:
-    username: doej
+    username: john
     firstName: John
     lastName: Doe
     email: user@example.com

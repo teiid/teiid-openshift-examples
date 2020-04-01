@@ -10,7 +10,7 @@ spec:
     - name: KEYCLOAK_RESOURCE
       value: portfolio
     - name: KEYCLOAK_AUTH_SERVER_URL
-      value: https://keycloak-demo.apps-crc.testing/auth
+      value: https://keycloak-user3.apps.cluster-enable-e4db.enable-e4db.example.opentlc.com/auth
     - name: KEYCLOAK_DISABLE_TRUST_MANAGER
       value: "true"
   datasources:
@@ -20,7 +20,7 @@ spec:
         - name: username
           value: user
         - name: password
-          value: password
+          value: changeit
         - name: jdbc-url
           value: jdbc:postgresql://accounts/accounts
     - name: quotesvc
@@ -84,3 +84,18 @@ spec:
             JOIN StockPrice sp on sp.symbol = p.symbol
             WHERE a.type='Active'
             GROUP BY c.lastname, c.firstname;
+
+        CREATE VIEW CustomerHoldings (
+            LastName string PRIMARY KEY,
+            FirstName string,
+            symbol string,
+            ShareCount integer,
+            StockValue double,
+            CONSTRAINT ACS ACCESSPATTERN (LastName)
+        ) AS 
+            SELECT c.lastname as LastName, c.firstname as FirstName, p.symbol as symbol, h.shares_count as ShareCount, (h.shares_count*sp.price) as StockValue 
+            FROM Customer c JOIN Account a on c.SSN=a.SSN 
+            JOIN Holdings h on a.account_id = h.account_id 
+            JOIN product p on h.product_id=p.id 
+            JOIN StockPrice sp on sp.symbol = p.symbol
+            WHERE a.type='Active';

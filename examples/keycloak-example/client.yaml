@@ -10,7 +10,7 @@ spec:
       app: sso
   client:
     redirectUris:
-      - https://portfolio-demo.apps-crc.testing/*
+      - https://portfolio-user3.apps.cluster-enable-e4db.enable-e4db.example.opentlc.com/*
     clientId: portfolio
     secret: changeit
     clientAuthenticatorType: client-secret
