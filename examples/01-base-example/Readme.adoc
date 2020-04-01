@@ -161,7 +161,7 @@ USE DATABASE Portfolio;
 
 #### Translator definition
 
-In order for Teiid is get work with data it receives from external sources which can any format, it needs adapters that are called "Translators" or "Data Wrappers" to convert the data into known format. Below snippet defines data wrappers for both the sources in this example. Here `rest` and `postgresql` are the data wrappers. Teiid supports many different Data Wrappers different data sources.
+In order for Teiid to get work with data it receives from external sources which can any format, it needs adapters that are called "Translators" or "Data Wrappers" to convert the data into known format. Below snippet defines data wrappers for both the sources in this example. Here `rest` and `postgresql` are the data wrappers. Teiid supports many different Data Wrappers different data sources.
 
 [source, sql]
 ----
@@ -171,7 +171,7 @@ CREATE FOREIGN DATA WRAPPER postgresql;
 
 #### External Source definitions
 
-In order for Teiid is get data from external sources, it needs connections to those external sources, in previous sections we defined the configuration for these data sources, now here we are tieing that configuration with Virtual Database semantics called "SERVER" which simply represents a connection. This connection is also will be marked to use a DATA WRAPPER.
+In order for Teiid to get data from external sources, it needs connections to those external sources, in previous sections we defined the configuration for these data sources, now here we are tieing that configuration with Virtual Database semantics called "SERVER" which simply represents a connection. This connection is also will be marked to use a DATA WRAPPER.
 
 [source, sql]
 ----
