@@ -1,0 +1,162 @@
+:toc:
+# Adding Role Based Permissions for Data Access
+
+## Goal
+
+This example will demonstrate the ability of Teiid to integrate with Keycloak and use Roles defined Keycloak to manage the access to the data that is being exposed to the user.
+
+Time: 30 mins to 1hr
+Skill: Intermediate
+Prerequisites: Finish the "Secure Access to Teiid with Keycloak" example.
+
+## Example Explanation
+
+The "Secure Access to Teiid with Keycloak" example took us through configuring the Keycloak as Identity Provider and secured the login access to all the interfaces like JDBC, ODBC, OData etc. However, how about restricting the user to access only certain data. Like a "Manager" might have more permissions compared to that of a "employee", they both probably need different set rules as to who can query which information. The advantage with Teiid is, an organization can control this "security policy" at a enterprise level across all the data sources they own in a single place.
+
+In this example, we will add another user "Bob" to Keycloak, then we will give them two different roles in the Keycloak, and we will modify the `portfolio` example, to restrict access to the data that both "John" and "Bob" can access. We will give access such that "John" can only look at his account as portfolio account holder, where as "Bob" can access any data as he is a broker in the financial firm.
+
+Since Teiid acts like relational database and its RBAC constructs are defined through DDL, we will use a set of "GRANT" or "REVOKE" statements to achieve this.
+
+## Configure Roles in Keycloak
+
+NOTE: The feature to add a `role` using CR is on roadmap, until then this need to accomplished using the UI.
+
+To work with this example, we need to create couple roles in Keycloak using the Administrative UI. Using the OpenShift console find the Route for the Keycloak, and open the page to Administrative console in a separate tab. 
+
+In order to login into Administrative console, please find credentials in the secret with name `credential-dv-keycloak`. Using the OpenShift console, use them to log into the Keycloak Administrative UI. 
+
+* Then switch to "DV" realm.
+* Click on "Roles" in the left side menu item and then on right side window find "Add Role" button near top right and click it.
+* Create a role called "account-owner"
+* Create another role called "broker"
+
+## Setting up a new user in Keycloak 
+
+Since we are adding users with roles, let delete previous user "john" and recreate, so that this user can be recreated with correct roles
+
+[source, bash]
+----
+oc delete KeycloakUser john
+----
+
+Let us create the both users with correct roles now
+
+[source, bash]
+----
+oc create -f john.yaml
+oc create -f bob.yaml
+----
+
+You can verify in the Keycloak admin console that Bob has the "broker" role and John has "account-owner"
+
+## Define Permissions and map to Roles in Virtual Database
+
+We can now define the DDL to create permissions and allocate them to the roles we created above.
+
+First we need to create DDL constructs of the roles in in Keycloak, these are just local representation of the Roles from the Keycloak. Note that you can assign multiple FOREIGN ROLES to a given Teiid role below. For simplicity we used one to one mapping. Also, you can use any names that are descriptive for Teiid Role and map to Keycloak based role.
+
+[source, SQL]
+----
+CREATE ROLE "broker" WITH FOREIGN ROLE "broker";
+CREATE ROLE "account-owner" WITH FOREIGN ROLE "account-owner";
+CREATE ROLE "all" WITH ANY AUTHENTICATED;
+----
+
+The last role is special one, it says that any one who is authenticated with Keycloak, irrespective of their roles, give them this role in Teiid. The other first two are very specific to what they map to.
+
+Then define the permissions for restriction of access of data. First lets give permissions to check the stock price to all users
+
+[source, SQL]
+----
+GRANT SELECT ON TABLE portfolio.StockPrice TO "all";
+----
+
+Give access to AccountValues and CustomerHoldings tables, to one with "broker" role
+
+[source, SQL]
+----
+GRANT SELECT ON TABLE portfolio.AccountValues TO "broker";
+
+GRANT SELECT ON TABLE portfolio.CustomerHoldings TO "broker";
+----
+
+then, give CustomerHoldings access to "account-owner", but to his own account, and restrict access to others. Note, this is "row" level permission just not at table level.
+
+[source, SQL]
+----
+GRANT SELECT ON TABLE portfolio.CustomerHoldings TO "account-owner";
+
+CREATE POLICY policyViewOwn TO "account-owner" ON portfolio.CustomerHoldings USING (FirstName = user());
+----
+
+## Virtual Database with Data Roles
+
+By incorporating the above into the DDL of the `portfolio` VDB, you can now see complete VDB here xref:portfolio.yaml[portfolio.yaml]
+
+Delete the previous version and deploy the new version of the  portfoilo VDB as below. However, like last example make sure the `KEYCLOAK_AUTH_SERVER_URL` is updated with your value of Keycloak. 
+
+[source, bash]
+----
+- name: KEYCLOAK_AUTH_SERVER_URL
+    value: https://keycloak-user3.apps.cluster-enable-e4db.enable-e4db.example.opentlc.com/auth
+----
+
+[source, bash]
+----
+oc delete vdb portfolio
+oc create -f portfolio.yaml
+----
+
+Execute below to see the status of the VDB deployment
+
+[source,sh]
+----
+oc get vdb portfolio -o yaml | grep phase 
+----
+
+On successfull deployment you will see `phase: Running`, then you are ready for issuing the queries against this database.
+
+## Test 
+
+Use can use same JDBC client that you have used before here to test again
+
+[source,bash]
+----
+oc run -it --restart=Never --attach --rm --image quay.io/asmigala/sqlline:latest sqlline 
+----
+
+Enter the following to connect to the `portfolio` database created as a user 'john' see what can be accessed with this user.
+
+[source,bash]
+----
+sqlline> !connect jdbc:teiid:portfolio@mm://portfolio:31000;
+
+Enter username for jdbc:teiid:portfolio@mm://portfolio:31000;: john
+Enter password for jdbc:teiid:portfolio@mm://portfolio:31000;: changeit
+
+0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From CustomerHoldings WHERE Lastname='Doe'
+
+0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From AccountValues;
+
+0: jdbc:teiid:portfolio@mm://portfolio:31000> !quit
+----
+
+Now, connect with user 'bob' and see the permissions
+
+[source,bash]
+----
+sqlline> !connect jdbc:teiid:portfolio@mm://portfolio:31000;
+
+Enter username for jdbc:teiid:portfolio@mm://portfolio:31000;: bob
+Enter password for jdbc:teiid:portfolio@mm://portfolio:31000;: changeit
+
+0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From CustomerHoldings WHERE Lastname='Smith'
+
+0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From CustomerHoldings WHERE Lastname='Doe'
+
+0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From AccountValues;
+
+0: jdbc:teiid:portfolio@mm://portfolio:31000> !quit
+----
+
+In above, all queries for bob should work

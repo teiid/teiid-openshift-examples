@@ -1,5 +1,5 @@
 :toc:
-# Keycloak Integration with Teiid for Security
+# Secure Access to Teiid with Keycloak
 
 ## Goal
 
@@ -191,3 +191,24 @@ oc create -f portfolio.yaml
 ----
 
 You can follow the same JDBC access as defined in the previous example to expose a port or use OData to access the data. But notice that this time when you login from JDBC/ODATA client you MUST provide the `username` and `password` before you can access the Virtual Database. So, essentially it is secured for access and access permission can be controlled through Keycloak.
+
+## Test
+
+Use can use same JDBC client that you have used before here to test again, this time, however this time the login will not succeed without providing the valid user name `john` and password `changeit`
+
+[source,bash]
+----
+oc run -it --restart=Never --attach --rm --image quay.io/asmigala/sqlline:latest sqlline 
+----
+
+Enter the following to connect to the `portfolio` database created.
+
+[source,bash]
+----
+sqlline> !connect jdbc:teiid:portfolio@mm://portfolio:31000;
+
+Enter username for jdbc:teiid:portfolio@mm://portfolio:31000;: john
+Enter password for jdbc:teiid:portfolio@mm://portfolio:31000;: changeit
+
+0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From CustomerHoldings where lastname='Doe'
+----

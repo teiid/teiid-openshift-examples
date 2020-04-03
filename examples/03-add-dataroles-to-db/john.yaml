@@ -13,7 +13,7 @@ spec:
     enabled: true
     emailVerified: true
     realmRoles:
-      - account-holder
+      - account-owner
     credentials:
       - temporary: false
         type: password

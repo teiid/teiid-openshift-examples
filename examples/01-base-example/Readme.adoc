@@ -381,7 +381,7 @@ Enter the following to connect to the `portfolio` database created.
 ----
 sqlline> !connect jdbc:teiid:portfolio@mm://portfolio:31000;
 
-Enter username for jdbc:teiid:portfolio@mm://portfolio:31000;: john
+Enter username for jdbc:teiid:portfolio@mm://portfolio:31000;: foo
 Enter password for jdbc:teiid:portfolio@mm://portfolio:31000;: ****
 
 0: jdbc:teiid:portfolio@mm://portfolio:31000>
