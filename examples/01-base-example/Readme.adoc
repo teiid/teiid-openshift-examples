@@ -19,7 +19,8 @@ For this example to work we need following software modules be available
 
 * Login to OpenShift console using the credentials, and from the OperatorHub menu item make sure 
     ** Teiid (Data Virtualization) Operator is installed.
-    ** We need this as example database to be used with in this example.
+    ** We need this as example database to be used with in this example. We will install a sample PostgreSQL database and load with sample data.
+    ** A SQL Client to be used for testing the Virtual Database. For this we will use SquirreL SQL Client. 
 
 ## Example Explanation
 
@@ -65,7 +66,7 @@ oc new-app -f postgresql-ephemeral-template.json \
 
 [source, bash]
 ----
-oc get pods 
+oc get pods -l cr=accounts -o jsonpath='{.items[0].metadata.name}'
 ----
 
 Find the pod starting with `accounts-xxxxx` and connect to it by executing
@@ -334,7 +335,7 @@ To deploy the above Virtual Database, execute the following.
 
 [source,sh]
 ----
-oc create -f ./portfolio.yaml
+oc create -f portfolio.yaml
 ----
 
 This deployment process can take 4-5 minutes for very first time, as the Operator builds a base image to use any subsequent deployments. You can test status by issuing following command
@@ -352,24 +353,96 @@ Now that the Virtual database is deployed,there are many different ways to acces
 
 ### Access using JDBC
 
+#### Access from another in cluster client
+
 JDBC connection to this database can be accessed from other services in cluster with out further configuration. The details for the service can be found by issuing 
 
 ----
 oc get service portfolio
 ----
 
-See more details xref:../jdbc.adoc[here]
+You can test this using a test client like below
 
-We found the service, however these services can be only accesses inside the cluster through another application, if you need external access, one needs to create _LoadBancer_ service that will open up an external port that can be accessed outside OpenShift.
+[source,bash]
+----
+oc run -it --restart=Never --attach --rm --image quay.io/asmigala/sqlline:latest sqlline 
+----
 
-Execute below to create 'LoadBalancer' Ingress (Note, depending upon the OpenShift cluster you are working with this may not work, may not have permissions)
+The above will install this image in the cluster, and will open a prompt like below
+
+[source,bash]
+----
+sqlline>
+----
+
+Enter the following to connect to the `portfolio` database created.
+
+[source,bash]
+----
+sqlline> !connect jdbc:teiid:portfolio@mm://portfolio:31000;
+
+Enter username for jdbc:teiid:portfolio@mm://portfolio:31000;: john
+Enter password for jdbc:teiid:portfolio@mm://portfolio:31000;: ****
+
+0: jdbc:teiid:portfolio@mm://portfolio:31000>
+----
+
+You can enter following general commands here to help with tool
+
+[source,bash]
+----
+!dbinfo
+!tables
+!help
+!quit
+----
+
+You can execute any sample queries at this prompt. Look below for for sample queries, in the "Testing with JDBC Client" section below. 
+
+See more details about JDBC xref:../../jdbc.adoc[here]
+
+NOTE: You can skip below sections as they just show different ways of accessing the database.
+
+#### External Access using Load Balancer
+
+This service can be only accesses inside the cluster through another application, if external access is needed, one needs to create _LoadBalancer_ service that will open up an external port that can be accessed outside OpenShift. This is needed for using with any tools that are not deployed on OpenShift.
+
+Execute below to create 'LoadBalancer' Ingress Service.
 
 [source, bash]
 ----
 oc create -f ingress.yaml
 ----
 
-To test externally one can use  http://squirrel-sql.sourceforge.net/[SquirreL] to access the VDB. SquirreL is JDBC client tool, using which you can access any database.
+You can find exposed host and port by executing
+
+[source, bash]
+----
+oc get svc portfolio-ingress -o=jsonpath='{..ingress[0].hostname}'
+----
+
+This will yield a hostname like
+
+----
+A4d3bf5fd1b9311eab2b602474b8b0b4-143190945..example.opentlc.com
+----
+
+NOTE: Depending upon the OpenShift cluster you are working with this may not work, and/or may not have permissions. Also, in OpenShift 4.x this ONLY works if there is external load balancer is configured. 
+
+#### External Access Using Port Forward
+
+In situations where external Load Balancer can not be configured, for testing pusposes you can open local port on your machine using the below command. 
+
+[source,bash]
+----
+oc port-forward $(oc get pods -o=jsonpath='{.items[0].metadata.name}' -l app=portfolio) 31000
+----
+
+when using this method one need to use `localhost` as hostname and `31000` for JDBC port.
+
+### Testing With JDBC Client
+
+To test one can use  http://squirrel-sql.sourceforge.net/[SquirreL] to access the VDB. SquirreL is JDBC client tool, using which you can access any database. This is only suggestion, but you can use any of your favorite JDBC Client tools.
 
 * Download this tool from the link provided, and install using directions http://squirrel-sql.sourceforge.net/#installation[here]
 
@@ -407,7 +480,8 @@ SELECT * FROM STOCKPRICE WHERE symbol = 'IBM';
 SELECT * FROM AccountValues WHERE LastName = 'Dragon';
 ----
 
-### Access using OData
+### Access using OData API
+
 To access using the OData REST API, find route that is created for this service and issue a query as
 
 [source, bash]

@@ -164,7 +164,7 @@ env:
   - name: KEYCLOAK_RESOURCE
     value: portfolio
   - name: KEYCLOAK_AUTH_SERVER_URL
-    value: https://keycloak-user3.apps.cluster-enable-e4db.enable-e4db.example.opentlc.com/auth <-- CHANGE THIS
+    value: https://keycloak-user3.apps.cluster-enable-e4db.enable-e4db.example.opentlc.com/auth <=== ***** CHANGE THIS
   - name: KEYCLOAK_DISABLE_TRUST_MANAGER
     value: "true"
 ----
@@ -190,4 +190,4 @@ which should taken and *ADD `/auth`* to it. Then update in the CR for the vdb `p
 oc create -f portfolio.yaml
 ----
 
-You can follow the same JDBC access as defined in the previous example to expose a port or use OData to access the data.
+You can follow the same JDBC access as defined in the previous example to expose a port or use OData to access the data. But notice that this time when you login from JDBC/ODATA client you MUST provide the `username` and `password` before you can access the Virtual Database. So, essentially it is secured for access and access permission can be controlled through Keycloak.
