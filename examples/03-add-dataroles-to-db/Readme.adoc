@@ -95,10 +95,27 @@ By incorporating the above into the DDL of the `portfolio` VDB, you can now see 
 
 Delete the previous version and deploy the new version of the  portfoilo VDB as below. However, like last example make sure the `KEYCLOAK_AUTH_SERVER_URL` is updated with your value of Keycloak. 
 
+To find the above KEYCLOAK_AUTH_SERVER_URL, execute the following
+
+[source,bash]
+----
+oc get Keycloak dv-keycloak -o yaml | grep internalURL:
+----
+
+should see a result like
+
+[source,bash]
+----
+internalURL: https://keycloak-user40.apps.cluster-enable-5f3a.enable-5f3a.example.opentlc.com
+----
+
+which should taken and ADD /auth to it. Then update in the CR for the vdb portfolio.yaml. For this example the CR for Portfolio is provided in portfolio.yaml, edit this file and update the value there. Once finished execute following to redeploy the VDB to be secured with the Keycloak instance
+
+
 [source, bash]
 ----
 - name: KEYCLOAK_AUTH_SERVER_URL
-    value: https://keycloak-user3.apps.cluster-enable-e4db.enable-e4db.example.opentlc.com/auth
+    value: https://keycloak-user40.apps.cluster-enable-5f3a.enable-5f3a.example.opentlc.com/auth
 ----
 
 [source, bash]
@@ -134,7 +151,7 @@ sqlline> !connect jdbc:teiid:portfolio@mm://portfolio:31000;
 Enter username for jdbc:teiid:portfolio@mm://portfolio:31000;: john
 Enter password for jdbc:teiid:portfolio@mm://portfolio:31000;: changeit
 
-0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From CustomerHoldings WHERE Lastname='Doe'
+0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From CustomerHoldings WHERE Lastname='Doe';
 
 0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From AccountValues;
 
