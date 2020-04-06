@@ -158,6 +158,8 @@ Enter password for jdbc:teiid:portfolio@mm://portfolio:31000;: changeit
 0: jdbc:teiid:portfolio@mm://portfolio:31000> !quit
 ----
 
+In above, first query with CustomerHoldings should show results Lastname = 'Doe' but not for any other name, the second query should fail denying the access.
+
 Now, connect with user 'bob' and see the permissions
 
 [source,bash]
@@ -167,9 +169,9 @@ sqlline> !connect jdbc:teiid:portfolio@mm://portfolio:31000;
 Enter username for jdbc:teiid:portfolio@mm://portfolio:31000;: bob
 Enter password for jdbc:teiid:portfolio@mm://portfolio:31000;: changeit
 
-0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From CustomerHoldings WHERE Lastname='Smith'
+0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From CustomerHoldings WHERE Lastname='Smith';
 
-0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From CustomerHoldings WHERE Lastname='Doe'
+0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From CustomerHoldings WHERE Lastname='Doe';
 
 0: jdbc:teiid:portfolio@mm://portfolio:31000> SELECT * From AccountValues;
 
