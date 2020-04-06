@@ -20,7 +20,7 @@ spec:
         - name: username
           value: user
         - name: password
-          value: password
+          value: changeit
         - name: jdbc-url
           value: jdbc:postgresql://accounts/accounts
     - name: quotesvc
