@@ -22,6 +22,8 @@ For this example to work we need following software modules be available
     ** We need this as example database to be used with in this example. We will install a sample PostgreSQL database and load with sample data.
     ** A SQL Client to be used for testing the Virtual Database. For this we will use SquirreL SQL Client. 
 
+NOTE: Teiid Operator is NOT a cluster wide operator, so it watches single namespace where it is installed. If you need to work in different projects, currently the only option is install this operator in every namespace you want to deploy a Virtual Database.
+
 ## Example Explanation
 
 This is example about building a Customer Portfolio. In this example we have a customer's account information in a PostgreSQL database, where he/she owns multiple positions in various stocks in their portfolio. 
@@ -76,6 +78,8 @@ Find the pod starting with `accounts-xxxxx` and connect to it by executing
 # copy schema file to remote pod directory
 oc rsync . accounts-xxxxx:/tmp
 ----
+
+NOTE: You might see an error here saying `rsync: failed to set permissions on "/tmp/.": Operation not permitted (1)` you can safely ignore that and go to next step.
 
 Using the OpenShift Console, go the `accounts-xxxxx` pod and open the Terminal, and when you have the prompt execute following to populate the Database with some sample data.
 
