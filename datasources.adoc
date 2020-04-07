@@ -294,6 +294,41 @@ datasources:
         value: pass
 ----
 
+== Configuring FTP Based Source [[config-ftp]]
+The translator name to use in the VDB's DDL is _ftp_ with its `Server` definition. 
+
+NOTE: The secure FTPS is still not supported.
+
+The following properties can be configured for creating the FTP based source.
+
+[Attributes]
+|===
+|Property Name |Description |Required|Default value
+|host| Host name of the FTP server |yes| n/a
+|port| Port of the FTP server |No| 21
+|username | User for salesforce.com | Yes | n/a
+|password | Password for salesforce.com| Yes | n/a
+|parentDirectory | Directory where file in | Yes | n/a
+|isFtps | Ftp Security | No | false
+|===
+
+[source, yaml]
+.A sample configuration
+----
+datasources:
+  - name: sampleftp
+    type: ftp
+    properties:
+      - name: host
+        value: localhost
+      - name: parent-directory
+        value: /path/to/file/
+      - name: username
+        value: user
+      - name: password
+        value: pass
+----
+
 == Configuring OpenAPI Based Source [[config-openapi]]
 The translator name to use in the VDB's DDL is _openapi_ with its `Server` definition. When this translator is used, the source will look for endpoint `/openapi` files and build the source model based on it. However if the API document endpoint is defined as something else, one could configure that in the VDB's DDL on schema statement as
 
