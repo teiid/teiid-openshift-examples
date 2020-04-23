@@ -27,6 +27,7 @@ The enable Keycloak based security on the OData API, the following additional co
     value: http://keycloak-myproject.192.168.99.100.nip.io/auth
   - name: KEYCLOAK_SSL_REQUIRED
     value: external
+  - name: KEYCLOAK_RESOURCE
     value: di
   - name: KEYCLOAK_PUBLIC_CLIENT
     value: true
