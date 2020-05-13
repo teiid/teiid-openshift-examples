@@ -1,0 +1,105 @@
+= Materializing of Views or Caching
+
+When using Teiid, one can cache the contents of a View (also called materialize) into a cache store such that any successive calls to see the data of that perticular View can be served from the cache instead of collating needed data again from the original sources. The user can define their intent to cache a View in the view definition along with configuration like how often they would like to refresh the cache etc. 
+
+The specifics about View level configuration for materialization can be found in the Reference Guide. Here in this document we will go over the configuration needed if you are using Teiid in OpenShift environment and how to configure for Infinispan (Data Grid) based caching for defined views.
+
+
+=== Infinispan (Data Grid) based caching
+
+When a View is defined as below in Custom Resource that defines Virtual Database
+
+[source,yaml]
+----
+CREATE VIEW vix (
+    "date" date primary key,
+    "open" double, 
+    "high" double,
+    "low" double,
+    "close" double,
+    MA10 double
+) OPTIONS (MATERIALIZED 'TRUE') AS 
+  select t.*, AVG("close") OVER (ORDER BY "date" ASC ROWS 9 PRECEDING) AS MA10 from (call vix_source.invokeHttp(action=>'GET', endpoint=>'https://datahub.io/core/finance-vix/r/vix-daily.csv')) w, texttable(to_chars(w.result, 'ascii') COLUMNS "date" date, "open" HEADER 'Vix Open' double, "high" HEADER 'Vix High' double, "low" HEADER 'Vix Low' double, "close" HEADER 'Vix Close' double HEADER) t;
+----
+
+When there is an option on the view called `MATERIALIZED` and defined as `TRUE`, then system automatically wires necessary components and start materializing the View `Vix` to the Infinispan clusters with out any other input from users. Basically an internal materialized view in a Infinispan cluster.
+
+To enable materialization to Infinispan cluster, the user has couple choices how he/she can configure an Infinispan cluster for its use. Those are 
+
+* Use a Shared Infinispan Cluster
+* Use a Dedicated Infinispan per VDB
+
+=== Shared Infinispan Cluster
+
+When using this option, it is assumed that user has access to a already installed Infinispan cluster and can actively managing it. The Teiid Operator expects details of the cluster access that are defined in a secret. If the secret name is define as `{vdb-name}-cache-store` then the contents of it used for that perticular virtual database that matches the name, if not one can define a secret name with `teiid-cache-store` that will apply to all the virtual databases in the namespace where the secret is defined and virtual database is being deployed.
+
+When working with shared cluster, Teiid engine creates a unique cache map in the Infinispan cluster per View based on vdb name and some deployment identifiers associated with it such that no two cache maps are in conflict based on the name. Also, it is expected that Teiid Operator when VDB is deleted these cache maps are destroyed accordingly.
+
+NOTE: Currently Teiid Operator can't destroy the cache maps when using the shared cluster, whether it is provided or automatically generated as Infinispan does not yet provide this functionality through its translator. This feature will be available in the future releases.
+
+=== Dedicated Infinispan per VDB
+
+When using this option, the expectation is that the Infinispan cluster is only used for the caching purpose of a single VDB. The user does not explicitly need to define a Infinispan cluster. If the Operator for Infinispan is available in the cluster, then Teiid Operator using the Infinispan Operator will dynamically create/install a cluster in the same namespace as where the VDB is being deployed for its use.
+
+When using this option user is not required to provide the secret file as defined in the section above. In absence of the secret, Teiid Operator will automatically generate a default secret with following contents
+
+. Default Secret file created {vdb-name}-cache-store
+[source,yaml]
+----
+kind: Secret
+apiVersion: v1
+metadata:
+  name: {vdb}-cache-store
+  namespace: demo
+data:
+  name: {vdb}-cache-store
+  namespace: {vdb-namespace}
+  username: developer
+  password: <random>
+  url: {vdb}-cache-store:11222
+  create: true
+  replicas: 3
+----
+
+However, if one need to customize the number of Infinispan cluster instances, or just turn off clustering, then they can define a secret file with necessary configuration. The same naming rules apply here as above whether one wants to define configuration for all the VDBs in a namespace or just a single VDB.
+
+When Teiid Operator installs the cluster automatically, it also destroys the cluster when the VDB is deleted.
+
+
+==== Secret File explained
+
+As mentioned above if user provides a secret file with name {vdb-name}-cache-store` then the contents of it used for that a virtual database and any of its updates, if not one can define a secret name with `teiid-cache-store` that will apply to all the virtual databases in that given namespace. So, the secret file is namespace scoped.
+
+The below defines the properties of the secret file
+
+
+[source,yaml]
+----
+kind: Secret
+apiVersion: v1
+metadata:
+  name: teiid-cache-store
+  namespace: demo
+data:
+  name: my-ispn-store <1>
+  namespace: my-namespace <2>
+  username: user <3>
+  password: password <4>
+  url: access-url <5>
+  create: false <6>
+  replicas: 2 <7>
+----
+
+<1> `name` defines the name of Infinispan cluster. This used for checking the existence of the defined cluster.
+
+<2> `namespace` defines namespace of the Infinispan cluster. This used for checking the existence of the defined cluster.
+
+<3> `username`, defines the user-id to use to access the Infinispan cluster.
+
+<4> `password` defines the credential needed for the defined user to access the Infinispan cluster.
+
+<5> `url` defines the URL for accessing the cluster over HotRod protocol. Typically this is `{cluster-name}:11222`
+
+<6> `create` defines a boolean flag, when set to `true`, if a Infinispan cluster does not already exist with specified names, then Teiid Operator will create a Infinispan cluster using the Infinispan Operator. If `false` then Teiid Operator will not create a new cluster. When Teiid Operator creates a new Infinispan cluster it will always creates a cluster to be  only used by that perticular virtual database, i.e. it is not a sharable cluster across multiple vdbs. When virtual database is deleted this cluster will also be destroyed automatically.
+
+<7> `replicas` defines the number of Infinispan data nodes to create, when `create` flag is set to `true`
