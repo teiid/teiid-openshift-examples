@@ -22,26 +22,32 @@ NOTE: All the data sources below in addition to what is defined here support "im
 For configuring the translator name in VDB, the follwing translators are supported
 
 - _amazon-athena_
+- _actian-vector_
 - _db2_
 - _derby_
+- _exasol_
 - _h2_
 - _hana_ (SAP Hana using the JDBC driver)
-- _hive_ (Hive using the Hive JDBC Driver)
+- _hbase_ (HBase using the Phoenix driver)
+- _hive_ (Hive using the Hive JDBC driver)
 - _hsql_
 - _impala_ (Cloudera Impala)
 - _informix_
 - _ingres_
-- _jtds_ (Connect Microsoft SQLServer using JTDS drivers)
+- _jdbc-simple_
+- _jdbc-ansi_
+- _jtds_sqlserver_ (Connect Microsoft SQLServer using JTDS drivers)
+- _ms-sqlserver_ (Microsoft SQLServer using the Microsoft driver)
 - _mysql_
 - _netezza_
 - _oracle_
 - _osisoft-pi_ (OSISOFT's PI Database using osisoft's JDBC Driver)
-- _phoenix_ (Apache Phenix using the Phoenix JDBC Driver)
+- _phoenix_ (Apache Phoenix using the Phoenix JDBC Driver)
 - _postgresql_
 - _prestodb_ (PrestoDB connecting using JDBC Driver)
 - _redshift_ (Amazon Red Shift)
-- _sapiq_ 
-- _sqlserver_ (Microsoft SQLServer)
+- _sap-iq_ 
+- _sqlserver_ (Same as ms-sqlserver)
 - _sybase_
 - _teradata_
 - _teiid_ (Connecting to another Teiid instance using its JDBC driver)
