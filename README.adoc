@@ -13,6 +13,7 @@ This repository contains examples and documention on how to develop and deploy D
 * xref:monitoring-with-prometheus.adoc[Monitoring with Prometheus]
 * xref:tracing-with-jaeger.adoc[Tracing with Jaeger]
 * xref:jdv-changes.adoc[JDV to "Teiid on OpenShift" changes]
+* xref:logging.adoc[How to configure Logging]
 
 Before running the examples, a test database is required. Follow the steps xref:example-setup.adoc[here] to install one, or use an existing development database.
 

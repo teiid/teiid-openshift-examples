@@ -1,0 +1,61 @@
+= Logging (Command and Audit Logging)
+
+The logging of the running Teiid is controlled through supplying the environment properties in the Custom Resource. For example
+
+[source,yaml]
+.dv-customer.yaml
+----
+apiVersion: teiid.io/v1alpha1
+kind: VirtualDatabase
+metadata:
+  name: dv-customer
+spec:
+  replicas: 1
+  env: <1>
+  - name: LOGGING_LEVEL_ORG_TEIID_COMMAND_LOG
+    value: DEBUG
+  build:
+    ... omitted by brevity, see other examples 
+----
+
+<1> Define a logging variable with its logging context and its desired logging level. In this example, we are enabling "org.teiid.COMMAND_LOG" logging context with `DEBUG` logging level. 
+
+To enable Audit logging use
+
+[source,yaml]
+----
+- name: LOGGING_LEVEL_ORG_TEIID_AUDIT_LOG
+  value: DEBUG
+----
+
+==== Log Contexts
+
+The supported logging contexts for this platform are defined below. Enable them accordingly for your specific needs.
+
+.Logging Contexts
+|===
+|Log Context | Description
+
+|LOGGING_LEVEL_ORG_TEIID_COMMAND_LOG | Use this in DEBUG level to see all the SQL commands that engine is executing, both from user as well as at the Translator Level
+|LOGGING_LEVEL_ORG_TEIID_AUDIT_LOG | When data roles are being used to control access, this context at DEBUG level will show the who is accessing which resources.
+| LOGGING_LEVEL_ORG_TEIID_COMMAND_LOG_SOURCE | This context at DEBUG level shows the native queries that are being executed by translator. This applies only to JDBC (relational) sources.
+| LOGGING_LEVEL_ORG_TEIID_RUNTIME | Engine specifc logging
+| LOGGING_LEVEL_ORG_TEIID_TXN_LOG | Transaction specific logging
+| LOGGING_LEVEL_ORG_TEIID_CONNECTOR | All transaltor specific logging
+| LOGGING_LEVEL_ORG_TEIID_PLANNER | Any engine query planning specific logging
+| LOGGING_LEVEL_ORG_TEIID_PROCESSOR | Any engine execution of the query specific logging
+| LOGGING_LEVEL_ORG_TEIID_BUFFER_MGR | Engine uses a component called buffer manager to support the in flight data, typically related to any memory or disk issues. 
+| LOGGING_LEVEL_ORG_TEIID | This covers all the above contexts as this is root context.
+|===
+
+==== Log Levels
+
+A log level is the verbosity of details that one is interested in. The following are the logging levels that are supported
+
+* ERROR
+* WARNING
+* INFO
+* DEBUG
+* TRACE
+
+The above is defined in an order based on their verbosity in logging starting from only errors to all the events.
