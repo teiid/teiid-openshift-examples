@@ -475,7 +475,7 @@ Password: <password>
 Test your connection, then press OK. Then right click on alias created, and choose "connect" to connect to the VDB and issue SQL queries like below and see the results.
 
 [source,SQL]
-.Sample Queres to try out
+.Sample queries
 ----
 -- Find current stock price of IBM stock
 SELECT * FROM STOCKPRICE WHERE symbol = 'IBM';
@@ -484,15 +484,49 @@ SELECT * FROM STOCKPRICE WHERE symbol = 'IBM';
 SELECT * FROM AccountValues WHERE LastName = 'Dragon';
 ----
 
-### Access using OData API
+### Accessing the virtual database through the OData API
 
-To access using the OData REST API, find route that is created for this service and issue a query as
+You can access the virtual database through an OData (Open Data Protocol) API.
+OData is a standard open source REST interface for interacting with multiple data sources. 
 
+Before you can set up OData access to the virtual database, you must know the OData route to the virtual database service.
+
+. From a terminal window type the following command to retrieve the OData route for the virtual database service:
++
+[source,bash]
+----
+$oc get vdb <virtual-database-name> -o yaml | grep route
+----
++
+For example,
++
+[source,bash]
+----
+$oc get vdb dv-customer -o yaml | grep route
+----
++
+The command returns the following output:
++
+[source,bash]
+----
+route: https://dv-customer-demo.apps-crc.testing/odata
+----
++
+Now that you have the route, you can use it to query the virtual database service. 
+. For example, type the following command to retrieve an account value from the _Portfolio_ virtual database 
+for the user with the name _Dragon_:
++ 
 [source, bash]
 ----
 https://{host}/odata/portfolio/AccountValues('Dragon')?$format=json
 
-# result will be something like
+----
++
+NOTE: Replace the {host} value with the route value that you retrieved in the Step 1.
++
+The command returns a result similar to the following JSON snippet:
++
+----
 {
    "@odata.context":"https://{host}/odata/portfolio/$metadata#AccountValues/$entity",
    "LastName":"Dragon",
@@ -500,5 +534,3 @@ https://{host}/odata/portfolio/AccountValues('Dragon')?$format=json
    "StockValue":30299.04
 }
 ----
-
-NOTE: Replace the {host} value with a value that matches with your service's route value
