@@ -8,7 +8,7 @@ For Teiid Operator to use this private maven repository, the user can define thi
 
 ### Global settings.xml for all Teiid Projects in namespace
 
-To configure the common `settings.xml` file for all the Teiid specific Virtual Databases, you can create a ConfigMap with name `teiid-maven-settings` with a key name `settings.xml` where under the key define the contents of the maven settings file. When Operator is building a image for your Virtual database, it will look for this ConfigMap with specified name, if it finds it it will use it as the default `settings.xml` file in the build. Providing a full settings.xml file is useful when your repository requires authentication, or you have many different repositories and would like to configure in single place.
+To configure the common `settings.xml` file for all the Teiid specific Virtual Databases, you can create a ConfigMap or Secret with name `teiid-maven-settings` with a key name `settings.xml` where under the key define the contents of the maven settings file. When Operator is building a image for your Virtual database, it will look for this ConfigMap with specified name, if it finds it it will use it as the default `settings.xml` file in the build. Providing a full settings.xml file is useful when your repository requires authentication, or you have many different repositories and would like to configure in single place.
 
 [source, yaml]
 . Sample Config Map
@@ -53,34 +53,12 @@ data:
 
 NOTE: Above snippet is just an example not a working settings.xml file, however you can copy and modify with your maven repository details and create on the Kubernetes/OpenShift cluster
 
+NOTE: See example of link:maven-settings.yaml[ConfigMap here]. Which can be created using `oc create -f maven-settings.yaml` command.
 
-### Maven Settings.XML file for a given Virtual Database
 
-If you do not want create `settings.xml` file namespace wide, then you can configure your Custom Resource with the details of the maven settings file. For example, if you configure your VDB custom resource as
+### Maven Settings.xml file for a given Virtual Database
 
-[source,yaml]
-.dv-customer.yaml
-----
-apiVersion: teiid.io/v1alpha1
-kind: VirtualDatabase
-metadata:
-  name: dv-customer
-spec:
-  replicas: 1 
-  ...
-  build:
-    source:
-      ddl: | 
-        CREATE DATABASE customer OPTIONS (ANNOTATION 'Customer VDB');
-        USE DATABASE customer;
-        ...
-      mavenSettings: <1>
-        configMapKeyRef:
-          key: settings.xml
-          name: my-maven-settings      
-----
-
-<1> where a using this `mavenSettings` define a ConfigMap and the key that represents the settings.xml content.
+If you do not want create `settings.xml` file namespace wide, then you can configure a config-map or secret with name `{vdb-name}-maven-settings.xml`. The key name semantics same as in above section. The configuration that is specific to VDB takes over the namespace wide configuration above. 
 
 ### Maven Repositories for a given Virtual Database
 
@@ -107,3 +85,5 @@ spec:
 ----
 
 <1> Define one or more maven private repositories to be used with the build. Make sure these are not secured and can be accessed without authentication
+
+The maven repo defined this is added in addition to above settings if both are available.
