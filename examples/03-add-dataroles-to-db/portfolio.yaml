@@ -4,6 +4,8 @@ metadata:
   name: portfolio
 spec:
   replicas: 1
+  expose:
+    - LoadBalancer
   env:
     - name: KEYCLOAK_REALM
       value: dv

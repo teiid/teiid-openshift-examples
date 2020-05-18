@@ -4,6 +4,8 @@ metadata:
   name: portfolio
 spec:
   replicas: 1
+  expose:
+    - LoadBalancer
   datasources:
     - name: accountdb
       type: postgresql

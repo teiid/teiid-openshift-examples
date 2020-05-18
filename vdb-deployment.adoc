@@ -1,8 +1,8 @@
 = Virtual Database Deployment [[deployment-cr]]
 
-Deployment of the virtualization is *always* done using the Operator. However, how the `Custom Resource` is defined for the deployment of virtualization depends upon the type of development model used.
+Deployment of the virtualization is *always* done using the Operator. However, the `Custom Resource` is defined for the deployment of virtualization depends upon the type of development model used.
 
-Once the Operator is available on your OpenShift cluster you deploy a VDB by executing below and supplying YAML file created
+Once the Operator is available on your OpenShift cluster you can deploy a VDB by executing below and supplying YAML file created
 
 [source,bash]
 ----
@@ -49,8 +49,9 @@ oc delete vdb dv-customer
 === Created Service and Routes
 When the virtualization completed with its deployment, it will create a Service with name of the custom resource (`dv-customer` from above example), 
 - Port `31000` is available for JDBC connection. 
-- Port `35432` will be open for any `PG` specific client including a ODBC client
-- A `http` endpoint with route will be available for a `odata`. In above CR, if there is a property `spec/exposeVia3scale` set to `true` then this route will not be created, and it is expected that user will use _3scale_ to manage the endpoint.
+- Port `5432` will be open for any `PG` specific client including a ODBC client
+- A `http` endpoint with route will be available for a `odata`. 
+- check out documention on the `exposes` tag in the Custom Resource on how to create LoadBalancer or NodePort using which one can access the virtual database from external client application outside the OpenShift/Kubernetes cluster.
 
 == Accessing the deployed Virtualization 
 Once virtualization is deployed in the OpenShift, it can be accessed using JDBC/ODBC and with variety of PostgreSQL clients along with OData.  See instructions xref:jdbc.adoc[here]

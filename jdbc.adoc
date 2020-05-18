@@ -34,34 +34,40 @@ NOTE: The transport layer of JDBC/PG is encrypted by default, but only over the 
 
 JDBC is not exposed to outside applications by default (no route created). It is only suitable for applications in the cloud. 
 
-If you have an external application that is using JDBC or the Postgres protocol issue the following. The below example shows JDBC, to use PG protocol use port 3 
+If you have an external application that is using JDBC or the Postgres protocol then a "LoadBalancer" service can be created such that any external application that is outside your cluster can be connected to this. To create "LoadBalancer", create your Custom Resource as below.
 
+[source,yaml]
+.dv-customer.yaml
 ----
-$oc create -f - <<INGRESS
-apiVersion: v1
-kind: Service
+apiVersion: teiid.io/v1alpha1
+kind: VirtualDatabase
 metadata:
-  name: <name>-ingress
+  name: dv-customer
 spec:
-  ports:
-  - name: teiid
-    port: 31000
-  type: LoadBalancer 
-  selector:
-    app: <service-name>
-  sessionAffinity: ClientIP
-INGRESS
+  replicas: 1 
+  expose: <1>
+      - LoadBalancer <2>
+  build:
+    source:
+      ddl: | <3>
+        CREATE DATABASE customer OPTIONS (ANNOTATION 'Customer VDB');
+        USE DATABASE customer;
+        ...
 ----
 
-To determine the ip/port run: 
+<1> Request to expose a list of services like LoadBalancer, NodePort, Route (default), ExposeVia3scale
+
+<2> Expose a "LoadBalancer" service for this virtual database
+
+To determine the ip/port of load balancer run: 
 
 ----
 $oc get svc <name>-ingress
 
 NAME                          TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                                                              AGE
-<name>-ingress                LoadBalancer   172.30.233.178   <pending>     31000:30430/TCP                                                      22m
+<name>-external               LoadBalancer   172.30.233.178   <pending>     31000:30430/TCP                                                      22m
 ----
 
-NOTE: The above INGRESS may not be possible with public OpenShift instances as it requires opening a port. Change the <name> and <service-name> accordingly.
+NOTE: The above external service may not be possible with public OpenShift instances as it requires opening a port. 
 
 NOTE: When working with OpenShift 4.x/Code Ready Containers, if the EXTERNAL-IP value is set, your environment has an external load balancer that you can use for the ingress gateway. If the EXTERNAL-IP value is <none> (or perpetually <pending>), your environment does not provide an external load balancer for the ingress gateway. In this case, you can access the gateway using the service’s node port. For CRC you can see it by `crc ip` and in output of the above command you will see a Node level port. In above example, a pod's 31000 port is assigned to 30430, you will need to connect to 30430 as JDBC port

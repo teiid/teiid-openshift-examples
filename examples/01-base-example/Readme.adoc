@@ -260,6 +260,8 @@ metadata:
   name: portfolio
 spec:
   replicas: 1
+    expose:
+    - LoadBalancer
   datasources:
     - name: accountdb
       type: postgresql
@@ -409,26 +411,31 @@ NOTE: You can skip below sections as they just show different ways of accessing 
 
 #### External Access using Load Balancer
 
-This service can be only accesses inside the cluster through another application, if external access is needed, one needs to create _LoadBalancer_ service that will open up an external port that can be accessed outside OpenShift. This is needed for using with any tools that are not deployed on OpenShift.
+These above services can be only accesses inside the cluster through another application, if you need external access, one needs to create _LoadBancer_ service that will open up an external port that can be accessed outside OpenShift.
 
-Execute below to create 'LoadBalancer' Ingress Service.
+See in the about Custom Resource, the `LoadBalancer` service exposed, when this configuration is defined, the Operator tries to create a LoadBalancer Ingress
 
+NOTE: Depending upon the OpenShift cluster you are working with this may not work, may not have permissions
+
+To find the external-ip you can execute 
 [source, bash]
 ----
-oc create -f ingress.yaml
+$oc get svc portfolio-external
 ----
+
+which should provide the host name and port to connect to for both using Teiid JDBC and PostgreSQL protocol.
 
 You can find exposed host and port by executing
 
 [source, bash]
 ----
-oc get svc portfolio-ingress -o=jsonpath='{..ingress[0].hostname}'
+oc get svc portfolio-external -o=jsonpath='{..ingress[0].hostname}'
 ----
 
 This will yield a hostname like
 
 ----
-A4d3bf5fd1b9311eab2b602474b8b0b4-143190945..example.opentlc.com
+A4d3bf5fd1b9311eab2b602474b8b0b4-143190945.example.opentlc.com
 ----
 
 NOTE: Depending upon the OpenShift cluster you are working with this may not work, and/or may not have permissions. Also, in OpenShift 4.x this ONLY works if there is external load balancer is configured. 

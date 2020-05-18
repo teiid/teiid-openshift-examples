@@ -24,13 +24,16 @@ metadata:
   name: dv-customer
 spec:
   replicas: 1 <1>
-  env: <2>
-  - name: SPRING_DATASOURCE_SAMPLEDB_USERNAME
-    value: user
-  - name: SPRING_DATASOURCE_SAMPLEDB_PASSWORD
-    value: mypassword
-  - name: SPRING_DATASOURCE_SAMPLEDB_JDBCURL
-    value: jdbc:postgresql://postgresql/$(SPRING_DATASOURCE_SAMPLEDB_DATABASENAME)
+  datasources: <2>
+    - name: accountdb
+      type: postgresql
+      properties:
+        - name: username
+          value: user
+        - name: password
+          value: changeit
+        - name: jdbc-url
+          value: jdbc:postgresql://accounts/accounts    
   build:
     source:
       dependencies: <3>
@@ -40,18 +43,26 @@ spec:
         USE DATABASE customer;
         ...
       mavenRepositories: <5>
-        central: https://repo.maven.apache.org/maven2     
+        central: https://repo.maven.apache.org/maven2
+  expose: <6>
+    - Route
 ----
 
 <1> defines the number of instances that you want to deploy. By default this is set to 1
 
-<2> defines the list of all the configuration properties for this virtualization. Mainly connection configuration to the data sources. The example above shows properties to connect to a `PostgreSQL` database. See the section on "Data Source Support" for the different supported data sources and the properties required for their configuration.
+<2> defines the list of all the configuration properties connection configuration to the data sources. The example above shows properties to connect to a `PostgreSQL` database. See the section on "Data Source Support" for the different supported data sources and the properties required for their configuration.
 
 <3> defines a list of maven dependency JAR files in GAV format (groupId:artifactid:version) especially for defining the JDBC driver files or any custom dependencies for data sources. Check specific data source support under "Data Source Support" section. Typically most libraries that are available in public maven repositories are automatically added to the Operator build.
 
 <4> defines the VDB in DDL form. Consult the Teiid documentation on how to build a VDB using DDL. Defining all DDL is beyond the scope of this document. 
 
 <5> In case any dependencies or VDB are defined in a private or non-public repository then use this property to define that repository location. One can configure more than one repository. See more details at xref:private_maven_usage.adoc[here] for full Maven configuration
+
+<6> Defines what services to expose. 
+* A `Route` exposes a route to the OData API. 
+* A `LoadBalancer` type exposes a Ingress host/port that can be accessed from external application clients into the openShift/Kubernetes cluster.
+* A `NodePort` will expose the port on the Node for testing.
+* `ExposeVia3scale` will skip creating a Route, however will generate annotations on the service to be discovered by the 3scale.
 
 A full example is provided here link:https://github.com/teiid/teiid-operator/blob/master/deploy/crds/vdb_from_ddl.yaml[dv-customer.yaml]
 
@@ -85,25 +96,6 @@ spec:
 NOTE: The options to provide the `settings.xml` file also apply here from above example <<YML_DDL>>
 
 A full example is provided here link:https://github.com/teiid/teiid-operator/blob/master/deploy/crs/vdb_from_maven.yaml[dv-customer.yaml]
-
-== Virtual Database defined as FAT JAR [[YML_FATJAR]]
-This example shows how to deploy a VDB that is defined as a FAT JAR that is built using `teiid-springboot` starter.
-
-An example project defined link:https://github.com/teiid/dv-customer-fatjar[here] shows you how you can use a java based project to develop a Virtual Database as a FAT JAR.
-
-After your FAT JAR is available in a maven repository, you can use a YAML based custom resource similar to below to deploy the VDB in OpenShift.
-
-NOTE: The below YAML file is exactly the same as the VDB in the maven example above, but the <maven> GAV is different. see the partial fragment below with the differences.
-
-[source, yaml]
-.dv-customer.yaml
-----
- build:
-   source:
-     maven  org.teiid:dv-customer-fatjar:1.1
-----
-
-A full example is provided here link:https://github.com/teiid/teiid-operator/blob/master/deploy/crs/vdb_from_fatjar.yaml[dv-customer.yaml]
 
 == VirtualDatabase Deployment [[deployment-cr]]
 
