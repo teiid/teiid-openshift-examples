@@ -1,0 +1,133 @@
+= TLS Certificate Usage with Virtual Databases
+
+TLS Certificates are used for many different purposes in Teiid. However, a single configuration defines certificate usage across various components in OpenShift/Kubernetes based deployments. The certificates are used for
+
+* To encrypt end to end communication in transport layer for JDBC, PostgreSQL protocol. Here when a client is connected, all the communication occurs over a encrypted channel.
+
+* Keystore/Truststore configuration used in communicating with external REST/OData APIs. Like for example invoking a HTTPS based REST API call.
+
+* Truststore configuration used in communicating with Keycloak server. The Keycloak IDP auth endpoint is at Http(s) location and uses a custom certificate.
+
+* Keystore/Truststore configuration used in communicating with SFTP based sources.
+
+== How to configure TLS certificates
+
+There are couple different ways a user can configure a TLS certificates for their use, below section defines these different types.
+
+=== Using Service Generated Certificates
+
+This is the most simple usecase, when a Operator finds that there are no custom certificates configured, it can create "Service Generated Certificates" to encrypt the traffic on the transport. This is the most basic form, works good with any client inside the OpenShift cluster as it genererated using the OpenShift CA. These are generally created during the deployment and available in a secret with name `{vdb-name}-certificates`. This secret contains `tls.crt` and `tls.key` to define the certificate and key that are generated. The Operator at deploy time looks for this named secret, and using this it converts this certificate and key combination into Java Keystore which then get configured on to virtual database container that gets deployed.
+
+During this certificate/key to Keystore conversion, the Operator also adds the default truststore from the Kubernetes `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` certificate into the system. So, if this service needs to call out any other service inside the OpenShift/Kubernetes, where the foreign service also used service based certificates then it should work without any changes. However, if the foreign service is created using custom or any other type of self signed certificates outside of OpenShift/Kubernetes then one need to look into configuring custom certificates.
+
+=== Using the Custom Certificates in a Secret
+
+A user can define a OpenShift/Kubernetes resource type `secret` of type `kubernetes.io/tls` with following two keys and their values then name it exactly as `{vd-name}-certificates` then Operator will pick this configuration and create Keystores as exactly defined in the previous section. The keys are
+ 
+ * tls.key -  TLS Key
+ * tls.crt -  TLS Certificate
+
+The certificate and keys are in PEM format, then they need to converted to base64 format before adding to the secret.
+
+Note that the key names must match exactly. During this operation the Operator will create Truststore based on the default truststore from the Kubernetes `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` certificate into the system. So, here also the same issues exist when calling into external services that are using the custom certificates as defined in the previous section.
+
+=== Using the Custom Keystore/Truststore in a Secret
+
+A user can define a OpenShift/Kubernetes resource type `secret` with type `Opaque` with name `{vdb-name}-keystore` with following keys with their contents in Base64 format. The contents of KeyStore and TrustStore must be in PKCS12 format before they are converted to base64.
+
+* keystore.pkcs12 - represents a Java Keystore in PKCS12 format that can contain the needed key and certificates inside it.
+* truststore.pkcs12 - represents a Java Key store in PCKCS12 format that can contain any number of public certificates to communicate with foreign services (Custom, OpenShift/Kubernetes).
+
+When using this option, this gives most flexibility to the user in the terms defining the configuration that will work in any situation. However, this also requires most amount of work from the user.
+
+When using this option, one needs to be build the keystore and truststore files first, then after using any base64 utilities convert the binary content of those files into base64 before adding to a secret.
+
+For example, to create the keystore from an existing private key and certificate, say if the user has `tls.key` and `tls.crt` in PEM format run the following command to create keystore and truststore.
+
+[source, sh]
+----
+openssl pkcs12 -export -in tls.crt -inkey tls.key -out keystore.pkcs12
+----
+
+Where pkcs12 is the openssl pkcs12 utility, `-export` means to export to a file, `-in tls.crt` is the certificate and `-inkey tls.key` is the key to be imported into the keystore. `-out keystore.pkcs12` is the keystore file. Convert this into a Base 64 by running following command
+
+[source, sh]
+----
+base64 keystore.pkcs12
+----
+
+grab the contents and paste into the Secret.
+
+To create a trust store one can execute the following command where `tls.crt` is the public certificate you want to add to the truststore. You can repeat the following command any number times to add all the public certificates you need for the entire system to function correctly.
+
+----
+keytool -import -file tls.crt -alias myalias -keystore truststore.pkcs12
+----
+
+Convert this into a Base 64 by running following command
+
+[source, sh]
+----
+base64 truststore.pkcs12
+----
+
+grab the contents and paste into the Secret.
+
+NOTE: use `keytool` from Java 11 or greater as PKCS12 is default format there.
+
+An example script to create the secret will be like below
+
+.dv-customer-keystore.yaml
+[source,yaml]
+----
+kind: Secret
+apiVersion: v1
+metadata:
+  name: dv-customer-keystore
+  namespace: demo
+data:
+  keystore.pkcs12: >-
+    MIIKAwIBAzCCCc8GCSqGSIb3DQEHAaCCCcAEggm8MIIJuDCCBG8GCSqGSIb3DQEHBqCCBGAwggRcAgEAMIIEVQYJKoZIhvcNAQcBMBwGCiqGSIb3DQEMAQYwDgQI7RFjrbx64PkCAggAgIIEKLn2Y244Jw2O37QlmT+uS3XE0vErwJIIwpwR8nlu8YDPTU8UtN3nDXNkdKbolQVTCVnzFSbJ7RohoAEJdB3D8iDkVpFpvIbBYUvq3LB8obFuSuFP50IMprp9gnUjRit5/nOGdJIKiM3ZJQgE46gvYsQJiKo0CGlBf/7J9CWh/zwp7fV4JzxZaW/4bkUaz1jegPx0lYEPW14U1lNF0BCn0DnTffCHnSqQIlW+KwNj3uNtqVqLTt4LoLTbfvCjYN+6q+0Ei67a05g8X2ZI7y7LJvfRGlAssVwqOIOMeiwajOtsJXXaN1WsZjURFVIJpmlWAcG/72J9xUlA5YYUzdxI8GdaQis78b0lsvYPU0WqCMBmfoJMxhQuIfpZVqDgqTTaJhvrv7lw/VYLyJKG1N0pAQ9dDnWUtje7MB+Q853ffjzZ5PDp8G+BoxUrsxABheslI8PwIb0JG66yxyBmgvpxlGVN1IyHLKZzn3/RUCA8/WLjuD1SAmFQxfDoOir1LEnodXLEVLH+8/Ety0xvP5T9BFn/YVsPSjplhukkdfqiHDqxffg8aJlpfOC8AJ4EVItb/W8fBQovQ+jhm1LpuQedA6fiaROYYHChaQM94y9HqPIveCEpKGkG47ohGWU/LCht/Da3iHhl6h9BCX/U/PcsojKy8ZmzZTJb+oIRCx+A84X/hObGoqU+dOItQ//G37BIL7jIcQ9gwShtQhXmdCtrh10iNKGxaDxyBBJS64+KeuAv16eyj3UHoR3Ux9P3RVzZ6bH+IrKsWRacg+JYzEZNAzo0NYkVCqgvbdC+fWDtq6rQA2knjRhwwK/WU/=
+  truststore.pkcs12: >-
+    MIIWlgIBAzCCFmIGCSqGSIb3DQEHAaCCFlMEghZPMIIWSzCCFkcGCSqGSIb3DQEHBqCCFjgwghY0AgEAMIIWLQYJKoZIhvcNAQcBMBwGCiqGSIb3DQEMAQYwDgQIq4NIOxI8IoUCAggAgIIWAN8YKMvjIo6qGX2Rz0SIKiDlUNySI5GKjt1RKicid9QIVfyKjWhjufqn+OXjhaxYJtZ+GgW3SdO1il0cHEGSQycEJPQ/diAMqmdgoyd1batEYxp1baR9wm4aqmYip0j3Xd84fpQylTs73tFOZYWJYPDqq27jYYbEUL0bOKkoMOvIftW6y18gT/E8XVYi7Gy81IJzNnhQkyt4bZO3/vyoEgvyUDGLCtFxSk4U9JiGk3RtzLW1HnOiGof1B/lJs7vHe13QITJWqxhqKs4rWYj8pOiyrIhAcLtGMEUH9cyQ7gpYFvx5KObY//gEDr2MnRdR4cm79wuffg9mUH96hvqwrm/dpJC1lP+dRM/9Alyn9KEuEilWaUOxkHobvcCs04fh2Fw8GS4wdCAiB7Rj3e2U1duWdg3MJ5Qxq4SVEZeTPkDKetqZTTWpzDiw8nxgZx7MGYAQ5kIYeWHWzVs9fFDuNFTnvhEb535KMz6qZYMjJdiZRVhX5XyCKyLyiBovQsdHDUkuubroJfUFe3VI7FNGNVJ1OIuqrIVJVYIpqER6khWoCOizm/L1PWU8XS6fsR3ES296VaukzAyewQIpQhEek9XjRY=
+type: Opaque
+----
+
+using the above format create your own secret file with same keys but content from your keystore/truststore, and then create above secret in OpenShift/Kubernetes by executing the following command
+
+[source, bash]
+----
+oc create -f dv-customer-keystore.yaml
+----
+
+note that in the above `dv-customer` is name of the virtual database this will be associated with. So make sure you follow the naming paradim.
+
+when using the custom keystores, since the keystore are built by the user, user needs to supply the passwords to make them utilized during the virtual database usage. User must provide following properties as environment properties in the Custom Resource of the virtual database.
+
+* TEIID_SSL_KEYSTORE_PASSWORD
+* TEIID_SSL_TRUSTSTORE_PASSWORD
+* KEYCLOAK_TRUSTSTORE_PASSWORD (when keyclock in use, and trust manager is not disabled)
+
+for example these can be defined in virtual database:
+
+.dv-customer.yaml
+[source, yaml]
+----
+apiVersion: teiid.io/v1alpha1
+kind: VirtualDatabase
+metadata:
+  name: dv-customer
+spec:
+  replicas: 1
+  env:
+  - name: TEIID_SSL_KEYSTORE_PASSWORD
+    value: changeit
+  - name: * TEIID_SSL_TRUSTSTORE_PASSWORD
+    value: changeit
+  - name: KEYCLOAK_TRUSTSTORE_PASSWORD
+    value: changeit
+
+  .. rest omitted for brevity
+----
+
+when system is configured with all above the certificates in the keystore and trustores then they are used to encrypt or decrpt various services then after.

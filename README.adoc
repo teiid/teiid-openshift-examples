@@ -10,6 +10,7 @@ This repository contains examples and documention on how to develop and deploy D
 * xref:datasources.adoc[How to configure physical data sources for VDB]
 * xref:vdb-deployment.adoc[How to deploy a VDB (CR) using Operator]
 * xref:jdbc.adoc[How to configure JDBC connection to a VDB]
+* xref:certificates.adoc[How to configure Certificates (keystores/truststores)]
 * xref:monitoring-with-prometheus.adoc[Monitoring with Prometheus]
 * xref:tracing-with-jaeger.adoc[Tracing with Jaeger]
 * xref:logging.adoc[How to configure Logging]
