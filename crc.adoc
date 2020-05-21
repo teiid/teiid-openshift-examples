@@ -1,0 +1,54 @@
+== Instructions to Install openShift with Code Ready Containers
+
+To learn more about what code ready containers are please read the following on https://developers.redhat.com/products/codeready-containers[codeready-containers]
+
+To install Code Ready Containers (CRC) you would need to account in Red Hat customer portal. Click the download link on the above page and dowload the required binaries for your Operating System.
+
+Typically you download binary files for `crc` and `oc` commands. Make sure you downloaded them and available in your path.
+
+To run CRC locally on a laptop with Teiid, you need at least 16GB RAM available, otherwise the system does not function well. One can follow below script to install CRC locally
+
+[source, bash]
+----
+#if you already have CRC installation stop and delete
+crc stop
+crc delete
+
+#set required CPUs to 8 and memory 8GB
+crc config set memory 8096
+crc config set cpus 8
+
+# initial setup
+crc setup
+
+# create a new instance
+crc start
+
+# shut down the instance to adjust disk size
+crc stop
+
+# default size is 30, up it to 60
+sudo qemu-img resize ~/.crc/machines/crc/crc +30G
+# verify the new size
+sudo qemu-img info ~/.crc/machines/crc/crc | grep 'virtual size'
+
+# we're ready, start again and give cluster admin to the developer account
+crc start
+eval $(crc oc-env)
+
+# login into the cluster
+oc login -u developer -p developer
+# give the developer admin rights
+oc adm policy --as system:admin add-cluster-role-to-user cluster-admin developer
+
+# after startup
+# The below is to increase the disk size to 30GB
+ssh -i ~/.crc/machines/crc/id_rsa core@`crc ip`
+sudo xfs_growfs /sysroot
+# confirm the new size of sysroot
+df -h
+
+# open the web browser to the OpenShift console, use same credentials as above to login
+crc console
+----
+

@@ -1,10 +1,11 @@
 :toc:
 
-= Development of a Virtualization
+= Virtualization development Options
 
-A User can develop a Virtualization (VDB) in a few different ways. Each of the options has advantages and disadvantages. In the end all options use the Operator to deploy the Virtualization to OpenShift and yield _exactly the same_ virtualization runtime with the same features. The choice depends upon the complexity of the project and the need for testing on and off the OpenShift platform.  
+A User can develop a Virtualization (VDB) in a couple different ways. Each of the options has advantages and disadvantages. In the end all options use the Operator to deploy the Virtualization to OpenShift and yield _exactly the same_ virtualization runtime with the same features. The choice depends upon the complexity of the project and the need for testing on and off the OpenShift platform.  
 
-=== Virtual Database defined as DDL on Operator Resource
+=== Virtual Database defined as DDL on Operator Custom Resource (CR)
+
 Using this option the User can directly define the VDB contents in the form of DDL in the `Custom Resource` VDB definition and use the Operator to deploy this virtualization. When deployed, the Operator will put together an S2I build on OpenShift based on dependencies it can glean from the VDB artifact. This may fail if certain dependencies are not found - such as if the developer omits the dependencies of JDBC drivers, etc.
 
 ===== Pros
