@@ -1,0 +1,13 @@
+= Tutorials for Data Virtualizations
+
+This section has many different tutorials to help you learn about Data Virtualization. The examples, build upon each other and they are numerically placed. The folders without any number can be executed anytime.
+
+Clone or copy this repository to start working on these tutorials
+
+* 01-base-example : The first example introduces to a designing a federated virtual database between a relational database and rest service.
+
+* 02-secure-access-with-keycloak : This example adds Keycloak (RHSSO) based security over the previous example to keep your data sources secured.
+
+* 03-add-dataroles-db : This example adds CRUD permissions to your data in the virtual database using data roles and ties them to the roles in the Keycloak
+
+* simple-jdbc-client: If you need a sample JDBC client to test connecting to your virtual database for any example above, one can use this. 
