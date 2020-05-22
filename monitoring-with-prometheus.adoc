@@ -5,13 +5,13 @@
 The main aim in this exercise is to expose the Data Virtualization servie metrics that was deployed in the previous steps using Prometheus.
 
 == Working with existing Prometheus Instance
-the Teiid Operator will automatically find the Prometheus instance in the cluster based on the matching labels configured as "team=dv", which are default labels that Teiid Operator is configured to scan with.
+the Teiid Operator will automatically find the Prometheus instance in the cluster based on the matching labels configured as "team=middleware", which are default labels that Teiid Operator is configured to scan with.
 
 [source, yaml]
 ----
 serviceMonitorSelector:
   matchLabels:
-    team: dv
+    team: middleware
 ----
 
 If Teiid Operator is needs to scan on different matching labels, configure a environment property "PROMETHEUS_MONITOR_LABEL_KEY" and "PROMETHEUS_MONITOR_LABEL_VALUE". For example
@@ -22,6 +22,8 @@ PROMETHEUS_MONITOR_LABEL_VALUE=bar
 ----
 
 on the operator deployment environment properties.
+
+NOTE: The operator automatically adds the configuration for metrics that it going to expose for given virtualization. However, if user wants expose different set of metrics they can provide a config-map with name `teiid-prometheus-config` with key called `rules` and then provide the full rules in yaml content in there. During the deployment if Operator finds existence of this config-map then it will use it for prometheus configuration instead of default one.
 
 == Prometheus Operator
 Note that in this example, the installation of Prometheus is done using using a Prometheus Operator.
