@@ -474,7 +474,7 @@ NOTE: you need to add the JDBC driver download above in the "Extra Class Path" t
 ----
 Name: portfolio
 Driver: Teiid
-URL: jdbc:teiid:portfolio.1@mm://127.0.0.1:31000
+URL: jdbc:teiid:portfolio@mm://127.0.0.1:31000
 User: <user>
 Password: <password>
 ----
