@@ -230,7 +230,7 @@ For connecting to Salesforce and importing/querying all `SObject`, the user fist
 |===
 |Property Name |Description |Required|Default value
 |url| URL of the salesforce|No|https://login.salesforce.com/services/Soap/u/45.0
-|userName | User for salesforce.com | Yes | n/a
+|username | User for salesforce.com | Yes | n/a
 |password | Password for salesforce.com| Yes | n/a
 |clientId | ClientId from connected app | Yes | n/a
 |clientSecret | clientSecret from connected app | No | n/a
