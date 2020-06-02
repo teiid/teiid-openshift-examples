@@ -11,6 +11,8 @@ spec:
       value: dv
     - name: KEYCLOAK_RESOURCE
       value: portfolio
+    - name: KEYCLOAK_CREDENTIALS_SECRET
+      value: changeit
     - name: KEYCLOAK_AUTH_SERVER_URL
       value: https://keycloak-user3.apps.cluster-enable-e4db.enable-e4db.example.opentlc.com/auth
     - name: KEYCLOAK_DISABLE_TRUST_MANAGER

@@ -77,7 +77,6 @@ spec:
     clientId: portfolio
     secret: changeit
     clientAuthenticatorType: client-secret
-    publicClient: true
     directAccessGrantsEnabled: true
 ----
 
@@ -163,6 +162,8 @@ env:
     value: dv
   - name: KEYCLOAK_RESOURCE
     value: portfolio
+  - name: KEYCLOAK_CREDENTIALS_SECRET
+    value: changeit
   - name: KEYCLOAK_AUTH_SERVER_URL
     value: https://keycloak-user3.apps.cluster-enable-e4db.enable-e4db.example.opentlc.com/auth <=== ***** CHANGE THIS
   - name: KEYCLOAK_DISABLE_TRUST_MANAGER

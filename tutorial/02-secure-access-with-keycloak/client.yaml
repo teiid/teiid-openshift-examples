@@ -14,5 +14,4 @@ spec:
     clientId: portfolio
     secret: changeit
     clientAuthenticatorType: client-secret
-    publicClient: true
     directAccessGrantsEnabled: true
