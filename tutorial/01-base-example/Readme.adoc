@@ -220,32 +220,54 @@ This is where data abstraction layer of the Virtual Database is defind. Here one
 [source, sql]
 ----
 SET SCHEMA Portfolio;
-           
-CREATE VIEW StockPrice (
-    symbol string PRIMARY KEY,
-    price bigdecimal
-) AS  
-    SELECT SP.symbol, SP.price
-    FROM (EXEC MarketData.getTextFiles('*.txt')) AS f, 
-    TEXTTABLE(f.file COLUMNS symbol string, price bigdecimal HEADER) AS SP;
-          
-CREATE VIEW AccountValues (
-    LastName string PRIMARY KEY,
-    FirstName string,
-    StockValue bigdecimal
-) AS
-    SELECT c.lastname as LastName, c.firstname as FirstName, sum((h.shares_count*sp.price)) as StockValue 
-    FROM Customer c JOIN Account a on c.SSN=a.SSN 
-    JOIN Holdings h on a.account_id = h.account_id 
-    JOIN product p on h.product_id=p.id 
-    JOIN StockPrice sp on sp.symbol = p.symbol
-    WHERE a.type='Active'
-    GROUP BY c.lastname, c.firstname;
+                
+      CREATE VIEW StockPrice (
+          symbol string PRIMARY KEY,
+          price double,
+          CONSTRAINT ACS ACCESSPATTERN (symbol)
+      ) AS  
+          SELECT p.symbol, y.price
+          FROM accounts.PRODUCT as p, TABLE(call invokeHttp(action=>'GET', endpoint=>QUERYSTRING('quote', p.symbol as "symbol", 'bq0bisvrh5rddd65fs70' as "token"), headers=>jsonObject('application/json' as "Content-Type"))) as x, 
+          JSONTABLE(JSONPARSE(x.result,true), '$' COLUMNS price double path '@.c') as y
+
+      CREATE VIEW AccountValues (
+          LastName string PRIMARY KEY,
+          FirstName string,
+          StockValue double
+      ) AS
+          SELECT c.lastname as LastName, c.firstname as FirstName, sum((h.shares_count*sp.price)) as StockValue 
+          FROM Customer c JOIN Account a on c.SSN=a.SSN 
+          JOIN Holdings h on a.account_id = h.account_id 
+          JOIN product p on h.product_id=p.id 
+          JOIN StockPrice sp on sp.symbol = p.symbol
+          WHERE a.type='Active'
+          GROUP BY c.lastname, c.firstname;
+
+      CREATE VIEW CustomerHoldings (
+          LastName string PRIMARY KEY,
+          FirstName string,
+          symbol string,
+          ShareCount integer,
+          StockValue double,
+          CONSTRAINT ACS ACCESSPATTERN (LastName)
+      ) AS 
+          SELECT c.lastname as LastName, c.firstname as FirstName, p.symbol as symbol, h.shares_count as ShareCount, (h.shares_count*sp.price) as StockValue 
+          FROM Customer c JOIN Account a on c.SSN=a.SSN 
+          JOIN Holdings h on a.account_id = h.account_id 
+          JOIN product p on h.product_id=p.id 
+          JOIN StockPrice sp on sp.symbol = p.symbol
+          WHERE a.type='Active';
 ----
 
-We setup two virtual VIEWS above, `StockPrice` gets stock price from the `quotessvc`, and the `AccountValues` view using `StockPrice` view builds the account value of the customers in the `AccountsDB` database.
+In the preceding example, we set up the following three virtual VIEWS:
 
-This value proposition of the Data Virtualization is the end user is only sees `AccoutValue` and `StockPrice` view, they do not know how this data is integrated together.
+* `StockPrice` gets the stock price from the `quotessvc`
+* `AccountValues` view uses the `StockPrice` view to determine the cumulative account value for all of the customers in the `AccountsDB` database.
+* `CustomerHoldings` stores the value of each individual customer's account based on the stock shares that they own. 
+
+
+This value proposition of the Data Virtualization is the end user sees only the `AccountValue` and `StockPrice` view.
+They do not know how this data is integrated together.
 
 ### Full Example CR
 
