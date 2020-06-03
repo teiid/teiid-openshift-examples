@@ -1,0 +1,129 @@
+= Virtual Database Import (VDB Import) Explained
+
+Virtual Database Import aka "VDB Import" is a feature that is supported by the Teiid, where one or more virtual databases can be included into some other Virtual Database with a simple "import" statement. 
+
+A typical usecase is, in an organization most of the data stores are owned and managed by certain groups that are associated business, when any other groups want access to their data stores, they may want to expose a moderated version of that data store and even maybe only a certain selected data inside or hide the physical layer terminology to consuming clients. Here the group does not want expose data directly and create a tight coupling, but provide a abstraction layer before exposing it to others. 
+
+The consuming group may have their own data stores and would like to consume this data from other group's data stores, here instead of directly consuming from the data store, they can consume the data through the VDB layer created above such that any changes to the physical data store schema is not affecting this group. They key is when there are updates to the base VDBs from these other groups come in,there should have easy way to push the changes to all consuming VDBs.
+
+For example, lets say we have two PostgreSQL instances in Sales department
+
+* Accounts Database (AccountsDB)
+* Sales Database (SalesDB)
+
+and the Operation folks are requiring some data from above two databases, then Sales team can create a one or two VDBs to expose the these VDBs and Operation team can consume them in their VDB by defining
+
+[source, SQL]
+----
+CREATE DATABASE OperationsDB;
+USE DATABASE OperationsDB;
+
+IMPORT DATABASE AccountsDB VERSION 1.0;
+IMPORT DATABASE SalesDB VERSION 1.0;
+----
+
+Here the `OperationsDB` refers to both `AccountsDB` and `SalesDB` and imports the metadata from them and users of the `OperatorDB` will have full access to data from the other two databases, without knowing where the actual data is coming from. When and if the AccountsDB and/or SalesDB changes those change need to be transparent to the OperationsDB and team should be able to build and deploy based on new versions.
+
+== How it Works in Teiid
+
+In the current incarnation of Teiid, the VDB developer can place their VDB into a maven repository which will give it a identifier,version number and a defined location. Then this maven artifact can defined as dependency to the next VDB in build process, where it will read the contents of the original VDB from the Maven repository and combine them into current VDB.
+
+For example, taking the above scenario user will develop two different VDBs `AccountsDB` and `SalesDB` and push them into a maven repository, then `OperationsDB` defines both `AccountsDB` and `SalesDB` as dependencies in its own maven project, then uses about `IMPORT` syntax in its VDB to add the contents from other two databases into current one. The result of build process is another VDB in this case `OperationsDB` which now contains both and will also get put into a maven repository for further consumption.
+
+To deploy the `OperationsDB` VDB, one needs to supply the maven co-ordinates of the `OperationsDB` to the Teiid Operator, where it will get the contents from the Maven repository and deploys the VDB in the OpenShift. The reason maven build process and repository are used is that these tasks can be automated in CI/CD type of builds such that if one of underlaying VDB is changed, then other VDB builds can be kicked off and rebuild themselves without any user in middle orchestrating the rebuild.
+
+In order to work with maven repositories one needs to write a `pom.xml` file then arrange the artifacts in certain order. The example, below goes into details of how to create a maven based VDB.
+
+== Creating a Maven based VDB
+
+A maven based VDB, is exactly same vdb with same DDL structure, with couple restrictions. The file name needs to be always named as `vdb.ddl` and needs to be packaged in certain folder structure as shown below. In addition one need to define a `pom.xml` file. If there are additional metadata files that go with the VDB they can be included in this structure.
+
+[source, text]
+----
+accountsdb/
+  src/
+    main/
+      vdb/
+        vdb.ddl
+  pom.xml
+----
+
+where a `pom.xml` can look like
+
+[source, xml]
+----
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>accountsdb</artifactId>
+  <version>1.0</version>
+  <name>Accounts Virtual Database</name>
+  <description>Accounts Virtual Database</description>
+  <packaging>vdb</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.teiid</groupId>
+        <artifactId>vdb-plugin</artifactId>
+        <version>1.5.1</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <goals>
+              <goal>vdb</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+----
+
+The above can be cut and pasted and change `artifactId` names for any number of vdbs. One can build the above VDB by executing
+
+[source, sh]
+----
+mvn deploy
+----
+
+which build the VDB and deploy to a maven repository. The maven repository can be private and be configured using additional configuration like defining them in the `settings.xml` file.
+
+Now, when building the VDB that `imports` this vdb (for ex: OperationsDB) from others they need to define their `pom.xml` with section like below to define their dependencies
+
+[source,xml]
+----
+<dependencies>
+  <dependency>
+    <groupId>org.example</groupId>
+    <artifactId>accountsdb</artifactId>
+    <version>1.0</version>
+  </dependency>
+</dependencies>
+----
+
+which defines the previous VDBs as dependencies, if there are more than one VDB you are trying to import repeat the step for each VDB, and inside the `<dependencies>` section. This block needs to be inside the `<projects` section inside the `pom.xml` for this project. The build of the VDB is same. This VDB should contain statements like
+
+[source,SQL]
+----
+IMPORT DATABASE AccountsDB VERSION 1.0;
+----
+
+then during the build, the build will read contents of the `AccountsDB's` `vdb.ddl` file and merge them with the current VDB. The result is combined VDB of multiple VDBs.
+
+Once you have the combined VDB then follow the directions in xref:dv-development-options.adoc[Virtual Database Development Options ] for deploying a Maven based VDB in OpenShift using Teiid Operator.
+
+== Limitations
+
+Is not recommended that DDL based VDBs do not use any statements like 
+
+[source, SQL]
+----
+IMPORT FOREIGN SCHEMA public FROM SERVER sampledb INTO accounts;
+----
+
+for more information see <<dv-on-openshift.adoc#DDL_LIMITATIONS,here>>.
+
+Also, VDB Import based VDBs should not use any `ALTER` statements that can be  used in the combined VDB to modify the metadata imported from the dependent VDBs. As the metadata merge happens during the build time, `ALTER` statements do not have view into Runtime version of the metadata.

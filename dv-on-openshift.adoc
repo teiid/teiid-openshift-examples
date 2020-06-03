@@ -101,7 +101,7 @@ A full example is provided here link:https://github.com/teiid/teiid-operator/blo
 
 For deployment of Virtual Database check xref:vdb-deployment.adoc[VDB Deployment]
 
-== VirtualDatabase DDL Limitations
+== VirtualDatabase DDL Limitations [[DDL_LIMITATIONS]]
 
 The above sections have shown different ways of configuring and deploying VDB, however the VDB is always built using DDL. To develop VDB using DDL please refer to Teiid's Reference Guide, which will provide details about different statements and syntax that Teiid supports.  When a VDB is being deployed in OpenShift as described above, the images that are generated needs to be in "immutable" state. That means, no matter how many times the image is stopped and started the same behavior must persist. However, when VDB is defined using the stataments like
 

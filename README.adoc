@@ -17,4 +17,5 @@ The below show various topics on Data Virtualization Operator as to how to confi
 * xref:logging.adoc[How to configure Logging]
 * xref:private_maven_usage.adoc[How to configure custom settings.xml file]
 * xref:materializing.adoc[How to configure Materialization With Infinispan]
+* xref:vdb-import.adoc[How to use VDB Import using Maven based VDBs]
 * xref:jdv-changes.adoc[JDV to "Teiid on OpenShift" changes]
