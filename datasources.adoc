@@ -313,9 +313,9 @@ The following properties can be configured for creating the FTP based source.
 |Property Name |Description |Required|Default value
 |host| Host name of the FTP server |yes| n/a
 |port| Port of the FTP server |No| 21
-|username | User for salesforce.com | Yes | n/a
-|password | Password for salesforce.com| Yes | n/a
-|parentDirectory | Directory where file in | Yes | n/a
+|username | User name for remote server login | Yes | n/a
+|password | Password  for remote server login | Yes | n/a
+|parentDirectory | Directory where file located in remote server | Yes | n/a
 |isFtps | Ftp Security | No | false
 |===
 
