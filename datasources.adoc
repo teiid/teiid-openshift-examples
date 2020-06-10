@@ -400,7 +400,7 @@ if the _security type_ is defined as _openid-connect_ the following properties a
 
 Alternatively, for the _openid-connect_ you can also supply 'refreshToken' property and avoid the `userName` and `password` properties, however describing on how to obtaining a refresh token is beyond this document as it is different for different services.
 
-NOTE: when using a endpoint that is Http(S) then you might have to configure the truststore for the third party endpoint. To do that, one would need to configure a custom truststore as defined xref:jdv-changes.adoc[here]
+NOTE: when using a endpoint that is Http(S) then you might have to configure the truststore for the third party endpoint. To do that, one would need to configure a custom truststore as defined xref:certificates.adoc[here]
 
 == Configuring Google Sheets as Source [[config-googlesheets]]
 The translator name to use in the VDB's DDL is _google-spreadsheet_ with its `Server` definition. This will represent each _Sheet_ on a google spread sheet as a _table_ in Teiid.
