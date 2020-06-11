@@ -20,7 +20,7 @@ This is the most simple usecase, when a Operator finds that there are no custom 
 
 During this certificate/key to Keystore conversion, the Operator also adds the default truststore from the Kubernetes `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` certificate into the system. So, if this service needs to call out any other service inside the OpenShift/Kubernetes, where the foreign service also used service based certificates then it should work without any changes. However, if the foreign service is created using custom or any other type of self signed certificates outside of OpenShift/Kubernetes then one need to look into configuring custom certificates.
 
-=== Using the Custom Certificates in a Secret
+=== Using Custom Certificates in a Secret
 
 A user can define a OpenShift/Kubernetes resource type `secret` of type `kubernetes.io/tls` with following two keys and their values then name it exactly as `{vd-name}-certificates` then Operator will pick this configuration and create Keystores as exactly defined in the previous section. The keys are
  
@@ -31,7 +31,7 @@ The certificate and keys are in PEM format, then they need to converted to base6
 
 Note that the key names must match exactly. During this operation the Operator will create Truststore based on the default truststore from the Kubernetes `/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt` certificate into the system. So, here also the same issues exist when calling into external services that are using the custom certificates as defined in the previous section.
 
-=== Using the Custom Keystore/Truststore in a Secret
+=== Using Custom Keystore/Truststore in a Secret
 
 A user can define a OpenShift/Kubernetes resource type `secret` with type `Opaque` with name `{vdb-name}-keystore` with following keys with their contents in Base64 format. The contents of KeyStore and TrustStore must be in PKCS12 format before they are converted to base64.
 
