@@ -148,6 +148,102 @@ datasources:
         value: test
 ----
 
+== [config-soap]] Configuring SOAP web service data source
+The translator name to use in the VDB's DDL is _soap_ or _ws_ with its `Server` definition.
+
+For configuring the SOAP webservice the following properties are needed
+
+[Attributes]
+|===
+|Property Name |applies to |Required |Default Value |Description
+
+|EndPoint
+|HTTP & SOAP
+|false
+|n/a
+|URL for HTTP, Service Endpoint for SOAP.  Not required if using HTTP invoke procedures that specify absolute URLs. Will be used as the base URL if an invoke procedure uses a relative URL.
+
+|SecurityType
+|HTTP & SOAP
+|false
+|none
+|Type of Authentication to used with the web service. Allowed values ["None","HTTPBasic"]
+
+|AuthUserName
+|HTTP & SOAP
+|false
+|n/a
+|Name value for authentication, used in HTTPBasic and WsSecurity
+
+|AuthPassword
+|HTTP & SOAP
+|false
+|n/a
+|Password value for authentication, used in HTTPBasic and WsSecurity
+
+|ConfigFile
+|HTTP & SOAP
+|false
+|n/a
+|CXF client configuration File or URL
+
+|EndPointName
+|HTTP & SOAP
+|false
+|teiid
+|Local part of the end point QName to use with this connection, needs to match one defined in cxf file
+
+|ServiceName
+|SOAP
+|false
+|n/a
+|Local part of the service QName to use with this connection
+
+|NamespaceUri
+|SOAP
+|false
+|http://teiid.org
+|Namespace URI of the service QName to use with this connection
+
+|RequestTimeout
+|HTTP & SOAP
+|false
+|n/a
+|Timeout for request
+
+|ConnectTimeout
+|HTTP & SOAP
+|false
+|n/a
+|Timeout for connection
+
+|Wsdl
+|SOAP
+|false
+|n/a
+|WSDL file or URL for the web service
+|===
+
+User does not need to add any dependencies.
+
+[source, yaml]
+.A sample configuration
+----
+  datasources:
+    - name: soapCountry
+      type: soap
+      properties:
+        - name: wsdl
+          value: http://www.oorsprong.org/websamples.countryinfo/CountryInfoService.wso?WSDL
+        - name: namespaceUri
+          value: http://www.oorsprong.org/websamples.countryinfo
+        - name: serviceName
+          value: CountryInfoService
+        - name: endPointName
+          value: CountryInfoServiceSoap12
+----
+
+
 == [[config-s3]]Configuring Amazon S3 as Source
 The translator name to use in the VDB's DDL is _amazon-s3_ with its `Server` definition.
 
