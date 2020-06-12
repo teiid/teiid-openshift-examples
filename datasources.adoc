@@ -277,7 +277,44 @@ datasources:
         value: xxxxxx
 ----
 
+== [[config-ceph]]Configuring Ceph/MinIO/Rook as Source using S3
 
+Using Amazon S3 protocol any data stores like Ceph, Minio, Rook can be used as file stores to access files from a VDB. To access a source like these use the the translator name in the VDB's DDL is _amazon-s3_ with its `Server` definition. 
+
+For example, define like below in DDL
+----
+CREATE SERVER cephstore FOREIGN DATA WRAPPER "amazon-s3";
+----
+
+Then configure the S3 based sources with the following properties
+
+[Attributes]
+|===
+|Property Name |Description |Required|Default value
+|endpoint | endpoint where service located| Yes | n/a
+|bucket | Bucket Name | Yes | n/a
+|accesskey| Access Key | Yes | n/a
+|secretkey| Secret key | Yes | n/a
+|===
+
+When Ceph is setup, one will need to create a bucket and will also can find out the the access-key and secret-key for access from Ceph before configuration for the VDB. User does not need to add any additional dependencies for this.
+
+[source, yaml]
+.A sample configuration
+----
+datasources:
+  - name: cephstore
+    type: amazon-s3
+    properties:
+      - name: endpoint
+        value: http://rook-ceph-rgw-my-store-rook-ceph.apps.dv-44-a.openshift-aws.rhocf-dev.com
+      - name: bucket
+        value: mybucket
+      - name: accesskey
+        value: xxxxxxxx
+      - name: secretkey
+        value: xxxxxx
+----
 
 == [[config-ispn]] Configuring Infinispan as source
 The translator name to use in the VDB's DDL is _infinispan-hotrod_ with its `Server` definition.
