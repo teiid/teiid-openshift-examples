@@ -19,39 +19,189 @@ NOTE: If any configured property in a ConfigMap or Secret is missing, the Operat
 NOTE: All the data sources below in addition to what is defined here support "importer.xxxxx" properties are defined on their translator page for further customization. Pleas refer to that documentation on available properties and their possible values and descriptions.
 
 == Configuring Relational Database [[config-jdbc]]
-For configuring the translator name in VDB, the follwing translators are supported
+For configuring the translator name in VDB, the following translators are supported
 
 - _amazon-athena_
+
+    jdbc-driver-link : https://docs.aws.amazon.com/athena/latest/ug/connect-with-jdbc.html
+    jdbc-driver-class : com.simba.athena.jdbc.Driver
+    jdbc-url : jdbc:awsathena://User=[AccessKey];Password=[SecretKey];S3OutputLocation=[Output];[Property1]=[Value1];[Property2]=[Value2];
+
 - _actian-vector_
+
+    maven-dependancy : 'com.ingres.jdbc:iijdbc:jar:10.0-4.0.5'
+    jdbc-driver-class : com.ingres.jdbc.IngresDriver
+    jdbc-url : jdbc:ingres://${host}:AH7/${db-name}
+
 - _db2_
+
+    maven-dependancy : 'com.ibm.db2:jcc:jar:11.1.4.4'
+    jdbc-driver-class : com.ibm.db2.jcc.DB2Driver
+    jdbc-url : jdbc:db2://{host}:50000/{database_name}
+
 - _derby_
+
+    maven-dependancy : 'org.apache.derby:derbyclient:jar:10.15.1.3' (dependancy automatically provided)
+    jdbc-driver-class : org.apache.derby.jdbc.ClientDriver
+    jdbc-url : jdbc:derby://{host}:1527/{db-name}
+
 - _exasol_
+
+    maven-dependancy : 'com.exasol:exasol-jdbc:jar:6.2.5'
+    jdbc-driver-class : com.exasol.jdbc.EXADriver
+    jdbc-url : jdbc:exa:<host>:<port>[;<prop_1>=<value_1>]...[;<prop_n>=<value_n>]
+
 - _h2_
+
+    maven-dependancy : 'com.h2database:h2:jar:1.4.200' (dependancy automatically provided)
+    jdbc-driver-class : org.h2.Driver
+    jdbc-url : jdbc:h2:[file:][<path>]<databaseName>
+
 - _hana_ (SAP Hana using the JDBC driver)
+
+    maven-dependancy : 'com.sap.cloud.db.jdbc:ngdbc:pom:2.4.76'
+    jdbc-driver-class : com.sap.db.jdbc.Driver
+    jdbc-url : jdbc:sap://<server>:<port>[/?<options>]
+
 - _hbase_ (HBase using the Phoenix driver)
+
+    maven-dependancy : 'org.apache.hbase:hbase-client:jar:2.2.5'
+    jdbc-driver-class : cdata.jdbc.apachehbase.ApacheHBaseDriver
+    jdbc-url : jdbc:apachehbase:{server};<port>
+
 - _hive_ (Hive using the Hive JDBC driver)
+
+    maven-dependancy : 'org.apache.hive:hive-jdbc:jar:3.1.2'
+    jdbc-driver-class : org.apache.hive.jdbc.HiveDriver
+    jdbc-url : jdbc:hive2://{host-name}:10000/default
+
 - _hsql_
+
+    maven-dependancy : 'org.hsqldb:hsqldb:jar:2.3.2'
+    jdbc-driver-class : org.hsqldb.jdbc.JDBCDriver
+    jdbc-url : jdbc:hsqldb:http://host[:port][/<alias>][<key-value-pairs>]'
+
 - _impala_ (Cloudera Impala)
+
+    maven-dependancy : 'com.cloudera.impala:jdbc:jar:2.5.5.1007'
+    jdbc-driver-class : com.cloudera.impala.jdbc.Driver
+    jdbc-url : jdbc:impala://[Host]:[Port]
+
+
 - _informix_
+
+    maven-dependancy : 'com.ibm.informix:jdbc:jar:4.50.3'
+    jdbc-driver-class : com.informix.jdbc.IfxDriver
+    jdbc-url : jdbc:informix-sqli://{<ip-address>|<host-name>}:<port-number>[/<dbname>]: INFORMIXSERVER=<server-name>
+
 - _ingres_
+
+    maven-dependancy : 'com.ingres.jdbc:iijdbc:jar:10.2-4.1.10'
+    jdbc-driver-class : com.ingres.jdbc.IngresDriver
+    jdbc-url : jdbc:ingres://{host}:{port:21071}/{database_name}
+
 - _jdbc-simple_
+
+
 - _jdbc-ansi_
+
+
 - _jtds_sqlserver_ (Connect Microsoft SQLServer using JTDS drivers)
+
+    maven-dependancy : 'net.sourceforge.jtds:jtds:jar:1.3.1' (dependancy automatically provided)
+    jdbc-driver-class : net.sourceforge.jtds.jdbc.Driver
+    jdbc-url : jdbc:jtds:sqlserver://{host}:1433/{database}
+
 - _ms-sqlserver_ (Microsoft SQLServer using the Microsoft driver)
+
+    maven-dependancy : 'com.microsoft.sqlserver:sqljdbc4:jar:4.0' (dependancy automatically provided)
+    jdbc-driver-class : com.microsoft.sqlserver.jdbc.SQLServerDriver
+    jdbc-url : jdbc:microsoft:sqlserver://{host}:1433
+
 - _mysql_
+
+    maven-dependancy : 'mysql:mysql-connector-java:jar:8.0.20' (dependancy automatically provided)
+    jdbc-driver-class : com.mysql.jdbc.Driver
+    jdbc-url : jdbc:mysql://{host}:3306/{database}
+
 - _netezza_
+
+    maven-dependancy : 'org.netezza:nzjdbc:jar:1.0'
+    jdbc-driver-class : org.netezza.Driver.
+    jdbc-url : jdbc:netezza://host:port/databaseName
+
 - _oracle_
+
+    maven-dependancy : 'com.oracle:ojdbc14:jar:10.2.0.4.0'
+    jdbc-driver-class : oracle.jdbc.driver.OracleDriver
+    jdbc-url : jdbc:oracle:thin:{host}:1521:orcl
+
 - _osisoft-pi_ (OSISOFT's PI Database using osisoft's JDBC Driver)
+
+    jdbc-driver-link : https://livelibrary.osisoft.com/LiveLibrary/content/en/jdbc-v4/
+    jdbc-driver-class : com.osisoft.jdbc.Driver
+    jdbc-url : jdbc:pioledbent://{das-name}/Data Source={af-name}; Integrated Security=SSPI
+
 - _phoenix_ (Apache Phoenix using the Phoenix JDBC Driver)
+
+    maven-dependancy : 'org.apache.phoenix:phoenix-queryserver-client:jar:5.0.0-HBase-2.0'
+    jdbc-driver-class : org.apache.phoenix.jdbc.PhoenixDriver
+    jdbc-url : jdbc:phoenix:<IP>:<port>:/<DB_NAME>
+
 - _postgresql_
+
+    maven-dependancy : 'org.postgresql:postgresql:jar:42.2.5' (dependancy automatically provided)
+    jdbc-driver-class : org.postgresql.Driver
+    jdbc-url : jdbc:postgresql://{host}:5432/{database}
+
 - _prestodb_ (PrestoDB connecting using JDBC Driver)
+
+    maven-dependancy : 'com.facebook.presto:presto-jdbc:jar:0.236'
+    jdbc-driver-class : com.facebook.presto.jdbc.PrestoDriver
+    jdbc-url : jdbc:presto://[Host]:[Port];
+
+
 - _redshift_ (Amazon Red Shift)
-- _sap-iq_ 
+
+    maven-dependancy : 'com.amazon.redshift:redshift-jdbc42:jar:1.2.1.1001'
+    jdbc-driver-class : com.amazon.redshift
+    jdbc-url : jdbc:redshift://endpoint:port/database
+
+- _sap-iq_
+
+    jdbc-driver-link : http://infocenter.sybase.com/help/index.jsp?topic=/com.sybase.infocenter.dc01776.1602/doc/html/san1357754912881.html
+    jdbc-driver-class : com.sybase.jdbc4.jdbc.SybDriver
+    jdbc-url : jdbc:sybase:Tds:host:port?ServiceName=database
+
 - _sqlserver_ (Same as ms-sqlserver)
+
+    maven-dependancy : 'com.microsoft.sqlserver:sqljdbc4:jar:4.0'
+    jdbc-driver-class : com.microsoft.sqlserver.jdbc.SQLServerDriver
+    jdbc-url : jdbc:microsoft:sqlserver://{host}:1433
+
 - _sybase_
+
+    maven-dependancy : 'com.esen.jdbc:sybase-jconn3:jar:6.0'
+    jdbc-driver-class : com.sybase.jdbc4.jdbc.SybDriver
+    jdbc-url : jdbc:sybase:Tds:<server-or-IP>:<port>[?ServiceName=<database>]
+
 - _teradata_
+
+    maven-dependancy : 'com.teradata.jdbc:terajdbc4:jar:16.20.00.10'
+    jdbc-driver-class : com.ncr.teradata.TeraDriver
+    jdbc-url : jdbc:teradata://server-name:server-port/database-server-name
+
 - _teiid_ (Connecting to another Teiid instance using its JDBC driver)
+
+    maven-dependancy : dependancy automatically provided
+    jdbc-driver-class : org.teiid.jdbc.TeiidDriver
+    jdbc-url : jdbc:teiid:{vdb}@mm://{host}:31000
+
 - _vertica_
+
+    jdbc-driver-link : https://www.vertica.com/client-drivers/
+    jdbc-driver-class : com.vertica.jdbc.Driver
+    jdbc-url : jdbc:vertica:{IP:5433/DB}
 
 For configuring the relational database like Oracle, MS-SQLServer, PostgreSQL etc, the following properties are required.
 
