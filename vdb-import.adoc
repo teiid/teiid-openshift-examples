@@ -117,13 +117,42 @@ Once you have the combined VDB then follow the directions in xref:dv-development
 
 == Limitations
 
-Is not recommended that DDL based VDBs do not use any statements like 
+You should avoid the use of some statements in the DDL for a virtual database. 
+
+.Foreign schema import
+ 
+For example:
 
 [source, SQL]
 ----
 IMPORT FOREIGN SCHEMA public FROM SERVER sampledb INTO accounts;
 ----
 
-for more information see <<dv-on-openshift.adoc#DDL_LIMITATIONS,here>>.
+The `IMPORT FOREIGN SCHEMA` statement is an expensive operation, that queries the underlying physical data source every time a pod restarts.
+Introducing this query places a strain on the underlying physical data source, increasing the time that it takes for the pod to start. 
+The problem is magnified if you have multiple pods trying to access the data source at once.
 
-Also, VDB Import based VDBs should not use any `ALTER` statements that can be  used in the combined VDB to modify the metadata imported from the dependent VDBs. As the metadata merge happens during the build time, `ALTER` statements do not have view into Runtime version of the metadata.
+Another problem with importing the foreign schema from another virtual database is that images deployed to OpenShift are assumed to be in an _immutable_ state. 
+That is, no matter how many times the image is stopped and started, their behavior should persist. 
+However, if you define a SQL `IMPORT SCHEMA` operation in the DDL, the virtual database loads the schema from the source virtual database every time that the image starts up.
+As a result, the image contents can be modified, which runs counter to the principle of immutability for this architecture.  
+
+If you can guarantee that the underlying data source always returns the same metadata, there is no problem. 
+Problems arise if the data source returns different metadata when the image starts.
+
+To ensure that the contents of an image remain stable, it is best to define all metadata explicitly in the virtual database DDL, 
+including tables, procedures, and any functions that data source represents.
+
+.`ALTER` statements to modify metadata
+
+Do not use `ALTER TABLE` statements in the DDL for a virtual database if the DDL includes either of the following statements:
+
+* `IMPORT FOREIGN SCHEMA` 
+* `IMPORT DATABASE` 
+
+`ALTER TABLE` statements are intended to modify the structure of a table by adding, removing, or modifying columns. 
+However, in the case of imported virtual databases, the actual structure of the imported tables is not available at build time.
+From the perspective of the virtual database, the runtime metadata does not yet exist to be modified.
+
+When you include an `ALTER TABLE` statement in the DDL with an `IMPORT` statement, it attempts to change a table or column that does not exist in the the virtual database metadata. 
+A deployment failure can result, or if the virtual database is deployed, its contents might not include the expected data.  
