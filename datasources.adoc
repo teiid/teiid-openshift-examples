@@ -260,7 +260,7 @@ NOTE: where {NAME} denotes the custom name given by the user, that defines the `
 
 You define many more properties to further tune the JDBC translator and schema import behavior. Please check Teiid translator documentation.
 
-The user is also required to provide a maven dependency for JDBC driver class for the above data source in `spec/dependencies` line in the CR. It is expected that the maven repository is *reachable* by the Operator. If in case the resource is not available in the public/private maven repository then there are other options to solve the issue. Look at section "Attach Private Libraries".
+The user is also required to provide a maven dependency for JDBC driver class for the above data source in `spec/dependencies` line in the CR. It is expected that the maven repository is *reachable* by the Operator. Please see xref:private_maven_usage.adoc[how configure a private maven repository].
 
 
 == [[config-mongo]]Configuring MongoDB database
@@ -298,7 +298,7 @@ datasources:
         value: test
 ----
 
-== [config-soap]] Configuring SOAP web service data source
+== [[config-soap]] Configuring SOAP web service data source
 The translator name to use in the VDB's DDL is _soap_ or _ws_ with its `Server` definition.
 
 For configuring the SOAP webservice the following properties are needed
