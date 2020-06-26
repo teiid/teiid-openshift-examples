@@ -58,11 +58,13 @@ NOTE: See example of link:maven-settings.yaml[ConfigMap here]. Which can be crea
 
 ### Maven Settings.xml file for a given Virtual Database
 
-If you do not want create `settings.xml` file namespace wide, then you can configure a config-map or secret with name `{vdb-name}-maven-settings.xml`. The key name semantics same as in above section. The configuration that is specific to VDB takes over the namespace wide configuration above. 
+If you do not want to create a `settings.xml` file that applies to all virtual database builds in the namespace, you can configure a ConfigMap or secret with the name `{vdb-name}-maven-settings`. 
+The key name semantics are the same as with configuring a global `settings.xml`. 
+The configuration that you add for a specific virtual database build takes precedence over any global configuration that you set for the namespace. 
 
 ### Maven Repositories for a given Virtual Database
 
-If you do not want deal with settings.xml file at all and your private maven repo is not secured and can be accessed with out any authentication, you can also define the maven repository directly on custom resource and Operator will adjust the build per your settings. An example of that can look like
+If you do not want deal with `settings.xml` file at all and your private Maven repository is not secured and can be accessed with out any authentication, you can also define the Maven repository directly on custom resource and Operator will adjust the build per your settings. An example of that can look like
 
 [source,yaml]
 .dv-customer.yaml
