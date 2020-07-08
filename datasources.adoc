@@ -63,12 +63,6 @@ For configuring the translator name in VDB, the following translators are suppor
     jdbc-driver-class : com.sap.db.jdbc.Driver
     jdbc-url : jdbc:sap://{host}:{port}[/?{options}]
 
-- _hbase_ (HBase using the Phoenix driver)
-
-    maven-dependancy : 'org.apache.hbase:hbase-client:jar:2.2.5'
-    jdbc-driver-class : cdata.jdbc.apachehbase.ApacheHBaseDriver
-    jdbc-url : jdbc:apachehbase:{host};{port}
-
 - _hive_ (Hive using the Hive JDBC driver)
 
     maven-dependancy : 'org.apache.hive:hive-jdbc:jar:3.1.2'
@@ -106,7 +100,7 @@ For configuring the translator name in VDB, the following translators are suppor
 - _jdbc-ansi_
 
 
-- _jtds_sqlserver_ (Connect Microsoft SQLServer using JTDS drivers)
+- _jtds-sqlserver_ (Connect Microsoft SQLServer using JTDS drivers)
 
     maven-dependancy : 'net.sourceforge.jtds:jtds:jar:1.3.1' (dependancy automatically provided)
     jdbc-driver-class : net.sourceforge.jtds.jdbc.Driver
@@ -394,28 +388,29 @@ User does not need to add any dependencies.
 ----
 
 
-== [[config-s3]]Configuring Amazon S3 as Source
-The translator name to use in the VDB's DDL is _amazon-s3_ with its `Server` definition.
+== [[config-s3]]Configuring S3 as Source
+The translator name to use in the VDB's DDL is _s3_ with its `Server` definition.
 
-For configuring the Amazon S3 the following properties are needed
+For configuring the S3 the following properties are needed
 
 [Attributes]
 |===
 |Property Name |Description |Required|Default value
-|region | S3 region ex: us-east-2 | Yes | n/a
+|endpoint | The S3 service endpoint | no | https://s3.amazonaws.com
+|region | S3 region ex: us-east-2 | no | US-EAST-1
 |bucket | Bucket Name | Yes | n/a
 |accesskey| Access Key | Yes | n/a
 |secretkey| Secret key | Yes | n/a
 |===
 
-When Amazon-S3 is setup, one will need to create a bucket and will also can find out the the access-key and secret-key for access from AWS website before configuration for the VDB. User does not need to add any dependencies for this.
+When S3 is setup, one will need to create a bucket and will also can find out the the access-key and secret-key for access.
 
 [source, yaml]
 .A sample configuration
 ----
 datasources:
   - name: sampledb
-    type: amazon-s3
+    type: s3
     properties:
       - name: region
         value: us-east-2
@@ -427,30 +422,17 @@ datasources:
         value: xxxxxx
 ----
 
-== [[config-ceph]]Configuring Ceph/MinIO/Rook as Source using S3
+== [[config-ceph]]Configuring Ceph/MinIO as Source using S3
 
-Using Amazon S3 protocol any data stores like Ceph, Minio, Rook can be used as file stores to access files from a VDB. To access a source like these use the the translator name in the VDB's DDL is _amazon-s3_ with its `Server` definition. 
+To access a source like these use the the translator name in the VDB's DDL is _s3_ with its `Server` definition. 
 
 For example, define like below in DDL
 ----
-CREATE SERVER cephstore FOREIGN DATA WRAPPER "amazon-s3";
+CREATE SERVER cephstore FOREIGN DATA WRAPPER "s3";
 ----
 
-Then configure the S3 based sources with the following properties
-
-[Attributes]
-|===
-|Property Name |Description |Required|Default value
-|endpoint | endpoint where service located| Yes | n/a
-|bucket | Bucket Name | Yes | n/a
-|accesskey| Access Key | Yes | n/a
-|secretkey| Secret key | Yes | n/a
-|===
-
-When Ceph is setup, one will need to create a bucket and will also can find out the the access-key and secret-key for access from Ceph before configuration for the VDB. User does not need to add any additional dependencies for this.
-
 [source, yaml]
-.A sample configuration
+.A sample ceph configuration
 ----
 datasources:
   - name: cephstore
